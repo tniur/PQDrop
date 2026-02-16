@@ -6,7 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		7B883B912F42849E00E6C81D /* PQUIComponents in Frameworks */ = {isa = PBXBuildFile; productRef = 7B883B902F42849E00E6C81D /* PQUIComponents */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
+		7B883B8E2F42848200E6C81D /* PQUIComponents */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = PQUIComponents; sourceTree = "<group>"; };
 		89B58CEA2F268EE300D437F7 /* PQDrop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PQDrop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -23,17 +28,27 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7B883B912F42849E00E6C81D /* PQUIComponents in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		7B883B8F2F42849E00E6C81D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		89B58CE12F268EE300D437F7 = {
 			isa = PBXGroup;
 			children = (
 				89B58CEC2F268EE300D437F7 /* PQDrop */,
 				89B58CEB2F268EE300D437F7 /* Products */,
+				7B883B8E2F42848200E6C81D /* PQUIComponents */,
+				7B883B8F2F42849E00E6C81D /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -65,6 +80,7 @@
 			);
 			name = PQDrop;
 			packageProductDependencies = (
+				7B883B902F42849E00E6C81D /* PQUIComponents */,
 			);
 			productName = PQDrop;
 			productReference = 89B58CEA2F268EE300D437F7 /* PQDrop.app */;
@@ -351,6 +367,13 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		7B883B902F42849E00E6C81D /* PQUIComponents */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PQUIComponents;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 89B58CE22F268EE300D437F7 /* Project object */;
 }

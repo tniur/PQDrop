@@ -1,0 +1,18 @@
+input_dir: Sources/PQUIComponents/Resources
+output_dir: ${DERIVED_SOURCES_DIR}
+
+xcassets:
+  - inputs: Colors.xcassets
+    outputs:
+      - templatePath: pqcustom.stencil
+        output: PQColor.swift
+        params:
+          enumName: PQColor
+          publicAccess: true
+  - inputs: Images.xcassets
+    outputs:
+      - templatePath: pqcustom.stencil
+        output: PQImage.swift
+        params:
+          enumName: PQImage
+          publicAccess: true
