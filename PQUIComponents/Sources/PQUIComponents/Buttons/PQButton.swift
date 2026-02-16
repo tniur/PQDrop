@@ -1,6 +1,6 @@
 //
 //  PQButton.swift
-//  PQDrop
+//  PQUIComponents
 //
 //  Created by Анастасия Журавлева on 16.02.2026.
 //
