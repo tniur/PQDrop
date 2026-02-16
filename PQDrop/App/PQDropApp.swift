@@ -11,7 +11,7 @@ import SwiftUI
 struct PQDropApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            SplashView(viewModel: .init())
         }
     }
 }
