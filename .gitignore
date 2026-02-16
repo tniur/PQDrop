@@ -1,0 +1,30 @@
+# Xcode and macOS project ignores
+
+# User scheme and workspace data (user-specific and shouldn't be in VCS)
+*.xcuserstate
+*.xcuserdatad
+*.xcuserscheme
+
+# Project user data
+*.xcworkspace/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+# Build products
+build/
+DerivedData/
+
+# SwiftPM
+.swiftpm/
+Package.resolved
+
+# Other
+.DS_Store
+*.moved-aside
+*.swp
+*.orig
+*.rej
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
