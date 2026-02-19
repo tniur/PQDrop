@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		7B883B912F42849E00E6C81D /* PQUIComponents in Frameworks */ = {isa = PBXBuildFile; productRef = 7B883B902F42849E00E6C81D /* PQUIComponents */; };
+		7BC738692F476A05005BF78C /* SUICoordinator in Frameworks */ = {isa = PBXBuildFile; productRef = 7BC738682F476A05005BF78C /* SUICoordinator */; };
+		7BC7390A2F476BFF005BF78C /* FactoryKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7BC739092F476BFF005BF78C /* FactoryKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,7 +30,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7BC7390A2F476BFF005BF78C /* FactoryKit in Frameworks */,
 				7B883B912F42849E00E6C81D /* PQUIComponents in Frameworks */,
+				7BC738692F476A05005BF78C /* SUICoordinator in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -81,6 +85,8 @@
 			name = PQDrop;
 			packageProductDependencies = (
 				7B883B902F42849E00E6C81D /* PQUIComponents */,
+				7BC738682F476A05005BF78C /* SUICoordinator */,
+				7BC739092F476BFF005BF78C /* FactoryKit */,
 			);
 			productName = PQDrop;
 			productReference = 89B58CEA2F268EE300D437F7 /* PQDrop.app */;
@@ -110,6 +116,10 @@
 			);
 			mainGroup = 89B58CE12F268EE300D437F7;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				7BC738672F476A05005BF78C /* XCRemoteSwiftPackageReference "SUICoordinator" */,
+				7BC739082F476BFF005BF78C /* XCRemoteSwiftPackageReference "Factory" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 89B58CEB2F268EE300D437F7 /* Products */;
 			projectDirPath = "";
@@ -368,10 +378,39 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		7BC738672F476A05005BF78C /* XCRemoteSwiftPackageReference "SUICoordinator" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/felilo/SUICoordinator.git";
+			requirement = {
+				kind = exactVersion;
+				version = 1.0.0;
+			};
+		};
+		7BC739082F476BFF005BF78C /* XCRemoteSwiftPackageReference "Factory" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/hmlongco/Factory.git";
+			requirement = {
+				kind = exactVersion;
+				version = 2.5.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		7B883B902F42849E00E6C81D /* PQUIComponents */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = PQUIComponents;
+		};
+		7BC738682F476A05005BF78C /* SUICoordinator */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7BC738672F476A05005BF78C /* XCRemoteSwiftPackageReference "SUICoordinator" */;
+			productName = SUICoordinator;
+		};
+		7BC739092F476BFF005BF78C /* FactoryKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7BC739082F476BFF005BF78C /* XCRemoteSwiftPackageReference "Factory" */;
+			productName = FactoryKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -1,6 +1,24 @@
 {
-  "originHash" : "ef02139bf251b4ea319a8365654a5ed55d56d8a256c5f726c68ce972f549a803",
+  "originHash" : "bdcff02f82208dd38a82e58beedb05a61d7435d299024c2647bd8beff23e64f5",
   "pins" : [
+    {
+      "identity" : "factory",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/hmlongco/Factory.git",
+      "state" : {
+        "revision" : "ccc898f21992ebc130bc04cc197460a5ae230bcf",
+        "version" : "2.5.3"
+      }
+    },
+    {
+      "identity" : "suicoordinator",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/felilo/SUICoordinator.git",
+      "state" : {
+        "revision" : "9f5a6f697f042b00172fb4d29ed145dac96e5c53",
+        "version" : "1.0.0"
+      }
+    },
     {
       "identity" : "swiftgenplugin",
       "kind" : "remoteSourceControl",
