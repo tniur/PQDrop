@@ -25,18 +25,16 @@ struct OnboardingView: View {
                 }
                 
                 VStack(spacing: 8) {
-                    PQButton(viewModel.isLast ? "Создать ключи" : "Далее") {
-                        withAnimation(.easeInOut) {
-                            viewModel.topButtonAction()
-                        }
-                    }
+                    PQButton(
+                        viewModel.isLast ? "Создать ключи" : "Далее",
+                        action: viewModel.topButtonAction
+                    )
                     
-                    PQButton(viewModel.isFirst ? "Пропустить" : "Назад",
-                             style: PQButtonStyle(.tertiary)) {
-                        withAnimation(.easeInOut) {
-                            viewModel.bottomButtonAction()
-                        }
-                    }
+                    PQButton(
+                        viewModel.isFirst ? "Пропустить" : "Назад",
+                        style: PQButtonStyle(.tertiary),
+                        action: viewModel.bottomButtonAction
+                    )
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 24)

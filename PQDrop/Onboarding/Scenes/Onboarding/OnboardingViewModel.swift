@@ -11,7 +11,6 @@ import FactoryKit
 @MainActor
 final class OnboardingViewModel: ObservableObject {
     
-    
     @Published var steps: [OnboardingStep] = OnboardingStep.mock
     @Published var index: Int = 0
     
@@ -22,15 +21,15 @@ final class OnboardingViewModel: ObservableObject {
         index >= steps.count - 1
     }
         
-    private var coordinator: AppCoordinatorProtocol
+    private var coordinator: OnboardingCoordinatorProtocol
 
-    init(coordinator: AppCoordinatorProtocol) {
+    init(coordinator: OnboardingCoordinatorProtocol) {
         self.coordinator = coordinator
     }
     
     func topButtonAction() {
         if isLast {
-            finish()
+            createKeys()
         } else {
             index += 1
         }
@@ -38,15 +37,15 @@ final class OnboardingViewModel: ObservableObject {
     
     func bottomButtonAction() {
         if isFirst {
-            finish()
+            createKeys()
         } else {
             index -= 1
         }
     }
     
-    private func finish() {
+    private func createKeys() {
         Task {
-            await coordinator.restartSplash()
+            await coordinator.showCreateKeys()
         }
     }
 }

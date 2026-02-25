@@ -23,7 +23,8 @@ final class AppCoordinator: Coordinator<AppRoute>, AppCoordinatorProtocol {
     }
     
     func showOnboarding() async {
-        await navigate(toRoute: .onboarding(coordinator: self))
+        let coordinator = OnboardingCoordinator()
+        await navigate(to: coordinator, presentationStyle: .fullScreenCover)
     }
     
     func showMainTabs() async {

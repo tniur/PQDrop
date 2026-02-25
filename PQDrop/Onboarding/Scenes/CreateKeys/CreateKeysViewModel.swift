@@ -24,7 +24,13 @@ final class CreateKeysViewModel: ObservableObject {
 
     private var uiTask: Task<Void, Never>?
     private var workTask: Task<Void, Never>?
+    
+    private var coordinator: OnboardingCoordinatorProtocol
 
+    init(coordinator: OnboardingCoordinatorProtocol) {
+        self.coordinator = coordinator
+    }
+    
     func createKeys() {
         cancel()
 

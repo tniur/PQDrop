@@ -15,12 +15,13 @@ public struct BackgroundView<Content: View>: View {
     }
 
     public var body: some View {
-        ZStack {
-            PQImage.background.swiftUIImage
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-            content()
-        }
+        content()
+            .background(
+                PQImage.background.swiftUIImage
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
+                    .padding(-10)
+            )
     }
 }
