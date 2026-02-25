@@ -12,9 +12,12 @@ enum CreateKeysStatus: Equatable {
 
     var text: String {
         switch self {
-        case .generating: return "Генерируем ключи..."
-        case .saving: return "Сохраняем в защищённое хранилище…"
-        case .slowDeviceHint: return "На некоторых устройствах это может занять немного больше времени."
+        case .generating:
+            return "Генерируем ключи..."
+        case .saving: 
+            return "Сохраняем в защищённое хранилище…"
+        case .slowDeviceHint: 
+            return "На некоторых устройствах это может занять немного больше времени."
         }
     }
 }
