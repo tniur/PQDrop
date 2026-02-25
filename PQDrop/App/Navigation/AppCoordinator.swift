@@ -9,7 +9,7 @@ import SwiftUI
 import SUICoordinator
 
 @MainActor
-final class AppCoordinator: Coordinator<AppRoute> {
+final class AppCoordinator: Coordinator<AppRoute>, AppCoordinatorProtocol {
 
     override init() {
         super.init()

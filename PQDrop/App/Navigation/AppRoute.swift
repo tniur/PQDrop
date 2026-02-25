@@ -9,9 +9,9 @@ import SwiftUI
 import SUICoordinator
 
 enum AppRoute: RouteType {
-    case splash(coordinator: AppCoordinator)
-    case onboarding(coordinator: AppCoordinator)
-    case mainTabs(coordinator: AppCoordinator)
+    case splash(coordinator: AppCoordinatorProtocol)
+    case onboarding(coordinator: AppCoordinatorProtocol)
+    case mainTabs(coordinator: AppCoordinatorProtocol)
 
     var presentationStyle: TransitionPresentationStyle { .push }
 

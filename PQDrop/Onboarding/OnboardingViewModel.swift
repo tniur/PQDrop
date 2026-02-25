@@ -22,9 +22,9 @@ final class OnboardingViewModel: ObservableObject {
         index >= steps.count - 1
     }
         
-    private var coordinator: AppCoordinator
+    private var coordinator: AppCoordinatorProtocol
 
-    init(coordinator: AppCoordinator) {
+    init(coordinator: AppCoordinatorProtocol) {
         self.coordinator = coordinator
     }
     

@@ -11,10 +11,10 @@ import FactoryKit
 @MainActor
 final class SplashViewModel: ObservableObject {
     
-    private var coordinator: AppCoordinator
+    private var coordinator: AppCoordinatorProtocol
     private var isShowingOnboarding: Bool = true
     
-    init(coordinator: AppCoordinator) {
+    init(coordinator: AppCoordinatorProtocol) {
         self.coordinator = coordinator
     }
     
