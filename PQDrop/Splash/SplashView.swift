@@ -17,6 +17,7 @@ struct SplashView: View {
             Text("PQDrop")
                 .font(PQFont.B30)
                 .foregroundStyle(PQColor.base0.swiftUIColor)
+                .onAppear(perform: viewModel.onAppear)
         }
     }
     

@@ -6,11 +6,13 @@
 //
 
 import Combine
+import FactoryKit
 
 @MainActor
 final class OnboardingViewModel: ObservableObject {
     
-    @Published var steps: [OnboardingStep]
+    
+    @Published var steps: [OnboardingStep] = OnboardingStep.mock
     @Published var index: Int = 0
     
     var isFirst: Bool {
@@ -19,26 +21,32 @@ final class OnboardingViewModel: ObservableObject {
     var isLast: Bool {
         index >= steps.count - 1
     }
-    
-    private var onFinish: () -> Void = { }
+        
+    private var coordinator: AppCoordinator
 
-    init(steps: [OnboardingStep]) {
-        self.steps = steps
+    init(coordinator: AppCoordinator) {
+        self.coordinator = coordinator
     }
     
     func topButtonAction() {
         if isLast {
-            onFinish()
-        }else {
+            finish()
+        } else {
             index += 1
         }
     }
     
     func bottomButtonAction() {
         if isFirst {
-            onFinish()
+            finish()
         } else {
             index -= 1
+        }
+    }
+    
+    private func finish() {
+        Task {
+            await coordinator.restartSplash()
         }
     }
 }
