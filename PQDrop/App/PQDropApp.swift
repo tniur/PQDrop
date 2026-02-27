@@ -6,12 +6,16 @@
 //
 
 import SwiftUI
+import SUICoordinator
 
 @main
 struct PQDropApp: App {
+    
+    private let coordinator = AppCoordinator()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            coordinator.getView()
         }
     }
 }

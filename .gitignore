@@ -4,6 +4,7 @@
 *.xcuserstate
 *.xcuserdatad
 *.xcuserscheme
+*.xcuserstate
 
 # Project user data
 *.xcworkspace/xcuserdata/

@@ -14,7 +14,7 @@ public enum PQFont {
     public static let B14 = Font.system(size: 14, weight: .bold)
     public static let B12 = Font.system(size: 12, weight: .bold)
 
-    public static let M20 = Font.system(size: 20, weight: .medium)
+    public static let M24 = Font.system(size: 24, weight: .medium)
 
     public static let R16 = Font.system(size: 16, weight: .regular)
     public static let R14 = Font.system(size: 14, weight: .regular)
