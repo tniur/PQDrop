@@ -10,7 +10,6 @@ import SUICoordinator
 
 enum AppRoute: RouteType {
     case splash(coordinator: AppCoordinatorProtocol)
-    case mainTabs(coordinator: AppCoordinatorProtocol)
 
     var presentationStyle: TransitionPresentationStyle { .push }
 
@@ -20,9 +19,6 @@ enum AppRoute: RouteType {
             let viewModel = SplashViewModel(coordinator: coordinator)
             let view = SplashView(viewModel: viewModel)
             return AnyView(view)
-            
-        case .mainTabs(let coordinator):
-            return AnyView(EmptyView())
         }
     }
 }

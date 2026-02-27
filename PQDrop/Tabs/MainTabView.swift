@@ -19,7 +19,7 @@ where DataSource.Page == MainTabPage, DataSource.DataSourcePage == MainTabPageDa
 
     var body: some View {
         TabView(selection: $dataSource.currentPage) {
-            ForEach(dataSource.pages, id: \.id) { page in
+            ForEach(dataSource.pages) { page in
                 if let coordinator = dataSource.getCoordinator(with: page) {
                     coordinator.viewAsAnyView()
                         .tabItem {

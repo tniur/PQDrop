@@ -29,13 +29,13 @@ enum MainTabPage: TabPage, CaseIterable {
     func coordinator() -> AnyCoordinatorType {
         switch self {
         case .containers:
-            return
+            return ProfileCoordinator()
         case .contacts:
-            return
+            return ProfileCoordinator()
         case .history:
-            return
+            return ProfileCoordinator()
         case .profile:
-            return 
+            return ProfileCoordinator()
         }
     }
 

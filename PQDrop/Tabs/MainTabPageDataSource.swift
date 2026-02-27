@@ -11,7 +11,8 @@ import PQUIComponents
 struct MainTabPageDataSource {
     let page: MainTabPage
 
-    @ViewBuilder var icon: some View {
+    @ViewBuilder
+    var icon: some View {
         switch page {
         case .containers:
             PQImage.containers.swiftUIImage
@@ -24,7 +25,8 @@ struct MainTabPageDataSource {
         }
     }
 
-    @ViewBuilder var title: some View {
+    @ViewBuilder
+    var title: some View {
         switch page {
         case .containers:
             Text("Контейнеры")
