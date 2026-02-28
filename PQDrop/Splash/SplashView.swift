@@ -22,7 +22,6 @@ struct SplashView: View {
                 .font(PQFont.B30)
                 .foregroundStyle(PQColor.base0.swiftUIColor)
                 .onAppear(perform: viewModel.onAppear)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
     

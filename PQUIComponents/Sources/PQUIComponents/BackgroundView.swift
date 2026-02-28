@@ -8,7 +8,7 @@
 import SwiftUI
 
 public struct BackgroundView<Content: View>: View {
-    
+
     // MARK: - Properties
 
     private let isImage: Bool
@@ -18,9 +18,10 @@ public struct BackgroundView<Content: View>: View {
 
     public var body: some View {
         content()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(backgroundView)
     }
-    
+
     // MARK: - Subviews
 
     @ViewBuilder
@@ -36,7 +37,7 @@ public struct BackgroundView<Content: View>: View {
                 .ignoresSafeArea()
         }
     }
-    
+
     // MARK: - Initializer
 
     public init(
