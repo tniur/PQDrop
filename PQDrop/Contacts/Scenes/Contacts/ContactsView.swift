@@ -19,7 +19,7 @@ struct ContactsView: View {
     var body: some View {
         BackgroundView(isImage: true) {
             contentView
-                .overlay(alignment: .bottom) {
+                .safeAreaInset(edge: .bottom) {
                     addContactButton
                         .padding(12)
                 }
@@ -30,7 +30,7 @@ struct ContactsView: View {
     
     private var contentView: some View {
         Group {
-            if !viewModel.contacts.isEmpty {
+            if viewModel.filteredContacts.isEmpty {
                 stubView
             } else {
                 listView
@@ -78,7 +78,7 @@ struct ContactsView: View {
     private var listView: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
-                ForEach(viewModel.contacts) { contact in
+                ForEach(viewModel.filteredContacts) { contact in
                     ContactView(
                         name: contact.name,
                         isVerified: contact.isVerified

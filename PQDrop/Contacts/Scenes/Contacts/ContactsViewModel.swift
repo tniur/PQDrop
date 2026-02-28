@@ -6,12 +6,24 @@
 //
 
 import Combine
+import Foundation
 
 final class ContactsViewModel: ObservableObject {
     
     // MARK: - Properties
-
-    @Published var contacts: [Contact] = [
+    
+    @Published var searchText: String = ""
+    
+    var filteredContacts: [Contact] {
+        if searchText.isEmpty {
+            return contacts
+        }
+        return contacts.filter {
+            $0.name.localizedCaseInsensitiveContains(searchText)
+        }
+    }
+    
+    private var contacts: [Contact] = [
         .init(id: "0", name: "odoaosd", isVerified: true),
         .init(id: "1", name: "smdks", isVerified: false),
         .init(id: "2", name: "smdks", isVerified: false),
@@ -25,8 +37,6 @@ final class ContactsViewModel: ObservableObject {
         .init(id: "10", name: "smdks", isVerified: false),
         .init(id: "11", name: "smdks", isVerified: true)
     ]
-    
-    @Published var searchText: String = ""
     
     private let coordinator: ContactsCoordinatorProtocol
     
