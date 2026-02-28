@@ -11,12 +11,16 @@ import Foundation
 @MainActor
 final class CreateKeysViewModel: ObservableObject {
 
+    // MARK: - Enums
+
     enum Phase: Equatable {
         case idle
         case creating
         case success
         case failure
     }
+
+    // MARK: - Properties
 
     @Published var phase: Phase = .idle
     @Published var progress: Double = 0
@@ -27,10 +31,14 @@ final class CreateKeysViewModel: ObservableObject {
     
     private var coordinator: OnboardingCoordinatorProtocol
 
+    // MARK: - Initializer
+
     init(coordinator: OnboardingCoordinatorProtocol) {
         self.coordinator = coordinator
     }
     
+    // MARK: - Methods
+
     func createKeys() {
         cancel()
 
@@ -92,6 +100,13 @@ final class CreateKeysViewModel: ObservableObject {
         workTask?.cancel()
         uiTask = nil
         workTask = nil
+    }
+    
+    func finish() {
+        Task {
+            UserDefaults.standard.set(true, forKey: UserDefaultsKeys.onboardingCompleted)
+            await coordinator.restartSplash()
+        }
     }
 
     // MARK: - Mock

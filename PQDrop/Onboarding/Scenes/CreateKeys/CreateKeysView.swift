@@ -10,10 +10,25 @@ import PQUIComponents
 
 struct CreateKeysView: View {
 
+    // MARK: - Properties
+
     @ObservedObject private var viewModel: CreateKeysViewModel
 
+    private var title: String {
+        switch viewModel.phase {
+        case .idle, .creating:
+            return "Создание ключей"
+        case .success:
+            return "Ключи созданы"
+        case .failure:
+            return "Не удалось создать ключи"
+        }
+    }
+    
+    // MARK: - Body
+
     var body: some View {
-        BackgroundView {
+        BackgroundView(isImage: true) {
             VStack(spacing: .zero) {
                 imageView
                     .frame(maxWidth: .infinity)
@@ -36,16 +51,7 @@ struct CreateKeysView: View {
         }
     }
 
-    private var title: String {
-        switch viewModel.phase {
-        case .idle, .creating:
-            return "Создание ключей"
-        case .success:
-            return "Ключи созданы"
-        case .failure:
-            return "Не удалось создать ключи"
-        }
-    }
+    // MARK: - Subviews
 
     @ViewBuilder
     private var imageView: some View {
@@ -117,9 +123,10 @@ struct CreateKeysView: View {
 
             Spacer()
             
-            PQButton("Далее") {
-                // тут переключать флоу
-            }
+            PQButton(
+                "Далее",
+                action: viewModel.finish
+            )
         }
     }
 
@@ -135,6 +142,8 @@ struct CreateKeysView: View {
             PQButton("Повторить", action: viewModel.retry)
         }
     }
+
+    // MARK: - Initializer
 
     init(viewModel: CreateKeysViewModel) {
         self.viewModel = viewModel

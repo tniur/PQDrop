@@ -10,10 +10,14 @@ import PQUIComponents
 
 struct OnboardingView: View {
     
+    // MARK: - Properties
+
     @ObservedObject private var viewModel: OnboardingViewModel
     
+    // MARK: - Body
+
     var body: some View {
-        BackgroundView {
+        BackgroundView(isImage: true) {
             ZStack(alignment: .bottom) {
                 TabView(selection: $viewModel.index) {
                     ForEach(viewModel.steps) { step in
@@ -66,6 +70,8 @@ struct OnboardingView: View {
             }
         }
     }
+
+    // MARK: - Initializer
 
     init(viewModel: OnboardingViewModel) {
         self.viewModel = viewModel

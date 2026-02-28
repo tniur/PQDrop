@@ -10,17 +10,24 @@ import PQUIComponents
 
 struct SplashView: View {
     
+    // MARK: - Properties
+
     @ObservedObject private var viewModel: SplashViewModel
     
+    // MARK: - Body
+
     var body: some View {
-        BackgroundView {
+        BackgroundView(isImage: true) {
             Text("PQDrop")
                 .font(PQFont.B30)
                 .foregroundStyle(PQColor.base0.swiftUIColor)
                 .onAppear(perform: viewModel.onAppear)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
     
+    // MARK: - Initializer
+
     init(viewModel: SplashViewModel) {
         self.viewModel = viewModel
     }
