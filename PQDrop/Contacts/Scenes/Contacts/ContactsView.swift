@@ -92,7 +92,6 @@ struct ContactsView: View {
             }
             .padding(.top)
             .padding(.horizontal)
-            .padding(.bottom, 70)
         }
     }
     

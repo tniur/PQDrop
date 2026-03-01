@@ -8,19 +8,27 @@
 import Combine
 import Foundation
 
+@MainActor
 final class ContactsViewModel: ObservableObject {
     
     // MARK: - Properties
     
     @Published var searchText: String = ""
+    @Published var filter: ContactsFilter = .all
     
     var filteredContacts: [Contact] {
-        if searchText.isEmpty {
-            return contacts
+        let base: [Contact]
+        switch filter {
+        case .all:
+            base = contacts
+        case .verifiedOnly:
+            base = contacts.filter { $0.isVerified }
+        case .unverifiedOnly:
+            base = contacts.filter { !$0.isVerified }
         }
-        return contacts.filter {
-            $0.name.localizedCaseInsensitiveContains(searchText)
-        }
+        
+        guard !searchText.isEmpty else { return base }
+        return base.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
     }
     
     private var contacts: [Contact] = [
@@ -49,7 +57,12 @@ final class ContactsViewModel: ObservableObject {
     // MARK: - Methods
 
     func showFilters() {
-        
+        Task {
+            let model = ContactsFilterSheetModel(currentFilter: filter) { filter in
+                self.filter = filter
+            }
+            await coordinator.showContactsFilterSheet(with: model)
+        }
     }
     
     func showSettings() {

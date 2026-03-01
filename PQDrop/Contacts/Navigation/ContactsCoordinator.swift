@@ -21,5 +21,9 @@ final class ContactsCoordinator: Coordinator<ContactsRoute>, ContactsCoordinator
     override func start() async {
         await startFlow(route: .contacts(coordinator: self))
     }
+    
+    func showContactsFilterSheet(with model: ContactsFilterSheetModel) async {
+        await navigate(toRoute: .contactsFiltersSheet(model: model))
+    }
 }
 

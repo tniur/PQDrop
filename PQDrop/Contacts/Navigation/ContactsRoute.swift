@@ -10,14 +10,26 @@ import SUICoordinator
 
 enum ContactsRoute: RouteType {
     case contacts(coordinator: ContactsCoordinatorProtocol)
-
-    var presentationStyle: TransitionPresentationStyle { .push }
+    case contactsFiltersSheet(model: ContactsFilterSheetModel)
+    
+    var presentationStyle: TransitionPresentationStyle {
+        switch self {
+        case .contacts:
+            .push
+        case .contactsFiltersSheet:
+            .sheet
+        }
+    }
 
     var body: some View {
         switch self {
         case .contacts(let coordinator):
             let viewModel = ContactsViewModel(coordinator: coordinator)
             let view = ContactsView(viewModel: viewModel)
+            return AnyView(view)
+            
+        case .contactsFiltersSheet(let model):
+            let view = ContactsFilterSheet(model: model)
             return AnyView(view)
         }
     }

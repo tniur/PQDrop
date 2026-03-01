@@ -6,5 +6,5 @@
 //
 
 protocol ContactsCoordinatorProtocol: AnyObject {
-    
+    func showContactsFilterSheet(with model: ContactsFilterSheetModel) async
 }
