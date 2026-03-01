@@ -66,13 +66,11 @@ final class ContactsViewModel: ObservableObject {
             await coordinator.showContactsFilterSheet(with: model)
         }
     }
-    
-    func showSettings() {
-        
-    }
-    
+
     func addContact() {
-        
+        Task {
+            await coordinator.showAddContact()
+        }
     }
     
     func delete(contact: Contact) {

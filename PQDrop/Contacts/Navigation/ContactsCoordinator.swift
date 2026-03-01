@@ -25,5 +25,13 @@ final class ContactsCoordinator: Coordinator<ContactsRoute>, ContactsCoordinator
     func showContactsFilterSheet(with model: ContactsFilterSheetModel) async {
         await navigate(toRoute: .contactsFiltersSheet(model: model))
     }
+    
+    func showAddContact() async {
+        await navigate(toRoute: .addContact(coordinator: self))
+    }
+    
+    func showAddNameToContact(with id: String) async {
+        await navigate(toRoute: .addNameToContact(coordinator: self, id: id))
+    }
 }
 
