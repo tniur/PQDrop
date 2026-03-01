@@ -12,6 +12,8 @@ final class AddNameToContactViewModel: ObservableObject {
     
     // MARK: - Properties
 
+    @Published var name: String = ""
+    
     private var coordinator: ContactsCoordinatorProtocol
     private var id: String
 
@@ -20,5 +22,13 @@ final class AddNameToContactViewModel: ObservableObject {
     init(coordinator: ContactsCoordinatorProtocol, id: String) {
         self.coordinator = coordinator
         self.id = id
+    }
+    
+    // MARK: - Methods
+    
+    func create() {
+        Task {
+            await coordinator.finish()
+        }
     }
 }

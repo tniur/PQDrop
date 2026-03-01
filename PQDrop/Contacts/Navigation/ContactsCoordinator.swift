@@ -33,5 +33,9 @@ final class ContactsCoordinator: Coordinator<ContactsRoute>, ContactsCoordinator
     func showAddNameToContact(with id: String) async {
         await navigate(toRoute: .addNameToContact(coordinator: self, id: id))
     }
+    
+    func finish() async {
+        await restart()
+    }
 }
 

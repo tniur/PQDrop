@@ -19,13 +19,16 @@ struct AddContactView: View {
     // MARK: - Body
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            titleView
-            contentView
-            Spacer()
+        BackgroundView {
+            VStack(alignment: .leading, spacing: 20) {
+                titleView
+                contentView
+                Spacer()
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 4)
         }
-        .padding(.horizontal)
-        .padding(.vertical, 4)
+        .toolbar(.hidden, for: .tabBar)
     }
 
     // MARK: - Subviews
@@ -40,7 +43,6 @@ struct AddContactView: View {
                 .font(PQFont.R14)
                 .foregroundStyle(PQColor.base5.swiftUIColor)
         }
-
     }
     
     private var contentView: some View {
