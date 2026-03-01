@@ -16,6 +16,7 @@ final class ContactsViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var filter: ContactsFilter = .all
     @Published var contactToDelete: Contact? = nil
+    @Published var showClearAlert = false
 
     var filteredContacts: [Contact] {
         let base: [Contact]
@@ -76,5 +77,9 @@ final class ContactsViewModel: ObservableObject {
     
     func delete(contact: Contact) {
         contacts.removeAll { $0.id == contact.id }
+    }
+    
+    func clearContacts() {
+        contacts.removeAll()
     }
 }

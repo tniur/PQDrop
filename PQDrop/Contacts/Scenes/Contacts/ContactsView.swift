@@ -13,7 +13,7 @@ struct ContactsView: View {
     // MARK: - Properties
 
     @ObservedObject private var viewModel: ContactsViewModel
-        
+    
     // MARK: - Body
 
     var body: some View {
@@ -60,13 +60,28 @@ struct ContactsView: View {
                 .foregroundStyle(PQColor.base7.swiftUIColor)
                 .onTapGesture(perform: viewModel.showFilters)
             
-            PQImage.dots.swiftUIImage
-                .renderingMode(.template)
-                .foregroundStyle(PQColor.base7.swiftUIColor)
-                .onTapGesture(perform: viewModel.showSettings)
+            Menu {
+                Button(role: .destructive) {
+                    viewModel.showClearAlert = true
+                } label: {
+                    Label("Очистить контакты", systemImage: "trash")
+                }
+            } label: {
+                PQImage.dots.swiftUIImage
+                    .renderingMode(.template)
+                    .foregroundStyle(PQColor.base7.swiftUIColor)
+            }
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
+        .alert("Очистить все контакты?", isPresented: $viewModel.showClearAlert) {
+            Button("Удалить все", role: .destructive) {
+                viewModel.clearContacts()
+            }
+            Button("Отмена", role: .cancel) {}
+        } message: {
+            Text("Все контакты будут удалены.")
+        }
     }
     
     private var stubView: some View {
