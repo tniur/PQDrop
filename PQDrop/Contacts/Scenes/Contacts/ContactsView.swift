@@ -13,7 +13,7 @@ struct ContactsView: View {
     // MARK: - Properties
 
     @ObservedObject private var viewModel: ContactsViewModel
-    
+        
     // MARK: - Body
 
     var body: some View {
@@ -84,6 +84,13 @@ struct ContactsView: View {
                         isVerified: contact.isVerified
                     )
                     .frame(maxWidth: .infinity)
+                    .contextMenu {
+                        Button(role: .destructive) {
+                            viewModel.contactToDelete = contact
+                        } label: {
+                            Label("Удалить", systemImage: "trash")
+                        }
+                    }
                 }
                 
                 Text("Verified – ключ подтверждён по независимому каналу.")
@@ -93,6 +100,26 @@ struct ContactsView: View {
             .padding(.top)
             .padding(.horizontal)
         }
+        .alert(
+            "Удалить контакт?",
+            isPresented: Binding(
+                get: { viewModel.contactToDelete != nil },
+                set: { if !$0 { viewModel.contactToDelete = nil } }
+            ),
+            actions: {
+                Button("Удалить", role: .destructive) {
+                    if let contact = viewModel.contactToDelete {
+                        viewModel.delete(contact: contact)
+                    }
+                }
+                Button("Отмена", role: .cancel) {}
+            },
+            message: {
+                if let contact = viewModel.contactToDelete {
+                    Text("Контакт «\(contact.name)» будет удалён.")
+                }
+            }
+        )
     }
     
     private var addContactButton: some View {
