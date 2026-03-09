@@ -8,7 +8,7 @@
 protocol ContactsCoordinatorProtocol: AnyObject {
     func showContactsFilterSheet(with model: ContactsFilterSheetModel) async
     func showAddContact() async
-    func showAddNameToContact(with id: String) async
+    func showEditContactName(with id: String) async
     func showContactDetails(with contact: Contact) async
     func finish() async
 }

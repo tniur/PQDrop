@@ -44,7 +44,7 @@ final class AddContactViewModel: ObservableObject {
 
     func showAddNameToContact(with id: String) {
         Task {
-            await coordinator.showAddNameToContact(with: id)
+            await coordinator.showEditContactName(with: id)
         }
     }
 }

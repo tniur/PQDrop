@@ -39,6 +39,7 @@ struct ContactDetailsView: View {
             .padding(.vertical, 8)
             .padding(.horizontal)
         }
+        .toolbar(.hidden, for: .tabBar)
     }
     
     // MARK: - Subviews

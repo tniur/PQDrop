@@ -45,7 +45,9 @@ final class ContactDetailsViewModel: ObservableObject {
     // MARK: - Methods
 
     func editName() {
-
+        Task {
+            await coordinator.showEditContactName(with: contact.id)
+        }
     }
     
     func copyFingerprint() {

@@ -12,12 +12,12 @@ enum ContactsRoute: RouteType {
     case contacts(coordinator: ContactsCoordinatorProtocol)
     case contactsFiltersSheet(model: ContactsFilterSheetModel)
     case addContact(coordinator: ContactsCoordinatorProtocol)
-    case addNameToContact(coordinator: ContactsCoordinatorProtocol, id: String)
+    case editContactName(coordinator: ContactsCoordinatorProtocol, id: String)
     case contactDetails(coordinator: ContactsCoordinatorProtocol, contact: Contact)
     
     var presentationStyle: TransitionPresentationStyle {
         switch self {
-        case .contacts, .addContact, .addNameToContact, .contactDetails:
+        case .contacts, .addContact, .editContactName, .contactDetails:
             .push
         case .contactsFiltersSheet:
             .sheet
@@ -40,9 +40,9 @@ enum ContactsRoute: RouteType {
             let view = AddContactView(viewModel: viewModel)
             return AnyView(view)
             
-        case .addNameToContact(let coordinator, let id):
-            let viewModel = AddNameToContactViewModel(coordinator: coordinator, id: id)
-            let view = AddNameToContactView(viewModel: viewModel)
+        case .editContactName(let coordinator, let id):
+            let viewModel = EditContactNameViewModel(coordinator: coordinator, id: id)
+            let view = EditContactNameView(viewModel: viewModel)
             return AnyView(view)
             
         case .contactDetails(let coordinator, let contact):
