@@ -14,7 +14,7 @@ final class AddNameToContactViewModel: ObservableObject {
 
     @Published var name: String = ""
     
-    private var coordinator: ContactsCoordinatorProtocol
+    private let coordinator: ContactsCoordinatorProtocol
     private var id: String
 
     // MARK: - Initializer

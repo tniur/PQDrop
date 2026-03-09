@@ -29,7 +29,7 @@ final class CreateKeysViewModel: ObservableObject {
     private var uiTask: Task<Void, Never>?
     private var workTask: Task<Void, Never>?
     
-    private var coordinator: OnboardingCoordinatorProtocol
+    private let coordinator: OnboardingCoordinatorProtocol
 
     // MARK: - Initializer
 

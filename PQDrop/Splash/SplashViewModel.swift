@@ -14,7 +14,7 @@ final class SplashViewModel: ObservableObject {
     
     // MARK: - Properties
 
-    private var coordinator: AppCoordinatorProtocol
+    private let coordinator: AppCoordinatorProtocol
     private var isShowingOnboarding: Bool = true
     
     // MARK: - Initializer

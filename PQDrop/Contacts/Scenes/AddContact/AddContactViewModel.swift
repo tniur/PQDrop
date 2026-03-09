@@ -13,7 +13,7 @@ final class AddContactViewModel: ObservableObject {
 
     // MARK: - Properties
 
-    private var coordinator: ContactsCoordinatorProtocol
+    private let coordinator: ContactsCoordinatorProtocol
     
     private var isProcessing = false
     

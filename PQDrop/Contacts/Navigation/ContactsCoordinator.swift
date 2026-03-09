@@ -34,6 +34,10 @@ final class ContactsCoordinator: Coordinator<ContactsRoute>, ContactsCoordinator
         await navigate(toRoute: .addNameToContact(coordinator: self, id: id))
     }
     
+    func showContactDetails(with contact: Contact) async {
+        await navigate(toRoute: .contactDetails(coordinator: self, contact: contact))
+    }
+    
     func finish() async {
         await restart()
     }

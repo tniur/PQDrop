@@ -23,7 +23,7 @@ final class OnboardingViewModel: ObservableObject {
         index >= steps.count - 1
     }
         
-    private var coordinator: OnboardingCoordinatorProtocol
+    private let coordinator: OnboardingCoordinatorProtocol
 
     // MARK: - Initializer
 

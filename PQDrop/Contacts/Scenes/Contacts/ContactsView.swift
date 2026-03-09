@@ -99,6 +99,9 @@ struct ContactsView: View {
                         isVerified: contact.isVerified
                     )
                     .frame(maxWidth: .infinity)
+                    .onTapGesture {
+                        viewModel.showDetails(of: contact)
+                    }
                     .contextMenu {
                         Button(role: .destructive) {
                             viewModel.contactToDelete = contact

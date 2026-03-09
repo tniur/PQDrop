@@ -34,18 +34,18 @@ final class ContactsViewModel: ObservableObject {
     }
     
     private var contacts: [Contact] = [
-        .init(id: "0", name: "odoaosd", isVerified: true),
-        .init(id: "1", name: "smdks", isVerified: false),
-        .init(id: "2", name: "smdks", isVerified: false),
-        .init(id: "3", name: "smdks", isVerified: true),
-        .init(id: "4", name: "smdks", isVerified: true),
-        .init(id: "5", name: "smdks", isVerified: false),
-        .init(id: "6", name: "smdks", isVerified: false),
-        .init(id: "7", name: "smdks", isVerified: true),
-        .init(id: "8", name: "smdks", isVerified: true),
-        .init(id: "9", name: "smdks", isVerified: true),
-        .init(id: "10", name: "smdks", isVerified: false),
-        .init(id: "11", name: "smdks", isVerified: true)
+        .init(id: "0", name: "odoaosd", isVerified: true, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000"),
+        .init(id: "1", name: "smdks", isVerified: false, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000"),
+        .init(id: "2", name: "smdks", isVerified: false, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000"),
+        .init(id: "3", name: "smdks", isVerified: true, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000"),
+        .init(id: "4", name: "smdks", isVerified: true, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000"),
+        .init(id: "5", name: "smdks", isVerified: false, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000"),
+        .init(id: "6", name: "smdks", isVerified: false, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000"),
+        .init(id: "7", name: "smdks", isVerified: true, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000"),
+        .init(id: "8", name: "smdks", isVerified: true, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000"),
+        .init(id: "9", name: "smdks", isVerified: true, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000"),
+        .init(id: "10", name: "smdks", isVerified: false, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000"),
+        .init(id: "11", name: "smdks", isVerified: true, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000")
     ]
     
     private let coordinator: ContactsCoordinatorProtocol
@@ -79,5 +79,11 @@ final class ContactsViewModel: ObservableObject {
     
     func clearContacts() {
         contacts.removeAll()
+    }
+    
+    func showDetails(of contact: Contact) {
+        Task {
+            await coordinator.showContactDetails(with: contact)
+        }
     }
 }
