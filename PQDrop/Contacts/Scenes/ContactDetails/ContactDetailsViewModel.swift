@@ -16,6 +16,9 @@ final class ContactDetailsViewModel: ObservableObject {
 
     @Published var contact: Contact
     @Published var showDeleteAlert = false
+    @Published var showVerificationAlert = false
+    
+    private var pendingVerificationValue: Bool?
     
     var verifiedSelection: Binding<Int> {
         Binding(
@@ -24,14 +27,38 @@ final class ContactDetailsViewModel: ObservableObject {
                 return self.contact.isVerified ? 0 : 1
             },
             set: { [weak self] newValue in
-                guard let self else { return }
-                self.contact.isVerified = (newValue == 0)
+                self?.handleVerificationSelectionChange(newValue)
             }
         )
     }
     
     var fingerprintBlocks: [FingerprintBlock] {
         contact.fingerprint.chunked(into: 6)
+    }
+    
+    var verificationAlertTitle: String {
+        guard let pendingVerificationValue else { return "" }
+        
+        if pendingVerificationValue {
+            return "Подтвердить контакт как Verified?"
+        } else {
+            return "Удалить верификацию контакта?"
+        }
+    }
+    
+    var verificationAlertMessage: String {
+        guard let pendingVerificationValue else { return "" }
+        
+        if pendingVerificationValue {
+            return "Вы подтверждаете, что сверили fingerprint по независимому каналу."
+        } else {
+            return "Этот ключ больше не считается проверенным."
+        }
+    }
+    
+    var verificationConfirmButtonTitle: String {
+        guard let pendingVerificationValue else { return "" }
+        return pendingVerificationValue ? "Подтвердить" : "Удалить верификацию"
     }
     
     private let coordinator: ContactsCoordinatorProtocol
@@ -59,5 +86,24 @@ final class ContactDetailsViewModel: ObservableObject {
         Task {
             await coordinator.finish()
         }
+    }
+    
+    func confirmVerificationChange() {
+        guard let pendingVerificationValue else { return }
+        contact.isVerified = pendingVerificationValue
+        self.pendingVerificationValue = nil
+    }
+    
+    func cancelVerificationChange() {
+        pendingVerificationValue = nil
+    }
+    
+    private func handleVerificationSelectionChange(_ newValue: Int) {
+        let newIsVerified = (newValue == 0)
+        
+        guard newIsVerified != contact.isVerified else { return }
+        
+        pendingVerificationValue = newIsVerified
+        showVerificationAlert = true
     }
 }

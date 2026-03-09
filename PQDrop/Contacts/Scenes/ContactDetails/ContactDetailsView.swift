@@ -23,21 +23,7 @@ struct ContactDetailsView: View {
 
     var body: some View {
         BackgroundView(isImage: true) {
-            VStack(spacing: 10) {
-                contentView
-                    .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 34))
-                
-                if !viewModel.contact.isVerified {
-                    Text("Это неподтверждённый контакт. Перед выдачей доступа проверьте fingerprint по независимому каналу.")
-                        .font(PQFont.B16)
-                        .foregroundStyle(PQColor.base0.swiftUIColor)
-                        .multilineTextAlignment(.center)
-                }
-                
-                Spacer()
-            }
-            .padding(.vertical, 8)
-            .padding(.horizontal)
+           contentView
         }
         .toolbar(.hidden, for: .tabBar)
         .navigationBarTitleDisplayMode(.inline)
@@ -57,18 +43,45 @@ struct ContactDetailsView: View {
         } message: {
             Text("Это не изменит доступ к уже выданным контейнерам.")
         }
+        .alert(
+            viewModel.verificationAlertTitle,
+            isPresented: $viewModel.showVerificationAlert
+        ) {
+            Button(viewModel.verificationConfirmButtonTitle) {
+                viewModel.confirmVerificationChange()
+            }
+            Button("Отмена", role: .cancel) {
+                viewModel.cancelVerificationChange()
+            }
+        } message: {
+            Text(viewModel.verificationAlertMessage)
+        }
     }
     
     // MARK: - Subviews
 
     private var contentView: some View {
-        VStack(spacing: 28) {
-            titleView
-            fingerprintView
+        VStack(spacing: 10) {
+            VStack(spacing: 28) {
+                titleView
+                fingerprintView
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal)
+            .padding(.vertical, 40)
+            .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 34))
+            
+            if !viewModel.contact.isVerified {
+                Text("Это неподтверждённый контакт. Перед выдачей доступа проверьте fingerprint по независимому каналу.")
+                    .font(PQFont.B16)
+                    .foregroundStyle(PQColor.base0.swiftUIColor)
+                    .multilineTextAlignment(.center)
+            }
+            
+            Spacer()
         }
-        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
         .padding(.horizontal)
-        .padding(.vertical, 40)
     }
     
     private var toolbarMenuView: some View {
