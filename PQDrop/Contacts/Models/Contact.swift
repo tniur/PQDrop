@@ -9,6 +9,7 @@ import Foundation
 
 struct Contact: Identifiable {
     let id: String
-    let name: String
-    let isVerified: Bool
+    var name: String
+    var isVerified: Bool
+    let fingerprint: String
 }
