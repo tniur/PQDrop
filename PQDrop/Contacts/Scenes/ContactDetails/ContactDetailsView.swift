@@ -40,6 +40,23 @@ struct ContactDetailsView: View {
             .padding(.horizontal)
         }
         .toolbar(.hidden, for: .tabBar)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                toolbarMenuView
+            }
+        }
+        .alert(
+            "Действительно удалить контакт \"\(viewModel.contact.name)\"?",
+            isPresented: $viewModel.showDeleteAlert
+        ) {
+            Button("Удалить", role: .destructive) {
+                viewModel.deleteContact()
+            }
+            Button("Отмена", role: .cancel) {}
+        } message: {
+            Text("Это не изменит доступ к уже выданным контейнерам.")
+        }
     }
     
     // MARK: - Subviews
@@ -52,6 +69,20 @@ struct ContactDetailsView: View {
         .frame(maxWidth: .infinity)
         .padding(.horizontal)
         .padding(.vertical, 40)
+    }
+    
+    private var toolbarMenuView: some View {
+        Menu {
+            Button(role: .destructive) {
+                viewModel.showDeleteAlert = true
+            } label: {
+                Label("Удалить контакт", systemImage: "trash")
+            }
+        } label: {
+            PQImage.dots.swiftUIImage
+                .renderingMode(.template)
+                .foregroundStyle(PQColor.base7.swiftUIColor)
+        }
     }
     
     private var titleView: some View {
@@ -73,10 +104,8 @@ struct ContactDetailsView: View {
             }
             
             Picker("", selection: viewModel.verifiedSelection) {
-                Text("Verified")
-                    .tag(0)
-                Text("Unverified")
-                    .tag(1)
+                Text("Verified").tag(0)
+                Text("Unverified").tag(1)
             }
             .pickerStyle(.segmented)
             .frame(width: 200)
@@ -96,10 +125,10 @@ struct ContactDetailsView: View {
             
             Text("нажмите на fingerprint, чтобы скопировать")
                 .font(PQFont.R12.italic())
-                .foregroundStyle(PQColor.blue2.swiftUIColor)
+                .foregroundStyle(PQColor.blue3.swiftUIColor)
                 .multilineTextAlignment(.center)
         }
-        .contentShape(Rectangle())
+        .contentShape(.rect)
         .frame(width: 248)
         .onTapGesture(perform: viewModel.copyFingerprint)
     }

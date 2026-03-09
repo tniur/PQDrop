@@ -15,6 +15,7 @@ final class ContactDetailsViewModel: ObservableObject {
     // MARK: - Properties
 
     @Published var contact: Contact
+    @Published var showDeleteAlert = false
     
     var verifiedSelection: Binding<Int> {
         Binding(
@@ -52,5 +53,11 @@ final class ContactDetailsViewModel: ObservableObject {
     
     func copyFingerprint() {
         UIPasteboard.general.string = contact.fingerprint
+    }
+    
+    func deleteContact() {
+        Task {
+            await coordinator.finish()
+        }
     }
 }
