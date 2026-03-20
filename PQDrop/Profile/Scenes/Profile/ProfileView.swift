@@ -9,12 +9,18 @@ import SwiftUI
 
 struct ProfileView: View {
     
+    // MARK: - Properties
+
     @ObservedObject private var viewModel: ProfileViewModel
     
+    // MARK: - Body
+
     var body: some View {
         Text("Профиль")
     }
     
+    // MARK: - Initializer
+
     init(viewModel: ProfileViewModel) {
         self.viewModel = viewModel
     }

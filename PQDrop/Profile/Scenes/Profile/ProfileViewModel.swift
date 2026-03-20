@@ -9,8 +9,12 @@ import Combine
 
 final class ProfileViewModel: ObservableObject {
     
+    // MARK: - Properties
+
     private let coordinator: ProfileCoordinatorProtocol
     
+    // MARK: - Initializer
+
     init(coordinator: ProfileCoordinatorProtocol) {
         self.coordinator = coordinator
     }

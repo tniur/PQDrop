@@ -11,11 +11,17 @@ import SUICoordinator
 struct MainTabView<DataSource: TabCoordinatorType>: View
 where DataSource.Page == MainTabPage, DataSource.DataSourcePage == MainTabPageDataSource {
 
-    @StateObject var dataSource: DataSource
+    // MARK: - Properties
+
+    @StateObject private var dataSource: DataSource
+
+    // MARK: - Initializer
 
     init(dataSource: DataSource) {
         _dataSource = .init(wrappedValue: dataSource)
     }
+
+    // MARK: - Body
 
     var body: some View {
         TabView(selection: $dataSource.currentPage) {
