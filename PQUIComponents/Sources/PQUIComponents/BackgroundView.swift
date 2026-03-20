@@ -8,20 +8,43 @@
 import SwiftUI
 
 public struct BackgroundView<Content: View>: View {
-    let content: () -> Content
 
-    public init(@ViewBuilder content: @escaping () -> Content) {
-        self.content = content
-    }
+    // MARK: - Properties
+
+    private let isImage: Bool
+    private let content: () -> Content
+
+    // MARK: - Body
 
     public var body: some View {
         content()
-            .background(
-                PQImage.background.swiftUIImage
-                    .resizable()
-                    .scaledToFill()
-                    .ignoresSafeArea()
-                    .padding(-10)
-            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(backgroundView)
+    }
+
+    // MARK: - Subviews
+
+    @ViewBuilder
+    private var backgroundView: some View {
+        if isImage {
+            PQImage.background.swiftUIImage
+                .resizable()
+                .scaledToFill()
+                .ignoresSafeArea()
+                .padding(-10)
+        } else {
+            PQColor.base1.swiftUIColor
+                .ignoresSafeArea()
+        }
+    }
+
+    // MARK: - Initializer
+
+    public init(
+        isImage: Bool = false,
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        self.isImage = isImage
+        self.content = content
     }
 }

@@ -28,7 +28,8 @@ final class AppCoordinator: Coordinator<AppRoute>, AppCoordinatorProtocol {
     }
     
     func showMainTabs() async {
-        await navigate(toRoute: .mainTabs(coordinator: self))
+        let coordinator = MainTabCoordinator()
+        await navigate(to: coordinator, presentationStyle: .fullScreenCover)
     }
     
     func restartSplash() async {

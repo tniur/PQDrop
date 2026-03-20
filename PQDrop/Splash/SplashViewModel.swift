@@ -7,26 +7,32 @@
 
 import Combine
 import FactoryKit
+import Foundation
 
 @MainActor
 final class SplashViewModel: ObservableObject {
     
-    private var coordinator: AppCoordinatorProtocol
+    // MARK: - Properties
+
+    private let coordinator: AppCoordinatorProtocol
     private var isShowingOnboarding: Bool = true
+    
+    // MARK: - Initializer
     
     init(coordinator: AppCoordinatorProtocol) {
         self.coordinator = coordinator
     }
     
+    // MARK: - Methods
+
     func onAppear() {
-        if isShowingOnboarding {
-            Task {
-                isShowingOnboarding = false
-                await coordinator.showOnboarding()
-            }
-        } else {
-            Task {
+        let onboardingCompleted = UserDefaults.standard.bool(forKey: UserDefaultsKeys.onboardingCompleted)
+        
+        Task {
+            if onboardingCompleted {
                 await coordinator.showMainTabs()
+            } else {
+                await coordinator.showOnboarding()
             }
         }
     }

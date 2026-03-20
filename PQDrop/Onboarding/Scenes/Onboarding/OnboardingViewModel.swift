@@ -11,6 +11,8 @@ import FactoryKit
 @MainActor
 final class OnboardingViewModel: ObservableObject {
     
+    // MARK: - Properties
+
     @Published var steps: [OnboardingStep] = OnboardingStep.mock
     @Published var index: Int = 0
     
@@ -21,12 +23,16 @@ final class OnboardingViewModel: ObservableObject {
         index >= steps.count - 1
     }
         
-    private var coordinator: OnboardingCoordinatorProtocol
+    private let coordinator: OnboardingCoordinatorProtocol
+
+    // MARK: - Initializer
 
     init(coordinator: OnboardingCoordinatorProtocol) {
         self.coordinator = coordinator
     }
     
+    // MARK: - Methods
+
     func topButtonAction() {
         if isLast {
             createKeys()
