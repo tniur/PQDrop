@@ -47,27 +47,27 @@ struct ContainerDetailsView: View {
     // MARK: - Subviews
 
     private var contentView: some View {
-        ScrollView {
-            VStack(spacing: 12) {
-                headerCardView
-                actionButtonsRow
-                menuRowsView
-
-                if !viewModel.isAvailable {
-                    Text("Нет доступа к содержимому")
-                        .font(PQFont.R14)
-                        .foregroundStyle(PQColor.base0.swiftUIColor)
-                        .multilineTextAlignment(.center)
-                }
-
-                PQButton(
-                    "Удалить",
-                    style: .init(.secondary),
-                    action: viewModel.confirmDelete
-                )
+        VStack(spacing: 12) {
+            headerCardView
+            actionButtonsRow
+            menuRowsView
+            
+            if !viewModel.isAvailable {
+                Text("Нет доступа к содержимому")
+                    .font(PQFont.R14)
+                    .foregroundStyle(PQColor.base0.swiftUIColor)
+                    .multilineTextAlignment(.center)
             }
-            .padding(.horizontal)
+            
+            PQButton(
+                "Удалить",
+                style: .init(.secondary),
+                action: viewModel.confirmDelete
+            )
+            
+            Spacer()
         }
+        .padding(.horizontal)
     }
 
     private var headerCardView: some View {

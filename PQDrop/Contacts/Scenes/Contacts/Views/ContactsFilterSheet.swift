@@ -21,9 +21,10 @@ struct ContactsFilterSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             Text("Фильтры")
-                .font(PQFont.B30)
+                .font(PQFont.B24)
                 .foregroundStyle(PQColor.base7.swiftUIColor)
-            
+                .padding(.top, 20)
+
             VStack(spacing: 16) {
                 ForEach(ContactsFilter.allCases) { filter in
                     HStack {
@@ -48,8 +49,8 @@ struct ContactsFilterSheet: View {
                 }
             }
         }
-        .padding()
-        .presentationDetents([.height(230)])
+        .padding(.horizontal, 20)
+        .presentationDetents([.height(160)])
         .presentationDragIndicator(.visible)
     }
     

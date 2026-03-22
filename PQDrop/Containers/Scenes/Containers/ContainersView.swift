@@ -39,7 +39,7 @@ struct ContainersView: View {
     // MARK: - Subviews
 
     private var contentView: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             LazyVStack(pinnedViews: .sectionHeaders) {
                 Section {
                     if viewModel.filteredContainers.isEmpty {
