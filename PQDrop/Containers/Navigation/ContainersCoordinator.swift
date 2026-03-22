@@ -29,4 +29,8 @@ final class ContainersCoordinator: Coordinator<ContainersRoute>, ContainersCoord
     func showContainerDetails(with container: Container) async {
         await navigate(toRoute: .containerDetails(coordinator: self, container: container))
     }
+
+    func showRecipientsSheet(recipients: [Recipient]) async {
+        await navigate(toRoute: .recipientsSheet(recipients: recipients))
+    }
 }

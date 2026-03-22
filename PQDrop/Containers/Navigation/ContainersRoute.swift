@@ -11,8 +11,16 @@ import SUICoordinator
 enum ContainersRoute: RouteType {
     case containers(coordinator: ContainersCoordinatorProtocol)
     case containerDetails(coordinator: ContainersCoordinatorProtocol, container: Container)
+    case recipientsSheet(recipients: [Recipient])
 
-    var presentationStyle: TransitionPresentationStyle { .push }
+    var presentationStyle: TransitionPresentationStyle {
+        switch self {
+        case .containers, .containerDetails:
+            .push
+        case .recipientsSheet:
+            .sheet
+        }
+    }
 
     var body: some View {
         switch self {
@@ -24,6 +32,10 @@ enum ContainersRoute: RouteType {
         case .containerDetails(let coordinator, let container):
             let viewModel = ContainerDetailsViewModel(coordinator: coordinator, container: container)
             let view = ContainerDetailsView(viewModel: viewModel)
+            return AnyView(view)
+
+        case .recipientsSheet(let recipients):
+            let view = RecipientsSheetView(recipients: recipients)
             return AnyView(view)
         }
     }

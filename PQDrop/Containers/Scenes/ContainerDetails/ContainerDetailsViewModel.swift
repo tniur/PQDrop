@@ -21,6 +21,16 @@ final class ContainerDetailsViewModel: ObservableObject {
     var isAvailable: Bool { container.isAvailable }
     var isCreated: Bool { container.isCreated }
 
+    var recipients: [Recipient] = [
+        .init(id: "1", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: true),
+        .init(id: "2", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: false),
+        .init(id: "3", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: true),
+        .init(id: "4", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: false),
+        .init(id: "5", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: true),
+        .init(id: "6", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: false),
+        .init(id: "7", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: true),
+    ]
+
     private let coordinator: ContainersCoordinatorProtocol
 
     // MARK: - Init
@@ -49,7 +59,9 @@ final class ContainerDetailsViewModel: ObservableObject {
     }
 
     func showRecipients() {
-        // TODO: - Navigate to recipients screen
+        Task {
+            await coordinator.showRecipientsSheet(recipients: recipients)
+        }
     }
 
     func showAccessManagement() {
