@@ -134,7 +134,7 @@ struct ContainersView: View {
                 )
                 .frame(maxWidth: .infinity)
                 .onTapGesture {
-                    // TODO: - Show container details
+                    viewModel.showContainerDetails(container: container)
                 }
                 .contextMenu {
                     Button(role: .destructive) {

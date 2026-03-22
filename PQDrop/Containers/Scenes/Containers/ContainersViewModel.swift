@@ -42,18 +42,18 @@ final class ContainersViewModel: ObservableObject {
         .init(id: "100000002", name: "Название контейнера", isAvailable: true, isCreated: true),
         .init(id: "100000003", name: "Название контейнера", isAvailable: false, isCreated: true),
         .init(id: "100000004", name: "Название контейнера", isAvailable: true, isCreated: true),
-        .init(id: "200000001", name: "Полученный контейнер", isAvailable: true, isCreated: false),
-        .init(id: "200000001", name: "Полученный контейнер", isAvailable: true, isCreated: false),
-        .init(id: "200000001", name: "Полученный контейнер", isAvailable: true, isCreated: false),
-        .init(id: "200000001", name: "Полученный контейнер", isAvailable: true, isCreated: false),
-        .init(id: "200000001", name: "Полученный контейнер", isAvailable: true, isCreated: false),
-        .init(id: "200000001", name: "Полученный контейнер", isAvailable: true, isCreated: false),
-        .init(id: "200000001", name: "Полученный контейнер", isAvailable: true, isCreated: false),
-        .init(id: "200000001", name: "Полученный контейнер", isAvailable: true, isCreated: false),
-        .init(id: "200000001", name: "Полученный контейнер", isAvailable: true, isCreated: false),
-        .init(id: "200000001", name: "Полученный контейнер", isAvailable: true, isCreated: false),
-        .init(id: "200000001", name: "Полученный контейнер", isAvailable: true, isCreated: false),
-        .init(id: "200000002", name: "Полученный контейнер", isAvailable: false, isCreated: false)
+        .init(id: "200000005", name: "Полученный контейнер", isAvailable: true, isCreated: false),
+        .init(id: "200000006", name: "Полученный контейнер", isAvailable: true, isCreated: false),
+        .init(id: "200000007", name: "Полученный контейнер", isAvailable: true, isCreated: false),
+        .init(id: "200000008", name: "Полученный контейнер", isAvailable: true, isCreated: false),
+        .init(id: "200000009", name: "Полученный контейнер", isAvailable: true, isCreated: false),
+        .init(id: "200000010", name: "Полученный контейнер", isAvailable: true, isCreated: false),
+        .init(id: "200000011", name: "Полученный контейнер", isAvailable: true, isCreated: false),
+        .init(id: "200000012", name: "Полученный контейнер", isAvailable: true, isCreated: false),
+        .init(id: "200000013", name: "Полученный контейнер", isAvailable: true, isCreated: false),
+        .init(id: "200000014", name: "Полученный контейнер", isAvailable: true, isCreated: false),
+        .init(id: "200000015", name: "Полученный контейнер", isAvailable: true, isCreated: false),
+        .init(id: "200000016", name: "Полученный контейнер", isAvailable: false, isCreated: false)
     ]
 
     private let coordinator: ContainersCoordinatorProtocol
@@ -85,5 +85,11 @@ final class ContainersViewModel: ObservableObject {
 
     func importContainer() {
         // TODO: - Navigate to import container flow
+    }
+
+    func showContainerDetails(container: Container) {
+        Task {
+            await coordinator.showContainerDetails(with: container)
+        }
     }
 }

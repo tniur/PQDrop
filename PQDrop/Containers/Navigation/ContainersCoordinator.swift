@@ -25,4 +25,8 @@ final class ContainersCoordinator: Coordinator<ContainersRoute>, ContainersCoord
     func finish() async {
         await restart()
     }
+
+    func showContainerDetails(with container: Container) async {
+        await navigate(toRoute: .containerDetails(coordinator: self, container: container))
+    }
 }
