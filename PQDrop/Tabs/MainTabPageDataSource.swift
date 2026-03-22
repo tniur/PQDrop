@@ -11,8 +11,7 @@ import PQUIComponents
 struct MainTabPageDataSource {
     let page: MainTabPage
 
-    @ViewBuilder
-    var icon: some View {
+    var icon: Image {
         switch page {
         case .containers:
             PQImage.containers.swiftUIImage
@@ -33,7 +32,7 @@ struct MainTabPageDataSource {
         case .contacts:
             Text("Контакты")
         case .history:
-            Text("Питание")
+            Text("История")
         case .profile:
             Text("Профиль")
         }
