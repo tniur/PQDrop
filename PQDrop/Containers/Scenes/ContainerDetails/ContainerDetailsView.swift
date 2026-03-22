@@ -67,7 +67,6 @@ struct ContainerDetailsView: View {
                 )
             }
             .padding(.horizontal)
-            .padding(.vertical, 8)
         }
     }
 
