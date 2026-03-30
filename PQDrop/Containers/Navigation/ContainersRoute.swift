@@ -12,10 +12,11 @@ enum ContainersRoute: RouteType {
     case containers(coordinator: ContainersCoordinatorProtocol)
     case containerDetails(coordinator: ContainersCoordinatorProtocol, container: Container)
     case recipientsSheet(recipients: [Recipient])
+    case accessControl(coordinator: ContainersCoordinatorProtocol, container: Container)
 
     var presentationStyle: TransitionPresentationStyle {
         switch self {
-        case .containers, .containerDetails:
+        case .containers, .containerDetails, .accessControl:
             .push
         case .recipientsSheet:
             .sheet
@@ -36,6 +37,11 @@ enum ContainersRoute: RouteType {
 
         case .recipientsSheet(let recipients):
             let view = RecipientsSheetView(recipients: recipients)
+            return AnyView(view)
+
+        case .accessControl(let coordinator, let container):
+            let viewModel = AccessControlViewModel(coordinator: coordinator, container: container)
+            let view = AccessControlView(viewModel: viewModel)
             return AnyView(view)
         }
     }

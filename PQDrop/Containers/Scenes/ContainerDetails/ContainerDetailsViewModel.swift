@@ -65,7 +65,9 @@ final class ContainerDetailsViewModel: ObservableObject {
     }
 
     func showAccessManagement() {
-        // TODO: - Navigate to access management screen
+        Task {
+            await coordinator.showAccessControl(with: container)
+        }
     }
 
     func showContainerHistory() {

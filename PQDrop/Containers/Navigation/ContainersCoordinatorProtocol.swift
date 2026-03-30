@@ -9,4 +9,5 @@ protocol ContainersCoordinatorProtocol: AnyObject {
     func finish() async
     func showContainerDetails(with container: Container) async
     func showRecipientsSheet(recipients: [Recipient]) async
+    func showAccessControl(with container: Container) async
 }
