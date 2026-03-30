@@ -21,7 +21,24 @@ where DataSource.Page == MainTabPage, DataSource.DataSourcePage == MainTabPageDa
     
     init(dataSource: DataSource) {
         _dataSource = .init(wrappedValue: dataSource)
-        UITabBar.appearance().unselectedItemTintColor = PQColor.base10.color
+
+        let itemAppearance = UITabBarItemAppearance()
+        itemAppearance.normal.iconColor = PQColor.base10.color
+        itemAppearance.normal.titleTextAttributes = [
+            .foregroundColor: PQColor.base10.color
+        ]
+
+        itemAppearance.selected.iconColor = PQColor.blue6.color
+        itemAppearance.selected.titleTextAttributes = [
+            .foregroundColor: PQColor.blue6.color
+        ]
+
+        let appearance = UITabBarAppearance()
+        appearance.configureWithTransparentBackground()
+        appearance.stackedLayoutAppearance = itemAppearance
+
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
     }
     
     // MARK: - Body
@@ -46,6 +63,5 @@ where DataSource.Page == MainTabPage, DataSource.DataSourcePage == MainTabPageDa
                 }
             }
         }
-        .tint(PQColor.blue6.swiftUIColor)
     }
 }
