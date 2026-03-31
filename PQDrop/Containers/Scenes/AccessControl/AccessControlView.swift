@@ -37,22 +37,7 @@ struct AccessControlView: View {
                 }
             }
         }
-        .alert(
-            viewModel.alertTitle,
-            isPresented: $viewModel.isShowingApplyAlert
-        ) {
-            if viewModel.hasSelection, viewModel.hasPendingChanges {
-                Button("Применить") {
-                    viewModel.applySelectedContacts()
-                }
-
-                Button("Отмена", role: .cancel) { }
-            } else {
-                Button("Понятно", role: .cancel) { }
-            }
-        } message: {
-            Text(viewModel.alertMessage)
-        }
+        .alert(item: $viewModel.activeAlert, content: makeAlert)
     }
 
     // MARK: - Subviews
@@ -60,16 +45,19 @@ struct AccessControlView: View {
     private var contentView: some View {
         VStack(spacing: 16) {
             headerCardView
+                .padding(.horizontal)
 
             Text("Выберите контакты, которым хотите выдать доступ к этому контейнеру. Изменения потребуют перешифровки – это займёт несколько минут.")
                 .font(PQFont.R14)
                 .foregroundStyle(PQColor.base0.swiftUIColor)
 
             countersView
+                .padding(.horizontal)
+
             contactsListView
+
             Spacer()
         }
-        .padding(.horizontal)
     }
 
     private var headerCardView: some View {
@@ -158,8 +146,19 @@ struct AccessControlView: View {
                     .onTapGesture {
                         viewModel.toggleContact(contact.id)
                     }
+                    .contextMenu {
+                        if viewModel.hasAccess(contact.id) {
+                            Button(role: .destructive) {
+                                viewModel.requestRevokeAccess(for: contact.id)
+                            } label: {
+                                Text("Ограничить доступ")
+                                Image(systemName: "person.crop.circle.badge.minus")
+                            }
+                        }
+                    }
                 }
             }
+            .padding(.horizontal)
         }
     }
 
@@ -167,5 +166,38 @@ struct AccessControlView: View {
 
     init(viewModel: AccessControlViewModel) {
         self.viewModel = viewModel
+    }
+    
+    // MARK: - Methods
+
+    private func makeAlert(_ alert: AccessControlAlert) -> Alert {
+        switch alert {
+        case .noSelection:
+            return Alert(
+                title: Text("Контакт не выбран"),
+                message: Text("Выберите хотя бы один контакт, чтобы выдать доступ к контейнеру."),
+                dismissButton: .cancel(Text("Понятно"))
+            )
+
+        case .applyAccessChanges:
+            return Alert(
+                title: Text("Выбрано \(viewModel.selectedContactIds.count) из \(viewModel.contacts.count) контактов"),
+                message: Text("Добавление/удаление получателей требует перешифровки контейнера. Это может занять несколько минут."),
+                primaryButton: .default(Text("Применить")) {
+                    viewModel.applySelectedContacts()
+                },
+                secondaryButton: .cancel(Text("Отмена"))
+            )
+
+        case .revokeAccess(let contactId):
+            return Alert(
+                title: Text("Ограничить доступ?"),
+                message: Text("Добавление/удаление получателей требует перешифровки контейнера. Это может занять несколько минут."),
+                primaryButton: .destructive(Text("Применить")) {
+                    viewModel.revokeAccess(for: contactId)
+                },
+                secondaryButton: .cancel(Text("Отмена"))
+            )
+        }
     }
 }

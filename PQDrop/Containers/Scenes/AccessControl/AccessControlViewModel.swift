@@ -15,7 +15,7 @@ final class AccessControlViewModel: ObservableObject {
     @Published var container: Container
     @Published var hasAccessContactIds: Set<String> = []
     @Published var selectedContactIds: Set<String> = []
-    @Published var isShowingApplyAlert = false
+    @Published var activeAlert: AccessControlAlert?
 
     var contacts: [Recipient] = [
         .init(id: "1", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: true),
@@ -27,32 +27,10 @@ final class AccessControlViewModel: ObservableObject {
         !selectedContactIds.isEmpty
     }
 
-    var hasPendingChanges: Bool {
-        !idsToGrant.isEmpty
-    }
-
-    var alertTitle: String {
-        if hasSelection {
-            return "Выбрано \(selectedContactIds.count) из \(contacts.count) контактов"
-        } else {
-            return "Контакт не выбран"
-        }
-    }
-
-    var alertMessage: String {
-        if hasSelection, hasPendingChanges {
-            return "Добавление получателей требует перешифровки контейнера. Это может занять несколько минут."
-        } else if hasSelection {
-            return "Нет изменений для применения."
-        } else {
-            return "Выберите хотя бы один контакт, чтобы выдать доступ к контейнеру."
-        }
-    }
-
     private var idsToGrant: Set<String> {
         selectedContactIds.subtracting(hasAccessContactIds)
     }
-    
+
     private let coordinator: ContainersCoordinatorProtocol
 
     // MARK: - Init
@@ -61,7 +39,7 @@ final class AccessControlViewModel: ObservableObject {
         self.coordinator = coordinator
         self.container = container
     }
-    
+
     // MARK: - Methods
 
     func isSelected(_ id: String) -> Bool {
@@ -83,12 +61,23 @@ final class AccessControlViewModel: ObservableObject {
     }
 
     func addContact() {
-        isShowingApplyAlert = true
+        activeAlert = hasSelection ? .applyAccessChanges : .noSelection
     }
 
     func applySelectedContacts() {
         hasAccessContactIds.formUnion(idsToGrant)
         selectedContactIds.removeAll()
-        isShowingApplyAlert = false
+        activeAlert = nil
+    }
+
+    func requestRevokeAccess(for id: String) {
+        guard hasAccessContactIds.contains(id) else { return }
+        activeAlert = .revokeAccess(contactId: id)
+    }
+
+    func revokeAccess(for id: String) {
+        hasAccessContactIds.remove(id)
+        selectedContactIds.remove(id)
+        activeAlert = nil
     }
 }
