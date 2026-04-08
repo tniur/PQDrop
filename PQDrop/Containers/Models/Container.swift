@@ -12,4 +12,5 @@ struct Container: Identifiable {
     var name: String
     var isAvailable: Bool
     var isCreated: Bool
+    var files: [ContainerFileItem] = []
 }

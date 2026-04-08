@@ -37,4 +37,8 @@ final class ContainersCoordinator: Coordinator<ContainersRoute>, ContainersCoord
     func showAccessControl(with container: Container) async {
         await navigate(toRoute: .accessControl(coordinator: self, container: container))
     }
+    
+    func showContainerContents(with container: Container) async {
+        await navigate(toRoute: .containersContents(coordinator: self, container: container))
+    }
 }

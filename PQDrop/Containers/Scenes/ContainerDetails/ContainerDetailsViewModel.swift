@@ -51,7 +51,9 @@ final class ContainerDetailsViewModel: ObservableObject {
     }
 
     func openContainer() {
-        // TODO: - Navigate to open container screen
+        Task {
+            await coordinator.showContainerContents(with: container)
+        }
     }
 
     func exportContainer() {
