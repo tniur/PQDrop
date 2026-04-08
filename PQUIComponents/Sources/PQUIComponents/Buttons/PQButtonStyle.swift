@@ -19,7 +19,7 @@ public struct PQButtonStyle: ButtonStyle {
 
     @Environment(\.isEnabled) private var isEnabled
 
-    private let type: PQButtonType
+    let type: PQButtonType
     private let isCompact: Bool
     private let height: CGFloat
 

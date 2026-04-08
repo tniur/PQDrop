@@ -41,6 +41,17 @@ public enum PQButtonType {
             PQColor.base0.swiftUIColor
         }
     }
+    
+    public var iconColor: SwiftUI.Color {
+        switch self {
+        case .primary:
+            PQColor.blue6.swiftUIColor
+        case .purple:
+            PQColor.base0.swiftUIColor
+        case .secondary, .tertiary:
+            PQColor.base0.swiftUIColor
+        }
+    }
 
     public var pressedBackgroundColor: SwiftUI.Color {
         switch self {
@@ -69,6 +80,17 @@ public enum PQButtonType {
         case .primary, .purple, .tertiary:
             .clear
         case .secondary:
+            PQColor.base3.swiftUIColor
+        }
+    }
+    
+    public var pressedIconColor: SwiftUI.Color {
+        switch self {
+        case .primary:
+            PQColor.blue6.swiftUIColor
+        case .purple:
+            PQColor.base0.swiftUIColor
+        case .secondary, .tertiary:
             PQColor.base3.swiftUIColor
         }
     }
@@ -104,6 +126,17 @@ public enum PQButtonType {
         }
     }
 
+    public var disabledIconColor: SwiftUI.Color {
+        switch self {
+        case .primary:
+            PQColor.blue4.swiftUIColor
+        case .purple:
+            PQColor.blue2.swiftUIColor
+        case .secondary, .tertiary:
+            PQColor.base2.swiftUIColor
+        }
+    }
+    
     public var strokeWidth: CGFloat {
         switch self {
         case .primary, .purple, .tertiary:

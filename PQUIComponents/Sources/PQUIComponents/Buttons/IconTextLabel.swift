@@ -14,13 +14,22 @@ public struct IconTextLabel: View {
     private let title: String?
     private let localizedTitle: LocalizedStringKey?
     private let icon: Image
-
+    private let style: PQButtonStyle
+    
+    private var foregroundStyle: Color {
+        if isEnabled {
+            style.type.iconColor
+        } else {
+            style.type.disabledIconColor
+        }
+    }
+    
     public var body: some View {
         HStack(spacing: 4) {
             icon
                 .resizable()
                 .renderingMode(.template)
-                .foregroundStyle(isEnabled ? PQColor.blue6.swiftUIColor : PQColor.blue4.swiftUIColor)
+                .foregroundStyle(foregroundStyle)
                 .frame(width: 24, height: 24)
             if let title {
                 Text(title)
@@ -29,16 +38,18 @@ public struct IconTextLabel: View {
             }
         }
     }
-    
-    init(title: String, icon: Image) {
+
+    init(title: String, icon: Image, style: PQButtonStyle) {
         self.title = title
         self.localizedTitle = nil
         self.icon = icon
+        self.style = style
     }
 
-    init(localizedTitle: LocalizedStringKey, icon: Image) {
+    init(localizedTitle: LocalizedStringKey, icon: Image, style: PQButtonStyle) {
         self.title = nil
         self.localizedTitle = localizedTitle
         self.icon = icon
+        self.style = style
     }
 }

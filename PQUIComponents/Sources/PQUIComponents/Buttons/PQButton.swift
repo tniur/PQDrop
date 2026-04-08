@@ -74,7 +74,7 @@ public extension PQButton where Label == IconTextLabel {
         action: @escaping () -> Void
     ) {
         self.init(style: style, action: action) {
-            IconTextLabel(title: titleKey, icon: icon)
+            IconTextLabel(title: titleKey, icon: icon, style: style)
         }
     }
 
@@ -85,7 +85,7 @@ public extension PQButton where Label == IconTextLabel {
         action: @escaping () -> Void
     ) {
         self.init(style: style, action: action) {
-            IconTextLabel(localizedTitle: titleKey, icon: icon)
+            IconTextLabel(localizedTitle: titleKey, icon: icon, style: style)
         }
     }
 }
