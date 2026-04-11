@@ -11,4 +11,5 @@ protocol ContainersCoordinatorProtocol: AnyObject {
     func showRecipientsSheet(recipients: [Recipient]) async
     func showAccessControl(with container: Container) async
     func showContainerContents(with container: Container) async
+    func showFileViewer(with item: ContainerFileItem) async
 }

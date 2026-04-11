@@ -14,10 +14,11 @@ enum ContainersRoute: RouteType {
     case recipientsSheet(recipients: [Recipient])
     case accessControl(coordinator: ContainersCoordinatorProtocol, container: Container)
     case containersContents(coordinator: ContainersCoordinatorProtocol, container: Container)
-    
+    case fileViewer(item: ContainerFileItem)
+
     var presentationStyle: TransitionPresentationStyle {
         switch self {
-        case .containers, .containerDetails, .accessControl, .containersContents:
+        case .containers, .containerDetails, .accessControl, .containersContents, .fileViewer:
             .push
         case .recipientsSheet:
             .sheet
@@ -44,10 +45,15 @@ enum ContainersRoute: RouteType {
             let viewModel = AccessControlViewModel(coordinator: coordinator, container: container)
             let view = AccessControlView(viewModel: viewModel)
             return AnyView(view)
-            
+
         case .containersContents(let coordinator, let container):
             let viewModel = ContainerContentsViewModel(coordinator: coordinator, container: container)
             let view = ContainerContentsView(viewModel: viewModel)
+            return AnyView(view)
+
+        case .fileViewer(let item):
+            let viewModel = FileViewerViewModel(item: item)
+            let view = FileViewerView(viewModel: viewModel)
             return AnyView(view)
         }
     }

@@ -44,7 +44,7 @@ struct ContainerContentsView: View {
         }
         .fileImporter(
             isPresented: $viewModel.showFilesImporter,
-            allowedContentTypes: [.pdf, .image],
+            allowedContentTypes: [.item],
             allowsMultipleSelection: true
         ) { result in
             switch result {

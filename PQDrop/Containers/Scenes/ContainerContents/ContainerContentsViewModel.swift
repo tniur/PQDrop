@@ -10,6 +10,7 @@ import Combine
 import UIKit
 import PhotosUI
 import UniformTypeIdentifiers
+import QuickLook
 
 @MainActor
 final class ContainerContentsViewModel: ObservableObject {
@@ -69,7 +70,9 @@ final class ContainerContentsViewModel: ObservableObject {
     }
 
     func openFile(_ file: ContainerFileItem) {
-        // TODO: Navigate to document/image viewer
+        Task {
+            await coordinator.showFileViewer(with: file)
+        }
     }
 
     func exportFile(_ file: ContainerFileItem) {
@@ -92,17 +95,43 @@ final class ContainerContentsViewModel: ObservableObject {
     }
 
     func handleImportedFiles(urls: [URL]) {
-        let importedFiles = urls.map { url in
-            let resourceValues = try? url.resourceValues(forKeys: [.fileSizeKey, .nameKey])
-            let fileSize = Int64(resourceValues?.fileSize ?? 0)
-            let sizeText = ByteCountFormatter.string(fromByteCount: fileSize, countStyle: .file)
+        let importedFiles: [ContainerFileItem] = urls.compactMap { sourceURL in
+            let hasAccess = sourceURL.startAccessingSecurityScopedResource()
+            defer {
+                if hasAccess {
+                    sourceURL.stopAccessingSecurityScopedResource()
+                }
+            }
 
-            return ContainerFileItem(
-                id: UUID().uuidString,
-                name: resourceValues?.name ?? url.lastPathComponent,
-                sizeText: sizeText,
-                isDraftAdded: true
-            )
+            let resourceValues = try? sourceURL.resourceValues(forKeys: [.fileSizeKey, .nameKey])
+            let fileName = resourceValues?.name ?? sourceURL.lastPathComponent
+            let ext = sourceURL.pathExtension
+            let destinationURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent(UUID().uuidString)
+                .appendingPathExtension(ext)
+
+            do {
+                if FileManager.default.fileExists(atPath: destinationURL.path) {
+                    try FileManager.default.removeItem(at: destinationURL)
+                }
+
+                try FileManager.default.copyItem(at: sourceURL, to: destinationURL)
+
+                let copiedValues = try? destinationURL.resourceValues(forKeys: [.fileSizeKey])
+                let fileSize = Int64(copiedValues?.fileSize ?? 0)
+                let sizeText = ByteCountFormatter.string(fromByteCount: fileSize, countStyle: .file)
+
+                return ContainerFileItem(
+                    id: UUID().uuidString,
+                    name: fileName,
+                    sizeText: sizeText,
+                    localURL: destinationURL,
+                    isDraftAdded: true
+                )
+            } catch {
+                print("Import error:", error)
+                return nil
+            }
         }
 
         container.files.append(contentsOf: importedFiles)
@@ -117,19 +146,31 @@ final class ContainerContentsViewModel: ObservableObject {
             }
 
             let ext = item.supportedContentTypes.first?.preferredFilenameExtension ?? "jpg"
-            let sizeText = ByteCountFormatter.string(
-                fromByteCount: Int64(data.count),
-                countStyle: .file
-            )
+            let fileName = "Фото_\(index + 1).\(ext)"
+            let destinationURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent(UUID().uuidString)
+                .appendingPathExtension(ext)
 
-            pickedFiles.append(
-                .init(
-                    id: UUID().uuidString,
-                    name: "Фото_\(index + 1).\(ext)",
-                    sizeText: sizeText,
-                    isDraftAdded: true
+            do {
+                try data.write(to: destinationURL, options: .atomic)
+
+                let sizeText = ByteCountFormatter.string(
+                    fromByteCount: Int64(data.count),
+                    countStyle: .file
                 )
-            )
+
+                pickedFiles.append(
+                    ContainerFileItem(
+                        id: UUID().uuidString,
+                        name: fileName,
+                        sizeText: sizeText,
+                        localURL: destinationURL,
+                        isDraftAdded: true
+                    )
+                )
+            } catch {
+                print("Photo save error:", error)
+            }
         }
 
         container.files.append(contentsOf: pickedFiles)

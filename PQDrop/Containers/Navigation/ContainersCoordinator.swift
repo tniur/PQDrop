@@ -41,4 +41,8 @@ final class ContainersCoordinator: Coordinator<ContainersRoute>, ContainersCoord
     func showContainerContents(with container: Container) async {
         await navigate(toRoute: .containersContents(coordinator: self, container: container))
     }
+    
+    func showFileViewer(with item: ContainerFileItem) async {
+        await navigate(toRoute: .fileViewer(item: item))
+    }
 }
