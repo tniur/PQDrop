@@ -202,6 +202,8 @@ final class ContainerContentsViewModel: ObservableObject {
             container.files[index].isMarkedForDeletion = false
         }
 
-        // TODO: launch re-encryption flow
+        Task {
+            await coordinator.showSaveContainer(with: container)
+        }
     }
 }

@@ -12,4 +12,6 @@ protocol ContainersCoordinatorProtocol: AnyObject {
     func showAccessControl(with container: Container) async
     func showContainerContents(with container: Container) async
     func showFileViewer(with item: ContainerFileItem) async
+    func showSaveContainer(with container: Container) async
+    func pop() async
 }

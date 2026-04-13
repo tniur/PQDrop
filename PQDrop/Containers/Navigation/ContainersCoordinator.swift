@@ -45,4 +45,12 @@ final class ContainersCoordinator: Coordinator<ContainersRoute>, ContainersCoord
     func showFileViewer(with item: ContainerFileItem) async {
         await navigate(toRoute: .fileViewer(item: item))
     }
+
+    func showSaveContainer(with container: Container) async {
+        await navigate(toRoute: .saveContainer(coordinator: self, container: container))
+    }
+
+    func pop() async {
+        await router.pop(animated: true)
+    }
 }
