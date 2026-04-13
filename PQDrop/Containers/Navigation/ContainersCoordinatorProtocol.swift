@@ -13,5 +13,8 @@ protocol ContainersCoordinatorProtocol: AnyObject {
     func showContainerContents(with container: Container) async
     func showFileViewer(with item: ContainerFileItem) async
     func showSaveContainer(with container: Container) async
+    func showEditContainerName(mode: EditContainerNameViewModel.Mode) async
+    func showCreateContainerFiles(name: String) async
+    func showCreateContainerSave(name: String, files: [ContainerFileItem]) async
     func pop() async
 }

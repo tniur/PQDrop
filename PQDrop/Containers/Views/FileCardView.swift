@@ -10,19 +10,44 @@ import PQUIComponents
 
 struct FileCardView: View {
 
+    enum Style {
+        case light
+        case dark
+    }
+
     let file: ContainerFileItem
+    let showBadges: Bool
+    let style: Style
+
+    private var nameColor: Color {
+        switch style {
+        case .light:
+            PQColor.base0.swiftUIColor
+        case .dark:
+            PQColor.base10.swiftUIColor
+        }
+    }
+
+    private var sizeColor: Color {
+        switch style {
+        case .light:
+            PQColor.blue2.swiftUIColor
+        case .dark:
+            PQColor.base5.swiftUIColor
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             ZStack(alignment: .bottom) {
                 previewView
 
-                if file.isDraftAdded {
+                if showBadges && file.isDraftAdded {
                     badge(title: "Новый", color: PQColor.green6.swiftUIColor)
                         .padding(6)
                 }
 
-                if file.isMarkedForDeletion {
+                if showBadges && file.isMarkedForDeletion {
                     badge(title: "Будет удалён", color: PQColor.red6.swiftUIColor)
                         .padding(6)
                 }
@@ -30,12 +55,12 @@ struct FileCardView: View {
 
             Text(file.name)
                 .font(PQFont.R14)
-                .foregroundStyle(PQColor.base0.swiftUIColor)
+                .foregroundStyle(nameColor)
                 .lineLimit(1)
 
             Text(file.sizeText)
                 .font(PQFont.R12)
-                .foregroundStyle(PQColor.blue2.swiftUIColor)
+                .foregroundStyle(sizeColor)
         }
     }
 
@@ -68,7 +93,7 @@ struct FileCardView: View {
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
                     .stroke(
-                        file.isMarkedForDeletion ? PQColor.red6.swiftUIColor : Color.clear,
+                        showBadges && file.isMarkedForDeletion ? PQColor.red6.swiftUIColor : Color.clear,
                         lineWidth: 1
                     )
             )
@@ -84,5 +109,11 @@ struct FileCardView: View {
                 Capsule()
                     .fill(color)
             )
+    }
+
+    init(file: ContainerFileItem, showBadges: Bool = true, style: Style = .light) {
+        self.file = file
+        self.showBadges = showBadges
+        self.style = style
     }
 }

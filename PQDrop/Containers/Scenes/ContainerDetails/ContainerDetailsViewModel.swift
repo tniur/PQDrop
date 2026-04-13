@@ -47,7 +47,9 @@ final class ContainerDetailsViewModel: ObservableObject {
     }
 
     func editName() {
-        // TODO: - Navigate to edit name screen
+        Task {
+            await coordinator.showEditContainerName(mode: .edit(container: container))
+        }
     }
 
     func openContainer() {

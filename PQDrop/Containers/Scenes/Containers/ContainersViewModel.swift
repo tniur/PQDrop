@@ -80,7 +80,9 @@ final class ContainersViewModel: ObservableObject {
     }
 
     func createContainer() {
-        // TODO: - Navigate to create container screen
+        Task {
+            await coordinator.showEditContainerName(mode: .create)
+        }
     }
 
     func importContainer() {

@@ -16,10 +16,14 @@ enum ContainersRoute: RouteType {
     case containersContents(coordinator: ContainersCoordinatorProtocol, container: Container)
     case fileViewer(item: ContainerFileItem)
     case saveContainer(coordinator: ContainersCoordinatorProtocol, container: Container)
+    case editContainerName(coordinator: ContainersCoordinatorProtocol, mode: EditContainerNameViewModel.Mode)
+    case createContainerFiles(coordinator: ContainersCoordinatorProtocol, name: String)
+    case createContainerSave(coordinator: ContainersCoordinatorProtocol, name: String, files: [ContainerFileItem])
 
     var presentationStyle: TransitionPresentationStyle {
         switch self {
-        case .containers, .containerDetails, .accessControl, .containersContents, .fileViewer, .saveContainer:
+        case .containers, .containerDetails, .accessControl, .containersContents, .fileViewer, .saveContainer,
+             .editContainerName, .createContainerFiles, .createContainerSave:
             .push
         case .recipientsSheet:
             .sheet
@@ -60,6 +64,21 @@ enum ContainersRoute: RouteType {
         case .saveContainer(let coordinator, let container):
             let viewModel = SaveContainerViewModel(coordinator: coordinator, container: container)
             let view = SaveContainerView(viewModel: viewModel)
+            return AnyView(view)
+
+        case .editContainerName(let coordinator, let mode):
+            let viewModel = EditContainerNameViewModel(coordinator: coordinator, mode: mode)
+            let view = EditContainerNameView(viewModel: viewModel)
+            return AnyView(view)
+
+        case .createContainerFiles(let coordinator, let name):
+            let viewModel = CreateContainerFilesViewModel(coordinator: coordinator, name: name)
+            let view = CreateContainerFilesView(viewModel: viewModel)
+            return AnyView(view)
+
+        case .createContainerSave(let coordinator, let name, let files):
+            let viewModel = CreateContainerSaveViewModel(coordinator: coordinator, name: name, files: files)
+            let view = CreateContainerSaveView(viewModel: viewModel)
             return AnyView(view)
         }
     }

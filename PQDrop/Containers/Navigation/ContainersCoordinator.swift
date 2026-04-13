@@ -50,6 +50,18 @@ final class ContainersCoordinator: Coordinator<ContainersRoute>, ContainersCoord
         await navigate(toRoute: .saveContainer(coordinator: self, container: container))
     }
 
+    func showEditContainerName(mode: EditContainerNameViewModel.Mode) async {
+        await navigate(toRoute: .editContainerName(coordinator: self, mode: mode))
+    }
+
+    func showCreateContainerFiles(name: String) async {
+        await navigate(toRoute: .createContainerFiles(coordinator: self, name: name))
+    }
+
+    func showCreateContainerSave(name: String, files: [ContainerFileItem]) async {
+        await navigate(toRoute: .createContainerSave(coordinator: self, name: name, files: files))
+    }
+
     func pop() async {
         await router.pop(animated: true)
     }

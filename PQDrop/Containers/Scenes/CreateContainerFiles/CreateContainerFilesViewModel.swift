@@ -1,86 +1,44 @@
 //
-//  ContainerContentsViewModel.swift
+//  CreateContainerFilesViewModel.swift
 //  PQDrop
 //
-//  Created by Анастасия Журавлева on 07.04.2026.
+//  Created by Анастасия Журавлева on 13.04.2026.
 //
 
 import SwiftUI
 import Combine
-import UIKit
 import PhotosUI
 import UniformTypeIdentifiers
-import QuickLook
 
 @MainActor
-final class ContainerContentsViewModel: ObservableObject {
+final class CreateContainerFilesViewModel: ObservableObject {
 
     // MARK: - Published
 
-    @Published var container: Container
-    @Published var showShareSheet = false
-    @Published var shareItem: Any?
-    @Published var showSaveAlert = false
-
+    @Published var files: [ContainerFileItem] = []
     @Published var showAddFilesSheet = false
     @Published var showFilesImporter = false
     @Published var showPhotosPicker = false
 
     // MARK: - Computed
 
-    var files: [ContainerFileItem] {
-        container.files
-    }
-
-    var hasUnsavedChanges: Bool {
-        container.files.contains(where: { $0.isDraftAdded || $0.isMarkedForDeletion })
-    }
-
-    var isEmptyState: Bool {
-        container.files.isEmpty
-    }
-
-    var addedFilesCount: Int {
-        container.files.filter(\.isDraftAdded).count
-    }
-
-    var deletedFilesCount: Int {
-        container.files.filter(\.isMarkedForDeletion).count
+    var hasFiles: Bool {
+        !files.isEmpty
     }
 
     // MARK: - Private
 
+    let name: String
     private let coordinator: ContainersCoordinatorProtocol
 
     // MARK: - Init
 
-    init(coordinator: ContainersCoordinatorProtocol, container: Container) {
+    init(coordinator: ContainersCoordinatorProtocol, name: String) {
         self.coordinator = coordinator
-        self.container = container
+        self.name = name
     }
 
     // MARK: - Actions
-
-    func editName() {
-        Task {
-            await coordinator.showEditContainerName(mode: .edit(container: container))
-        }
-    }
-
-    func copyId() {
-        UIPasteboard.general.string = container.id
-    }
-
-    func openFile(_ file: ContainerFileItem) {
-        Task {
-            await coordinator.showFileViewer(with: file)
-        }
-    }
-
-    func exportFile(_ file: ContainerFileItem) {
-        shareItem = file.name
-        showShareSheet = true
-    }
 
     func presentAddFilesSheet() {
         showAddFilesSheet = true
@@ -127,8 +85,7 @@ final class ContainerContentsViewModel: ObservableObject {
                     id: UUID().uuidString,
                     name: fileName,
                     sizeText: sizeText,
-                    localURL: destinationURL,
-                    isDraftAdded: true
+                    localURL: destinationURL
                 )
             } catch {
                 print("Import error:", error)
@@ -136,7 +93,7 @@ final class ContainerContentsViewModel: ObservableObject {
             }
         }
 
-        container.files.append(contentsOf: importedFiles)
+        files.append(contentsOf: importedFiles)
     }
 
     func handlePickedPhotos(_ items: [PhotosPickerItem]) async {
@@ -166,8 +123,7 @@ final class ContainerContentsViewModel: ObservableObject {
                         id: UUID().uuidString,
                         name: fileName,
                         sizeText: sizeText,
-                        localURL: destinationURL,
-                        isDraftAdded: true
+                        localURL: destinationURL
                     )
                 )
             } catch {
@@ -175,37 +131,16 @@ final class ContainerContentsViewModel: ObservableObject {
             }
         }
 
-        container.files.append(contentsOf: pickedFiles)
+        files.append(contentsOf: pickedFiles)
     }
 
-    func toggleDeletion(for file: ContainerFileItem) {
-        guard let index = container.files.firstIndex(where: { $0.id == file.id }) else {
-            return
-        }
-
-        if container.files[index].isDraftAdded {
-            container.files.remove(at: index)
-            return
-        }
-
-        container.files[index].isMarkedForDeletion.toggle()
+    func removeFile(_ file: ContainerFileItem) {
+        files.removeAll { $0.id == file.id }
     }
 
-    func confirmSave() {
-        guard hasUnsavedChanges else { return }
-        showSaveAlert = true
-    }
-
-    func save() {
-        container.files.removeAll(where: \.isMarkedForDeletion)
-
-        for index in container.files.indices {
-            container.files[index].isDraftAdded = false
-            container.files[index].isMarkedForDeletion = false
-        }
-
+    func create() {
         Task {
-            await coordinator.showSaveContainer(with: container)
+            await coordinator.showCreateContainerSave(name: name, files: files)
         }
     }
 }
