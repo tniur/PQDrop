@@ -117,6 +117,9 @@ struct CreateContainerFilesView: View {
         LazyVGrid(columns: columns, spacing: 12) {
             ForEach(viewModel.files) { file in
                 FileCardView(file: file, showBadges: false, style: .dark)
+                    .onTapGesture {
+                        viewModel.openFile(file)
+                    }
                     .contextMenu {
                         Button(role: .destructive) {
                             viewModel.removeFile(file)

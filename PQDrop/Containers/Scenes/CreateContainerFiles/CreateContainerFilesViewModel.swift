@@ -134,6 +134,12 @@ final class CreateContainerFilesViewModel: ObservableObject {
         files.append(contentsOf: pickedFiles)
     }
 
+    func openFile(_ file: ContainerFileItem) {
+        Task {
+            await coordinator.showFileViewer(with: file)
+        }
+    }
+
     func removeFile(_ file: ContainerFileItem) {
         files.removeAll { $0.id == file.id }
     }
