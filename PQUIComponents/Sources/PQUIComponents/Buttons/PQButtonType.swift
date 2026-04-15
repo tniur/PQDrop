@@ -10,6 +10,7 @@ import SwiftUI
 public enum PQButtonType {
     case primary
     case purple
+    case secondary
     case tertiary
 
     public var backgroundColor: SwiftUI.Color {
@@ -18,7 +19,7 @@ public enum PQButtonType {
             PQColor.base0.swiftUIColor
         case .purple:
             PQColor.blue6.swiftUIColor
-        case .tertiary:
+        case .secondary, .tertiary:
             .clear
         }
     }
@@ -27,9 +28,7 @@ public enum PQButtonType {
         switch self {
         case .primary:
             PQColor.base10.swiftUIColor
-        case .purple:
-            PQColor.base0.swiftUIColor
-        case .tertiary:
+        case .purple, .secondary, .tertiary:
             PQColor.base0.swiftUIColor
         }
     }
@@ -38,6 +37,19 @@ public enum PQButtonType {
         switch self {
         case .primary, .purple, .tertiary:
             .clear
+        case .secondary:
+            PQColor.base0.swiftUIColor
+        }
+    }
+    
+    public var iconColor: SwiftUI.Color {
+        switch self {
+        case .primary:
+            PQColor.blue6.swiftUIColor
+        case .purple:
+            PQColor.base0.swiftUIColor
+        case .secondary, .tertiary:
+            PQColor.base0.swiftUIColor
         }
     }
 
@@ -47,7 +59,7 @@ public enum PQButtonType {
             PQColor.base2.swiftUIColor
         case .purple:
             PQColor.blue8.swiftUIColor
-        case .tertiary:
+        case .secondary, .tertiary:
             .clear
         }
     }
@@ -58,7 +70,7 @@ public enum PQButtonType {
             PQColor.base10.swiftUIColor
         case .purple:
             PQColor.base0.swiftUIColor
-        case .tertiary:
+        case .secondary, .tertiary:
             PQColor.base3.swiftUIColor
         }
     }
@@ -67,6 +79,19 @@ public enum PQButtonType {
         switch self {
         case .primary, .purple, .tertiary:
             .clear
+        case .secondary:
+            PQColor.base3.swiftUIColor
+        }
+    }
+    
+    public var pressedIconColor: SwiftUI.Color {
+        switch self {
+        case .primary:
+            PQColor.blue6.swiftUIColor
+        case .purple:
+            PQColor.base0.swiftUIColor
+        case .secondary, .tertiary:
+            PQColor.base3.swiftUIColor
         }
     }
 
@@ -76,7 +101,7 @@ public enum PQButtonType {
             PQColor.blue1.swiftUIColor
         case .purple:
             PQColor.blue3.swiftUIColor
-        case .tertiary:
+        case .secondary, .tertiary:
             .clear
         }
     }
@@ -87,7 +112,7 @@ public enum PQButtonType {
             PQColor.base4.swiftUIColor
         case .purple:
             PQColor.blue2.swiftUIColor
-        case .tertiary:
+        case .secondary, .tertiary:
             PQColor.base2.swiftUIColor
         }
     }
@@ -96,13 +121,28 @@ public enum PQButtonType {
         switch self {
         case .primary, .purple, .tertiary:
             .clear
+        case .secondary:
+            PQColor.base2.swiftUIColor
         }
     }
 
+    public var disabledIconColor: SwiftUI.Color {
+        switch self {
+        case .primary:
+            PQColor.blue4.swiftUIColor
+        case .purple:
+            PQColor.blue2.swiftUIColor
+        case .secondary, .tertiary:
+            PQColor.base2.swiftUIColor
+        }
+    }
+    
     public var strokeWidth: CGFloat {
         switch self {
         case .primary, .purple, .tertiary:
             .zero
+        case .secondary:
+            1
         }
     }
 }

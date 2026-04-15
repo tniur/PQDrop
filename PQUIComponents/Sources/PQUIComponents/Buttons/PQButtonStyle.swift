@@ -13,19 +13,26 @@ public struct PQButtonStyle: ButtonStyle {
 
     private enum Constant {
         static let cornerRadius = 28.0
-        static let height = 56.0
     }
 
     // MARK: - Properties
 
-    private let type: PQButtonType
-    @Environment(\.isEnabled)
-    private var isEnabled
+    @Environment(\.isEnabled) private var isEnabled
+
+    let type: PQButtonType
+    private let isCompact: Bool
+    private let height: CGFloat
 
     // MARK: - Initializer
 
-    public init(_ type: PQButtonType) {
+    public init(
+        _ type: PQButtonType,
+        isCompact: Bool = false,
+        height: CGFloat = 56.0
+    ) {
         self.type = type
+        self.isCompact = isCompact
+        self.height = height
     }
 
     // MARK: - Methods
@@ -33,8 +40,9 @@ public struct PQButtonStyle: ButtonStyle {
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(PQFont.R16)
-            .frame(maxWidth: .infinity)
-            .frame(height: Constant.height)
+            .frame(maxWidth: isCompact ? nil : .infinity)
+            .frame(height: height)
+            .padding(.horizontal, isCompact ? 20 : 16)
             .foregroundStyle(isEnabled ? (configuration.isPressed ? type.pressedForegroundColor : type.foregroundColor) : type.disabledForegroundColor)
             .background {
                 RoundedRectangle(cornerRadius: Constant.cornerRadius)

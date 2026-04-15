@@ -91,7 +91,7 @@ struct ContactsView: View {
     }
     
     private var listView: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(viewModel.filteredContacts) { contact in
                     ContactView(

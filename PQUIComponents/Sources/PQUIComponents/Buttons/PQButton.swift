@@ -63,55 +63,29 @@ public extension PQButton where Label == Text {
     }
 }
 
-// MARK: - Label == AnyView
+// MARK: - Label == IconTextLabel
 
-//public extension PQButton where Label == AnyView {
-//
-//    init(
-//        _ titleKey: String,
-//        icon: Image,
-//        action: @escaping () -> Void
-//    ) {
-//        self.init(style: .init(.secondary, fullRounded: true), action: action) {
-//            AnyView(
-//                HStack(spacing: 8) {
-//                    icon
-//                        .renderingMode(.template)
-//                        .foregroundStyle(PQColor.blue6.swiftUIColor)
-//                    Text(titleKey)
-//
-//                    Spacer()
-//
-//                    Image(systemName: "chevron.right")
-//                        .renderingMode(.template)
-//                        .foregroundStyle(PQColor.base3.swiftUIColor)
-//                }
-//                .padding()
-//            )
-//        }
-//    }
-//
-//    init(
-//        _ titleKey: LocalizedStringKey,
-//        icon: Image,
-//        action: @escaping () -> Void
-//    ) {
-//        self.init(style: .init(.secondary, fullRounded: true), action: action) {
-//            AnyView(
-//                HStack(spacing: 8) {
-//                    icon
-//                        .renderingMode(.template)
-//                        .foregroundStyle(PQColor.blue6.swiftUIColor)
-//                    Text(titleKey)
-//
-//                    Spacer()
-//
-//                    Image(systemName: "chevron.right")
-//                        .renderingMode(.template)
-//                        .foregroundStyle(PQColor.base3.swiftUIColor)
-//                }
-//                .padding()
-//            )
-//        }
-//    }
-//}
+public extension PQButton where Label == IconTextLabel {
+
+    init(
+        _ titleKey: String,
+        icon: Image,
+        style: PQButtonStyle = .init(.primary, isCompact: false),
+        action: @escaping () -> Void
+    ) {
+        self.init(style: style, action: action) {
+            IconTextLabel(title: titleKey, icon: icon, style: style)
+        }
+    }
+
+    init(
+        _ titleKey: LocalizedStringKey,
+        icon: Image,
+        style: PQButtonStyle = .init(.primary, isCompact: false),
+        action: @escaping () -> Void
+    ) {
+        self.init(style: style, action: action) {
+            IconTextLabel(localizedTitle: titleKey, icon: icon, style: style)
+        }
+    }
+}
