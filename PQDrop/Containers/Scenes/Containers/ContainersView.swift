@@ -7,6 +7,7 @@
 
 import SwiftUI
 import PQUIComponents
+import UniformTypeIdentifiers
 
 struct ContainersView: View {
 
@@ -33,6 +34,18 @@ struct ContainersView: View {
                 }
                 .searchable(text: $viewModel.searchText, prompt: "Поиск")
                 .searchToolbarBehavior(.minimize)
+        }
+        .fileImporter(
+            isPresented: $viewModel.isFileImporterPresented,
+            allowedContentTypes: [.item],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                viewModel.handleImportedFile(url: urls.first)
+            case .failure:
+                break
+            }
         }
     }
 

@@ -11,6 +11,7 @@ import SUICoordinator
 enum ContainersRoute: RouteType {
     case containers(coordinator: ContainersCoordinatorProtocol)
     case containerDetails(coordinator: ContainersCoordinatorProtocol, container: Container)
+    case importContainer(coordinator: ContainersCoordinatorProtocol, fileURL: URL)
     case recipientsSheet(recipients: [Recipient])
     case accessControl(coordinator: ContainersCoordinatorProtocol, container: Container)
     case containersContents(coordinator: ContainersCoordinatorProtocol, container: Container)
@@ -22,8 +23,8 @@ enum ContainersRoute: RouteType {
 
     var presentationStyle: TransitionPresentationStyle {
         switch self {
-        case .containers, .containerDetails, .accessControl, .containersContents, .fileViewer, .saveContainer,
-             .editContainerName, .createContainerFiles, .createContainerSave:
+        case .containers, .containerDetails, .importContainer, .accessControl, .containersContents, .fileViewer,
+             .saveContainer, .editContainerName, .createContainerFiles, .createContainerSave:
             .push
         case .recipientsSheet:
             .sheet
@@ -40,6 +41,11 @@ enum ContainersRoute: RouteType {
         case .containerDetails(let coordinator, let container):
             let viewModel = ContainerDetailsViewModel(coordinator: coordinator, container: container)
             let view = ContainerDetailsView(viewModel: viewModel)
+            return AnyView(view)
+
+        case .importContainer(let coordinator, let fileURL):
+            let viewModel = ImportContainerViewModel(coordinator: coordinator, fileURL: fileURL)
+            let view = ImportContainerView(viewModel: viewModel)
             return AnyView(view)
 
         case .recipientsSheet(let recipients):

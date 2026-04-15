@@ -14,8 +14,15 @@ final class ContainersViewModel: ObservableObject {
     // MARK: - Properties
 
     @Published var searchText: String = ""
-    @Published var selectedTab: ContainersTab = .created
+    @Published var selectedTab: ContainersTab = .created {
+        didSet {
+            ContainersMockStore.preferredTab = selectedTab
+        }
+    }
     @Published var containerToDelete: Container? = nil
+    @Published var isFileImporterPresented = false
+
+    @Published private var containers: [Container]
 
     var filteredContainers: [Container] {
         let tabFiltered: [Container]
@@ -37,37 +44,21 @@ final class ContainersViewModel: ObservableObject {
         !searchText.isEmpty
     }
 
-    private var containers: [Container] = [
-        .init(id: "100000001", name: "Название контейнера", isAvailable: true, isCreated: true),
-        .init(id: "100000002", name: "Название контейнера", isAvailable: true, isCreated: true),
-        .init(id: "100000003", name: "Название контейнера", isAvailable: false, isCreated: true),
-        .init(id: "100000004", name: "Название контейнера", isAvailable: true, isCreated: true),
-        .init(id: "200000005", name: "Полученный контейнер", isAvailable: true, isCreated: false),
-        .init(id: "200000006", name: "Полученный контейнер", isAvailable: true, isCreated: false),
-        .init(id: "200000007", name: "Полученный контейнер", isAvailable: true, isCreated: false),
-        .init(id: "200000008", name: "Полученный контейнер", isAvailable: true, isCreated: false),
-        .init(id: "200000009", name: "Полученный контейнер", isAvailable: true, isCreated: false),
-        .init(id: "200000010", name: "Полученный контейнер", isAvailable: true, isCreated: false),
-        .init(id: "200000011", name: "Полученный контейнер", isAvailable: true, isCreated: false),
-        .init(id: "200000012", name: "Полученный контейнер", isAvailable: true, isCreated: false),
-        .init(id: "200000013", name: "Полученный контейнер", isAvailable: true, isCreated: false),
-        .init(id: "200000014", name: "Полученный контейнер", isAvailable: true, isCreated: false),
-        .init(id: "200000015", name: "Полученный контейнер", isAvailable: true, isCreated: false),
-        .init(id: "200000016", name: "Полученный контейнер", isAvailable: false, isCreated: false)
-    ]
-
     private let coordinator: ContainersCoordinatorProtocol
 
     // MARK: - Initializer
 
     init(coordinator: ContainersCoordinatorProtocol) {
         self.coordinator = coordinator
+        containers = ContainersMockStore.containers
+        selectedTab = ContainersMockStore.preferredTab
     }
 
     // MARK: - Methods
 
     func delete(container: Container) {
-        containers.removeAll { $0.id == container.id }
+        ContainersMockStore.delete(container: container)
+        containers = ContainersMockStore.containers
     }
 
     func emptyTabAction() {
@@ -86,7 +77,15 @@ final class ContainersViewModel: ObservableObject {
     }
 
     func importContainer() {
-        // TODO: - Navigate to import container flow
+        isFileImporterPresented = true
+    }
+
+    func handleImportedFile(url: URL?) {
+        guard let url else { return }
+
+        Task {
+            await coordinator.showImportContainerValidation(fileURL: url)
+        }
     }
 
     func showContainerDetails(container: Container) {
