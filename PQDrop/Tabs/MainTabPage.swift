@@ -33,7 +33,7 @@ enum MainTabPage: TabPage, CaseIterable {
         case .contacts:
             return ContactsCoordinator()
         case .history:
-            return ProfileCoordinator()
+            return HistoryCoordinator()
         case .profile:
             return ProfileCoordinator()
         }

@@ -32,8 +32,10 @@ struct AccessControlView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Button(action: viewModel.addContact) {
                     PQImage.plus.swiftUIImage
+                        .resizable()
                         .renderingMode(.template)
                         .foregroundStyle(PQColor.base8.swiftUIColor)
+                        .frame(width: 32, height: 32)
                 }
             }
         }
@@ -50,6 +52,7 @@ struct AccessControlView: View {
             Text("Выберите контакты, которым хотите выдать доступ к этому контейнеру. Изменения потребуют перешифровки – это займёт несколько минут.")
                 .font(PQFont.R14)
                 .foregroundStyle(PQColor.base0.swiftUIColor)
+                .padding(.horizontal)
 
             countersView
                 .padding(.horizontal)

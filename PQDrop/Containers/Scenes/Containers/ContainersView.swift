@@ -53,23 +53,20 @@ struct ContainersView: View {
 
     private var contentView: some View {
         ScrollView(showsIndicators: false) {
-            LazyVStack(pinnedViews: .sectionHeaders) {
-                Section {
-                    if viewModel.filteredContainers.isEmpty {
-                        if viewModel.isSearchActive {
-                            emptySearchView
-                        } else {
-                            emptyTabView
-                        }
+            VStack(alignment: .leading, spacing: 20) {
+                segmentedControl
+                
+                if viewModel.filteredContainers.isEmpty {
+                    if viewModel.isSearchActive {
+                        emptySearchView
                     } else {
-                        containersList
-                            .padding(.vertical)
+                        emptyTabView
                     }
-                } header: {
-                    segmentedControl
+                } else {
+                    containersList
                 }
             }
-            .padding(.horizontal)
+            .padding()
         }
     }
     
@@ -79,14 +76,14 @@ struct ContainersView: View {
                 .resizable()
                 .renderingMode(.template)
                 .foregroundStyle(PQColor.base7.swiftUIColor)
-                .frame(width: 36, height: 36)
+                .frame(width: 32, height: 32)
                 .onTapGesture(perform: viewModel.createContainer)
 
             PQImage.import.swiftUIImage
                 .resizable()
                 .renderingMode(.template)
                 .foregroundStyle(PQColor.base7.swiftUIColor)
-                .frame(width: 36, height: 36)
+                .frame(width: 32, height: 32)
                 .onTapGesture(perform: viewModel.importContainer)
         }
         .padding(.vertical, 4)

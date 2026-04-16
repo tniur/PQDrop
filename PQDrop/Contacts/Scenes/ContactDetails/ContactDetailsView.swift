@@ -93,8 +93,10 @@ struct ContactDetailsView: View {
             }
         } label: {
             PQImage.dots.swiftUIImage
+                .resizable()
                 .renderingMode(.template)
                 .foregroundStyle(PQColor.base7.swiftUIColor)
+                .frame(width: 32, height: 32)
         }
     }
     
