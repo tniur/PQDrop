@@ -63,5 +63,9 @@ where DataSource.Page == MainTabPage, DataSource.DataSourcePage == MainTabPageDa
                 }
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .mainTabSelectionRequested)) { notification in
+            guard let page = notification.object as? MainTabPage else { return }
+            dataSource.currentPage = page
+        }
     }
 }
