@@ -56,8 +56,10 @@ struct ContactsView: View {
     private var toolbarButtonsView: some View {
         HStack(spacing: 12) {
             PQImage.sliders.swiftUIImage
+                .resizable()
                 .renderingMode(.template)
                 .foregroundStyle(PQColor.base7.swiftUIColor)
+                .frame(width: 32, height: 32)
                 .onTapGesture(perform: viewModel.showFilters)
             
             Menu {
@@ -68,8 +70,10 @@ struct ContactsView: View {
                 }
             } label: {
                 PQImage.dots.swiftUIImage
+                    .resizable()
                     .renderingMode(.template)
                     .foregroundStyle(PQColor.base7.swiftUIColor)
+                    .frame(width: 32, height: 32)
             }
         }
         .padding(.horizontal, 8)
@@ -142,8 +146,10 @@ struct ContactsView: View {
     
     private var addContactButton: some View {
         PQImage.plus.swiftUIImage
+            .resizable()
             .renderingMode(.template)
             .foregroundStyle(PQColor.base7.swiftUIColor)
+            .frame(width: 32, height: 32)
             .padding(8)
             .glassEffect(.regular.interactive(), in: Circle())
             .onTapGesture(perform: viewModel.addContact)
