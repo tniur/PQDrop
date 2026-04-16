@@ -42,6 +42,12 @@ struct ContainerDetailsView: View {
         .sheet(isPresented: $viewModel.showShareSheet) {
             ActivityViewControllerRepresentable(activityItems: [viewModel.container.name])
         }
+        .sheet(isPresented: $viewModel.showHistorySheet) {
+            ContainerHistorySheetView(
+                events: viewModel.historyEvents,
+                onShowAllTap: viewModel.showAllHistory
+            )
+        }
     }
 
     // MARK: - Subviews

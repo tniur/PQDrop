@@ -7,6 +7,7 @@
 
 import Combine
 import UIKit
+import Foundation
 
 @MainActor
 final class ContainerDetailsViewModel: ObservableObject {
@@ -16,10 +17,53 @@ final class ContainerDetailsViewModel: ObservableObject {
     @Published var container: Container
     @Published var showDeleteAlert = false
     @Published var showShareSheet = false
+    @Published var showHistorySheet = false
     @Published var isError = false
 
     var isAvailable: Bool { container.isAvailable }
     var isCreated: Bool { container.isCreated }
+    var historyEvents: [HistoryEvent] {
+        guard isCreated, isAvailable else { return [] }
+
+        return [
+            .init(
+                id: "\(container.id)-export-1209",
+                type: .export,
+                icon: .export,
+                listTitle: "Экспорт \"\(container.name)\"",
+                detailsTitle: "Экспорт контейнера",
+                dateTitle: "20 марта 2026",
+                time: "12:09",
+                containerName: container.name,
+                containerID: container.id,
+                result: "Успешно"
+            ),
+            .init(
+                id: "\(container.id)-import-1111",
+                type: .imported,
+                icon: .imported,
+                listTitle: "Импорт \"\(container.name)\"",
+                detailsTitle: "Импорт контейнера",
+                dateTitle: "20 марта 2026",
+                time: "11:11",
+                containerName: container.name,
+                containerID: container.id,
+                result: "Успешно"
+            ),
+            .init(
+                id: "\(container.id)-access-1012",
+                type: .access,
+                icon: .accessGranted,
+                listTitle: "Доступ \"\(container.name)\"",
+                detailsTitle: "Доступ контейнера",
+                dateTitle: "20 марта 2026",
+                time: "10:12",
+                containerName: container.name,
+                containerID: container.id,
+                result: "Доступ выдан"
+            )
+        ]
+    }
 
     var recipients: [Recipient] = [
         .init(id: "1", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: true),
@@ -75,7 +119,15 @@ final class ContainerDetailsViewModel: ObservableObject {
     }
 
     func showContainerHistory() {
-        // TODO: - Navigate to container history screen
+        showHistorySheet = true
+    }
+
+    func showAllHistory() {
+        showHistorySheet = false
+        NotificationCenter.default.post(
+            name: .mainTabSelectionRequested,
+            object: MainTabPage.history
+        )
     }
 
     func copyContainerToSelf() {
