@@ -14,28 +14,26 @@ struct AddFilesSourceSheetView: View {
     let onGalleryTap: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 16) {
             Text("Добавить файлы")
                 .font(PQFont.B24)
                 .foregroundStyle(PQColor.base7.swiftUIColor)
-
-            PQButton(
-                "Из файлов",
-                icon: Image(systemName: "folder"),
-                style: .init(.purple),
-                action: onFilesTap
-            )
-
-            PQButton(
-                "Из галереи",
-                icon: Image(systemName: "photo.on.rectangle"),
-                style: .init(.purple),
-                action: onGalleryTap
-            )
-
-            Spacer()
+                .padding(.top, 20)
+            VStack(alignment: .leading, spacing: 4) {
+                PQButton(
+                    "Из файлов",
+                    icon: PQImage.doc.swiftUIImage,
+                    action: onFilesTap
+                )
+                
+                PQButton(
+                    "Из галереи",
+                    icon: PQImage.photo.swiftUIImage,
+                    action: onGalleryTap
+                )
+            }
         }
-        .padding(20)
+        .padding(.horizontal, 20)
         .presentationDetents([.height(200)])
         .presentationDragIndicator(.visible)
     }
