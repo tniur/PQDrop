@@ -26,19 +26,19 @@ struct HistoryEventDetailsSheet: View {
 
             VStack(alignment: .leading, spacing: 20) {
                 detailsBlock(
-                    title: "Дата и время",
+                    title: String(localized: "history.details.date.time"),
                     value: event.dateTitle,
                     secondaryValue: event.time
                 )
 
                 detailsBlock(
-                    title: "Контейнер",
+                    title: String(localized: "history.details.container"),
                     value: event.containerName,
-                    secondaryValue: "id: \(event.containerID)"
+                    secondaryValue: String(localized: "shared.id\(event.containerID)")
                 )
 
                 detailsBlock(
-                    title: "Результат",
+                    title: String(localized: "history.details.result"),
                     value: event.result
                 )
             }

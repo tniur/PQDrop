@@ -5,6 +5,8 @@
 //  Created by Анастасия Журавлева on 20.03.2026.
 //
 
+import Foundation
+
 enum ContainersTab: Int, CaseIterable {
     case created = 0
     case received = 1
@@ -12,36 +14,36 @@ enum ContainersTab: Int, CaseIterable {
     var title: String {
         switch self {
         case .created:
-            return "Созданные"
+            return String(localized: "containers.tab.created")
         case .received:
-            return "Полученные"
+            return String(localized: "containers.tab.received")
         }
     }
 
     var emptyTitle: String {
         switch self {
         case .created:
-            return "У вас пока\nнет контейнеров"
+            return String(localized: "containers.empty.created.title")
         case .received:
-            return "Пока нет полученных\nконтейнеров"
+            return String(localized: "containers.empty.received.title")
         }
     }
 
     var emptySubtitle: String {
         switch self {
         case .created:
-            return "Создайте контейнер, чтобы зашифровать файлы и выдать доступ получателям."
+            return String(localized: "containers.empty.created.subtitle")
         case .received:
-            return "Импортируйте контейнер из Files или получите его другим способом."
+            return String(localized: "containers.empty.received.subtitle")
         }
     }
 
     var emptyButtonTitle: String {
         switch self {
         case .created:
-            return "Создать"
+            return String(localized: "shared.create")
         case .received:
-            return "Импортировать"
+            return String(localized: "shared.import")
         }
     }
 }

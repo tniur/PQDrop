@@ -33,15 +33,15 @@ struct ContactDetailsView: View {
             }
         }
         .alert(
-            "Действительно удалить контакт \"\(viewModel.contact.name)\"?",
+            String(localized: "contacts.details.delete.confirm.title\(viewModel.contact.name)"),
             isPresented: $viewModel.showDeleteAlert
         ) {
-            Button("Удалить", role: .destructive) {
+            Button(String(localized: "shared.delete"), role: .destructive) {
                 viewModel.deleteContact()
             }
-            Button("Отмена", role: .cancel) {}
+            Button(String(localized: "shared.cancel"), role: .cancel) {}
         } message: {
-            Text("Это не изменит доступ к уже выданным контейнерам.")
+            Text(String(localized: "contacts.details.delete.confirm.message"))
         }
         .alert(
             viewModel.verificationAlertTitle,
@@ -50,7 +50,7 @@ struct ContactDetailsView: View {
             Button(viewModel.verificationConfirmButtonTitle) {
                 viewModel.confirmVerificationChange()
             }
-            Button("Отмена", role: .cancel) {
+            Button(String(localized: "shared.cancel"), role: .cancel) {
                 viewModel.cancelVerificationChange()
             }
         } message: {
@@ -72,7 +72,7 @@ struct ContactDetailsView: View {
             .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 34))
             
             if !viewModel.contact.isVerified {
-                Text("Это неподтверждённый контакт. Перед выдачей доступа проверьте fingerprint по независимому каналу.")
+                Text(String(localized: "contacts.details.unverified.hint"))
                     .font(PQFont.B16)
                     .foregroundStyle(PQColor.base0.swiftUIColor)
                     .multilineTextAlignment(.center)
@@ -89,7 +89,7 @@ struct ContactDetailsView: View {
             Button(role: .destructive) {
                 viewModel.showDeleteAlert = true
             } label: {
-                Label("Удалить контакт", systemImage: "trash")
+                Label(String(localized: "contacts.details.delete.menu"), systemImage: "trash")
             }
         } label: {
             PQImage.dots.swiftUIImage
@@ -119,8 +119,8 @@ struct ContactDetailsView: View {
             }
             
             Picker("", selection: viewModel.verifiedSelection) {
-                Text("Verified").tag(0)
-                Text("Unverified").tag(1)
+                Text(String(localized: "shared.status.verified")).tag(0)
+                Text(String(localized: "shared.status.unverified")).tag(1)
             }
             .pickerStyle(.segmented)
             .frame(width: 200)
@@ -138,7 +138,7 @@ struct ContactDetailsView: View {
                 }
             }
             
-            Text("нажмите на fingerprint, чтобы скопировать")
+            Text(String(localized: "contacts.details.fingerprint.hint"))
                 .font(PQFont.R12.italic())
                 .foregroundStyle(PQColor.blue3.swiftUIColor)
                 .multilineTextAlignment(.center)

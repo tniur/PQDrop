@@ -28,13 +28,13 @@ struct MainTabPageDataSource {
     var title: some View {
         switch page {
         case .containers:
-            Text("Контейнеры")
+            Text("containers.title")
         case .contacts:
-            Text("Контакты")
+            Text("contacts.title")
         case .history:
-            Text("История")
+            Text("history.title")
         case .profile:
-            Text("Профиль")
+            Text("profile.title")
         }
     }
 }

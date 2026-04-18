@@ -19,7 +19,7 @@ struct EditContainerNameView: View {
     var body: some View {
         BackgroundView {
             VStack(alignment: .leading, spacing: 20) {
-                Text("Название контейнера")
+                Text(String(localized: "containers.edit.name.title"))
                     .font(PQFont.B30)
                     .foregroundStyle(PQColor.base10.swiftUIColor)
 
@@ -45,11 +45,11 @@ struct EditContainerNameView: View {
     private var contentView: some View {
         VStack(alignment: .leading, spacing: 8) {
             PQTextField(
-                placeholderText: "Введите название контейнера",
+                placeholderText: String(localized: "containers.edit.name.placeholder"),
                 text: $viewModel.name
             )
 
-            Text("Контейнер — это зашифрованная папка с файлами.")
+            Text(String(localized: "containers.edit.name.hint"))
                 .font(PQFont.R14)
                 .foregroundStyle(PQColor.base5.swiftUIColor)
         }

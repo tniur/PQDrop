@@ -25,9 +25,9 @@ final class EditContainerNameViewModel: ObservableObject {
     var buttonTitle: String {
         switch mode {
         case .create:
-            return "Далее"
+            return String(localized: "shared.next")
         case .edit:
-            return "Сохранить"
+            return String(localized: "shared.save")
         }
     }
 

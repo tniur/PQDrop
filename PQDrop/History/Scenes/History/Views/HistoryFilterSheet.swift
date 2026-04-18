@@ -20,7 +20,7 @@ struct HistoryFilterSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text("Тип события")
+            Text(String(localized: "history.filter.title"))
                 .font(PQFont.B24)
                 .foregroundStyle(PQColor.base7.swiftUIColor)
                 .padding(.top, 20)
@@ -28,7 +28,7 @@ struct HistoryFilterSheet: View {
             VStack(spacing: 16) {
                 ForEach(HistoryEventFilter.allCases) { filter in
                     HStack {
-                        Text(filter.rawValue)
+                        Text(filter.title)
                             .font(PQFont.B16)
                             .foregroundStyle(PQColor.base7.swiftUIColor)
 

@@ -35,35 +35,35 @@ extension OnboardingStep {
         .init(
             id: 0,
             image: PQImage.lock.swiftUIImage,
-            title: "Локальное крипто-хранилище для файлов",
-            subtitle: "Шифрует файлы прямо на устройстве. Делитесь контейнерами без серверов и облаков."
+            title: String(localized: "onboarding.step.local.storage.title"),
+            subtitle: String(localized: "onboarding.step.local.storage.subtitle")
         ),
         .init(
             id: 1,
             image: PQImage.containerOpen.swiftUIImage,
-            title: "Файл превращается в защищённый контейнер",
-            subtitle: "Приложение шифрует содержимое и сохраняет его локально. Даже если контейнер перехватят — без ключа его не открыть.",
-            mark: "Шифрование: AES-GCM + постквантовая выдача прав доступа"
+            title: String(localized: "onboarding.step.secure.container.title"),
+            subtitle: String(localized: "onboarding.step.secure.container.subtitle"),
+            mark: String(localized: "onboarding.step.secure.container.mark")
         ),
         .init(
             id: 2,
             image: PQImage.containerClose.swiftUIImage,
-            title: "Оффлайн-обмен с контролем доступа",
-            subtitle: "Контейнер отправляется любым способом (AirDrop/экспорт). Право открыть — передаётся отдельно через QR-код.",
-            mark: "Ключ можно передать по другому каналу – так снижается риск MITM."
+            title: String(localized: "onboarding.step.offline.access.title"),
+            subtitle: String(localized: "onboarding.step.offline.access.subtitle"),
+            mark: String(localized: "onboarding.step.offline.access.mark")
         ),
         .init(
             id: 3,
             image: PQImage.checkId.swiftUIImage,
-            title: "Проверяйте подлинность ключей",
-            subtitle: "Публичный ключ можно подменить при обмене. Сверьте fingerprint по независимому каналу и отметьте контакт как Verified."
+            title: String(localized: "onboarding.step.verify.keys.title"),
+            subtitle: String(localized: "onboarding.step.verify.keys.subtitle")
         ),
         .init(
             id: 4,
             image: PQImage.fileAlert.swiftUIImage,
-            title: "Важно: это не DRM",
-            subtitle: "Если получатель расшифровал и сохранил файл, “забрать назад” его нельзя без серверов или DRM-механизмов.",
-            mark: "Но перехват контейнера ≠ утечка содержимого."
+            title: String(localized: "onboarding.step.not.drm.title"),
+            subtitle: String(localized: "onboarding.step.not.drm.subtitle"),
+            mark: String(localized: "onboarding.step.not.drm.mark")
         )
     ]
 }

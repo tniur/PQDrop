@@ -43,12 +43,12 @@ struct FileCardView: View {
                 previewView
 
                 if showBadges && file.isDraftAdded {
-                    badge(title: "Новый", color: PQColor.green6.swiftUIColor)
+                    badge(title: String(localized: "files.badge.new"), color: PQColor.green6.swiftUIColor)
                         .padding(6)
                 }
 
                 if showBadges && file.isMarkedForDeletion {
-                    badge(title: "Будет удалён", color: PQColor.red6.swiftUIColor)
+                    badge(title: String(localized: "files.badge.will.delete"), color: PQColor.red6.swiftUIColor)
                         .padding(6)
                 }
             }

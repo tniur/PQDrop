@@ -26,7 +26,10 @@ struct AccessContactView: View {
 
             Spacer()
 
-            VerificationBadge(isVerified: isVerified)
+            VerificationBadge(
+                isVerified: isVerified,
+                title: String(localized: isVerified ? "shared.status.verified" : "shared.status.unverified")
+            )
 
             PQImage.checkmarkCircle.swiftUIImage
                 .renderingMode(.template)

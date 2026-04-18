@@ -5,6 +5,8 @@
 //  Created by Анастасия Журавлева on 15.04.2026.
 //
 
+import Foundation
+
 enum ImportContainerStatus: Equatable {
     case checkingFormat
     case checkingFingerprint
@@ -13,11 +15,11 @@ enum ImportContainerStatus: Equatable {
     var text: String {
         switch self {
         case .checkingFormat:
-            return "Проверяем формат файла..."
+            return String(localized: "containers.import.status.checking.format")
         case .checkingFingerprint:
-            return "Проверяем подпись и fingerprint..."
+            return String(localized: "containers.import.status.checking.fingerprint")
         case .checkingAccess:
-            return "Проверяем доступ..."
+            return String(localized: "containers.import.status.checking.access")
         }
     }
 }
