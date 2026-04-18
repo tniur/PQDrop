@@ -16,7 +16,7 @@ struct ProfileView: View {
     // MARK: - Body
 
     var body: some View {
-        Text("Профиль")
+        Text("profile.title")
     }
     
     // MARK: - Initializer

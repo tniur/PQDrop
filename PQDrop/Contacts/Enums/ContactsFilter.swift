@@ -5,10 +5,23 @@
 //  Created by Анастасия Журавлева on 01.03.2026.
 //
 
-enum ContactsFilter: String, CaseIterable, Identifiable {
-    case all = "Все"
-    case verifiedOnly = "Только верифицированные"
-    case unverifiedOnly = "Только неверифицированные"
-    
+import Foundation
+
+enum ContactsFilter: CaseIterable, Identifiable {
+    case all
+    case verifiedOnly
+    case unverifiedOnly
+
     var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .all:
+            return String(localized: "contacts.filter.all")
+        case .verifiedOnly:
+            return String(localized: "contacts.filter.verified.only")
+        case .unverifiedOnly:
+            return String(localized: "contacts.filter.unverified.only")
+        }
+    }
 }

@@ -19,9 +19,9 @@ struct SaveContainerView: View {
         case .loading:
             return ""
         case .success:
-            return "Изменения сохранены"
+            return String(localized: "containers.save.result.success.title")
         case .failure:
-            return "Не удалось сохранить изменения"
+            return String(localized: "containers.save.result.failure.title")
         }
     }
 
@@ -105,7 +105,7 @@ struct SaveContainerView: View {
 
     private var successBlock: some View {
         VStack(spacing: .zero) {
-            Text("Контейнер обновлён")
+            Text(String(localized: "containers.save.result.success.message"))
                 .font(PQFont.R14)
                 .foregroundStyle(PQColor.blue2.swiftUIColor)
                 .multilineTextAlignment(.center)
@@ -113,7 +113,7 @@ struct SaveContainerView: View {
             Spacer()
 
             PQButton(
-                "Вернуться к контейнеру",
+                String(localized: "containers.return.to.container"),
                 style: .init(.primary),
                 action: viewModel.goBack
             )
@@ -122,7 +122,7 @@ struct SaveContainerView: View {
 
     private var failureBlock: some View {
         VStack(spacing: .zero) {
-            Text("Попробуйте ещё раз")
+            Text(String(localized: "shared.try.again"))
                 .font(PQFont.R14)
                 .foregroundStyle(PQColor.blue2.swiftUIColor)
                 .multilineTextAlignment(.center)
@@ -131,13 +131,13 @@ struct SaveContainerView: View {
 
             VStack(spacing: 8) {
                 PQButton(
-                    "Повторить",
+                    String(localized: "shared.retry"),
                     style: .init(.primary),
                     action: viewModel.retry
                 )
 
                 PQButton(
-                    "Отмена",
+                    String(localized: "shared.cancel"),
                     style: .init(.secondary),
                     action: viewModel.cancel
                 )

@@ -19,9 +19,9 @@ struct CreateContainerSaveView: View {
         case .loading:
             return ""
         case .success:
-            return "Контейнер создан"
+            return String(localized: "containers.create.result.success.title")
         case .failure:
-            return "Не удалось\nсоздать контейнер"
+            return String(localized: "containers.create.result.failure.title")
         }
     }
 
@@ -105,7 +105,7 @@ struct CreateContainerSaveView: View {
 
     private var successBlock: some View {
         VStack(spacing: .zero) {
-            Text("Контейнер сохранён\nв разделе \"Созданные\"")
+            Text(String(localized: "containers.create.result.success.message"))
                 .font(PQFont.R14)
                 .foregroundStyle(PQColor.blue2.swiftUIColor)
                 .multilineTextAlignment(.center)
@@ -114,13 +114,13 @@ struct CreateContainerSaveView: View {
 
             VStack(spacing: 8) {
                 PQButton(
-                    "Открыть контейнер",
+                    String(localized: "containers.open"),
                     style: .init(.primary),
                     action: viewModel.openContainer
                 )
 
                 PQButton(
-                    "Перейти к списку",
+                    String(localized: "shared.go.to.list"),
                     style: .init(.secondary),
                     action: viewModel.goToList
                 )
@@ -130,7 +130,7 @@ struct CreateContainerSaveView: View {
 
     private var failureBlock: some View {
         VStack(spacing: .zero) {
-            Text("Попробуйте ещё раз")
+            Text(String(localized: "shared.try.again"))
                 .font(PQFont.R14)
                 .foregroundStyle(PQColor.blue2.swiftUIColor)
                 .multilineTextAlignment(.center)
@@ -139,13 +139,13 @@ struct CreateContainerSaveView: View {
 
             VStack(spacing: 8) {
                 PQButton(
-                    "Повторить",
+                    String(localized: "shared.retry"),
                     style: .init(.primary),
                     action: viewModel.retry
                 )
 
                 PQButton(
-                    "Отмена",
+                    String(localized: "shared.cancel"),
                     style: .init(.secondary),
                     action: viewModel.cancel
                 )

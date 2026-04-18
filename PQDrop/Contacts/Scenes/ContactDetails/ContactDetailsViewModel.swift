@@ -40,9 +40,9 @@ final class ContactDetailsViewModel: ObservableObject {
         guard let pendingVerificationValue else { return "" }
         
         if pendingVerificationValue {
-            return "Подтвердить контакт как Verified?"
+            return String(localized: "contacts.verification.alert.title.confirm")
         } else {
-            return "Удалить верификацию контакта?"
+            return String(localized: "contacts.verification.alert.title.remove")
         }
     }
     
@@ -50,15 +50,17 @@ final class ContactDetailsViewModel: ObservableObject {
         guard let pendingVerificationValue else { return "" }
         
         if pendingVerificationValue {
-            return "Вы подтверждаете, что сверили fingerprint по независимому каналу."
+            return String(localized: "contacts.verification.alert.message.confirm")
         } else {
-            return "Этот ключ больше не считается проверенным."
+            return String(localized: "contacts.verification.alert.message.remove")
         }
     }
     
     var verificationConfirmButtonTitle: String {
         guard let pendingVerificationValue else { return "" }
-        return pendingVerificationValue ? "Подтвердить" : "Удалить верификацию"
+        return pendingVerificationValue
+        ? String(localized: "shared.confirm")
+        : String(localized: "contacts.verification.remove")
     }
     
     private let coordinator: ContactsCoordinatorProtocol

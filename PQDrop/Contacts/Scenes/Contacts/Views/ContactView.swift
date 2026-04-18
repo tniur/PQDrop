@@ -25,7 +25,10 @@ struct ContactView: View {
 
             Spacer()
 
-            VerificationBadge(isVerified: isVerified)
+            VerificationBadge(
+                isVerified: isVerified,
+                title: String(localized: isVerified ? "shared.status.verified" : "shared.status.unverified")
+            )
         }
         .padding(.vertical)
         .padding(.horizontal, 20)

@@ -24,7 +24,7 @@ struct AccessControlView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text("Доступ")
+                Text(String(localized: "containers.access.title"))
                     .font(PQFont.B16)
                     .foregroundStyle(PQColor.base0.swiftUIColor)
             }
@@ -49,7 +49,7 @@ struct AccessControlView: View {
             headerCardView
                 .padding(.horizontal)
 
-            Text("Выберите контакты, которым хотите выдать доступ к этому контейнеру. Изменения потребуют перешифровки – это займёт несколько минут.")
+            Text(String(localized: "containers.access.description"))
                 .font(PQFont.R14)
                 .foregroundStyle(PQColor.base0.swiftUIColor)
                 .padding(.horizontal)
@@ -70,7 +70,7 @@ struct AccessControlView: View {
                     .font(PQFont.B24)
                     .foregroundStyle(PQColor.base7.swiftUIColor)
 
-                Text("id: \(viewModel.container.id)")
+                Text(String(localized: "shared.id\(viewModel.container.id)"))
                     .font(PQFont.R15)
                     .foregroundStyle(PQColor.base5.swiftUIColor)
             }
@@ -94,7 +94,7 @@ struct AccessControlView: View {
             .frame(width: 18, height: 18)
             .foregroundStyle(PQColor.base0.swiftUIColor)
 
-            Text(viewModel.container.isAvailable ? "Доступен" : "Недоступен")
+            Text(String(localized: viewModel.container.isAvailable ? "shared.available" : "shared.unavailable"))
                 .font(PQFont.B14)
                 .foregroundStyle(PQColor.base0.swiftUIColor)
         }
@@ -113,7 +113,7 @@ struct AccessControlView: View {
     private var countersView: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 4) {
-                Text("Имеют доступ:")
+                Text(String(localized: "containers.access.has.access"))
                     .font(PQFont.B16)
                     .foregroundStyle(PQColor.base0.swiftUIColor)
 
@@ -123,7 +123,7 @@ struct AccessControlView: View {
             }
 
             HStack(spacing: 4) {
-                Text("Выбрано:")
+                Text(String(localized: "containers.access.selected"))
                     .font(PQFont.B16)
                     .foregroundStyle(PQColor.base0.swiftUIColor)
 
@@ -154,7 +154,7 @@ struct AccessControlView: View {
                             Button(role: .destructive) {
                                 viewModel.requestRevokeAccess(for: contact.id)
                             } label: {
-                                Text("Ограничить доступ")
+                                Text(String(localized: "containers.access.restrict"))
                                 Image(systemName: "person.crop.circle.badge.minus")
                             }
                         }
@@ -177,29 +177,33 @@ struct AccessControlView: View {
         switch alert {
         case .noSelection:
             return Alert(
-                title: Text("Контакт не выбран"),
-                message: Text("Выберите хотя бы один контакт, чтобы выдать доступ к контейнеру."),
-                dismissButton: .cancel(Text("Понятно"))
+                title: Text(String(localized: "containers.access.alert.no.selection.title")),
+                message: Text(String(localized: "containers.access.alert.no.selection.message")),
+                dismissButton: .cancel(Text(String(localized: "shared.got.it")))
             )
 
         case .applyAccessChanges:
             return Alert(
-                title: Text("Выбрано \(viewModel.selectedContactIds.count) из \(viewModel.contacts.count) контактов"),
-                message: Text("Добавление/удаление получателей требует перешифровки контейнера. Это может занять несколько минут."),
-                primaryButton: .default(Text("Применить")) {
+                title: Text(
+                    String(localized:
+                        "containers.access.alert.apply.title\(viewModel.selectedContactIds.count)\(viewModel.contacts.count)"
+                    )
+                ),
+                message: Text(String(localized: "containers.access.alert.changes.message")),
+                primaryButton: .default(Text(String(localized: "shared.apply"))) {
                     viewModel.applySelectedContacts()
                 },
-                secondaryButton: .cancel(Text("Отмена"))
+                secondaryButton: .cancel(Text(String(localized: "shared.cancel")))
             )
 
         case .revokeAccess(let contactId):
             return Alert(
-                title: Text("Ограничить доступ?"),
-                message: Text("Добавление/удаление получателей требует перешифровки контейнера. Это может занять несколько минут."),
-                primaryButton: .destructive(Text("Применить")) {
+                title: Text(String(localized: "containers.access.alert.restrict.title")),
+                message: Text(String(localized: "containers.access.alert.changes.message")),
+                primaryButton: .destructive(Text(String(localized: "shared.apply"))) {
                     viewModel.revokeAccess(for: contactId)
                 },
-                secondaryButton: .cancel(Text("Отмена"))
+                secondaryButton: .cancel(Text(String(localized: "shared.cancel")))
             )
         }
     }

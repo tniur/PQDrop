@@ -45,7 +45,7 @@ struct ContainerCardView: View {
                     .font(PQFont.B16)
                     .foregroundStyle(nameColor)
 
-                Text("id: \(id)")
+                Text(String(localized: "shared.id\(id)"))
                     .font(PQFont.R12)
                     .foregroundStyle(idColor)
             }

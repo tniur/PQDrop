@@ -42,7 +42,7 @@ enum ContainersMockStore {
         importedIndex += 1
 
         let rawName = fileURL.deletingPathExtension().lastPathComponent
-        let name = rawName.isEmpty ? "Импортированный контейнер" : rawName
+        let name = rawName.isEmpty ? String(localized: "containers.imported.default.name") : rawName
         let container = Container(
             id: id,
             name: name,

@@ -18,7 +18,7 @@ struct RecipientsSheetView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Получатели")
+            Text(String(localized: "containers.recipients.title"))
                 .font(PQFont.B24)
                 .foregroundStyle(PQColor.base7.swiftUIColor)
                 .padding(.top, 20)
@@ -50,7 +50,7 @@ struct RecipientsSheetView: View {
     private var emptyView: some View {
         VStack {
             Spacer()
-            Text("Получателей пока нет. Доступ есть только у вас.")
+            Text(String(localized: "containers.recipients.empty"))
                 .font(PQFont.R16)
                 .foregroundStyle(PQColor.base5.swiftUIColor)
                 .multilineTextAlignment(.center)

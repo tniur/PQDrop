@@ -28,7 +28,7 @@ struct ContainerHistorySheetView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text("История")
+            Text(String(localized: "history.title"))
                 .font(PQFont.B24)
                 .foregroundStyle(PQColor.base10.swiftUIColor)
                 .padding(.top, 20)
@@ -61,7 +61,7 @@ struct ContainerHistorySheetView: View {
             }
             
             PQButton(
-                "Смотреть все",
+                String(localized: "history.show.all"),
                 style: .init(.purple),
                 action: onShowAllTap
             )
@@ -73,11 +73,11 @@ struct ContainerHistorySheetView: View {
         VStack(spacing: 8) {
             Spacer()
 
-            Text("История пока пуста")
+            Text(String(localized: "history.empty.title"))
                 .font(PQFont.B16)
                 .foregroundStyle(PQColor.base5.swiftUIColor)
 
-            Text("Здесь появятся действия с контейнером и доступом.")
+            Text(String(localized: "containers.history.empty.subtitle"))
                 .font(PQFont.R12)
                 .foregroundStyle(PQColor.base4.swiftUIColor)
                 .multilineTextAlignment(.center)

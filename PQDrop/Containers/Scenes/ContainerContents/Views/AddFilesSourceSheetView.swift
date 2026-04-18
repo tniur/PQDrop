@@ -15,19 +15,19 @@ struct AddFilesSourceSheetView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Добавить файлы")
+            Text(String(localized: "shared.add.files"))
                 .font(PQFont.B24)
                 .foregroundStyle(PQColor.base7.swiftUIColor)
                 .padding(.top, 20)
             VStack(alignment: .leading, spacing: 4) {
                 PQButton(
-                    "Из файлов",
+                    String(localized: "files.source.files"),
                     icon: PQImage.doc.swiftUIImage,
                     action: onFilesTap
                 )
                 
                 PQButton(
-                    "Из галереи",
+                    String(localized: "files.source.gallery"),
                     icon: PQImage.photo.swiftUIImage,
                     action: onGalleryTap
                 )

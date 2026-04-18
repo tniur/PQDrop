@@ -12,13 +12,10 @@ public struct VerificationBadge: View {
     // MARK: - Properties
 
     private let isVerified: Bool
+    private let title: String
 
     private var markIcon: Image {
         isVerified ? PQImage.done.swiftUIImage : PQImage.xmark.swiftUIImage
-    }
-
-    private var markText: String {
-        isVerified ? "Verified" : "Unverified"
     }
 
     private var markBackgroundColor: Color {
@@ -33,7 +30,7 @@ public struct VerificationBadge: View {
                 .renderingMode(.template)
                 .foregroundStyle(PQColor.base0.swiftUIColor)
 
-            Text(markText)
+            Text(title)
                 .font(PQFont.B12)
                 .foregroundStyle(PQColor.base0.swiftUIColor)
         }
@@ -46,7 +43,8 @@ public struct VerificationBadge: View {
 
     // MARK: - Initializer
 
-    public init(isVerified: Bool) {
+    public init(isVerified: Bool, title: String) {
         self.isVerified = isVerified
+        self.title = title
     }
 }

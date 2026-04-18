@@ -35,11 +35,11 @@ struct AddContactView: View {
 
     private var titleView: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("Добавить контакт")
+            Text(String(localized: "contacts.add.title"))
                 .font(PQFont.B30)
                 .foregroundStyle(PQColor.base10.swiftUIColor)
 
-            Text("Отсканируйте QR контакта или скопируйте ключ из буфера.")
+            Text(String(localized: "contacts.add.subtitle"))
                 .font(PQFont.R14)
                 .foregroundStyle(PQColor.base5.swiftUIColor)
         }
@@ -64,7 +64,7 @@ struct AddContactView: View {
             .onDisappear { isScannerActive = false }
 
             PQButton(
-                "Скопировать из буфера",
+                String(localized: "contacts.add.paste"),
                 style: PQButtonStyle(.purple),
                 action: viewModel.pasteFromClipboard
             )

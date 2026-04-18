@@ -32,7 +32,10 @@ struct RecipientRowView: View {
 
             Spacer()
 
-            VerificationBadge(isVerified: isVerified)
+            VerificationBadge(
+                isVerified: isVerified,
+                title: String(localized: isVerified ? "shared.status.verified" : "shared.status.unverified")
+            )
         }
     }
 
