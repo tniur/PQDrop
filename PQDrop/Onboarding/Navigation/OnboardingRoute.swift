@@ -22,7 +22,9 @@ enum OnboardingRoute: RouteType {
             return AnyView(view)
             
         case .createKeys(let coordinator):
-            let viewModel = CreateKeysViewModel(coordinator: coordinator)
+            let keychainService = KeychainService()
+            let keyPairManager = KeyPairManager(keychainService: keychainService)
+            let viewModel = CreateKeysViewModel(coordinator: coordinator, keyPairManager: keyPairManager)
             let view = CreateKeysView(viewModel: viewModel)
             return AnyView(view)
         }
