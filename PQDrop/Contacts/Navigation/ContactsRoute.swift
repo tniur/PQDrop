@@ -27,7 +27,8 @@ enum ContactsRoute: RouteType {
     var body: some View {
         switch self {
         case .contacts(let coordinator):
-            let viewModel = ContactsViewModel(coordinator: coordinator)
+            let contactRepository = ContactRepository()
+            let viewModel = ContactsViewModel(coordinator: coordinator, contactRepository: contactRepository)
             let view = ContactsView(viewModel: viewModel)
             return AnyView(view)
             
@@ -46,7 +47,8 @@ enum ContactsRoute: RouteType {
             return AnyView(view)
             
         case .contactDetails(let coordinator, let contact):
-            let viewModel = ContactDetailsViewModel(coordinator: coordinator, contact: contact)
+            let contactRepository = ContactRepository()
+            let viewModel = ContactDetailsViewModel(coordinator: coordinator, contact: contact, contactRepository: contactRepository)
             let view = ContactDetailsView(viewModel: viewModel)
             return AnyView(view)
         }

@@ -24,6 +24,7 @@ struct ContactsView: View {
                         .padding(12)
                 }
         }
+        .onAppear(perform: viewModel.loadContacts)
     }
     
     // MARK: - Subviews

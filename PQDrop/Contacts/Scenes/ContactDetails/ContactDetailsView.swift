@@ -144,7 +144,7 @@ struct ContactDetailsView: View {
                 .multilineTextAlignment(.center)
         }
         .contentShape(.rect)
-        .frame(width: 248)
+        .frame(maxWidth: .infinity)
         .onTapGesture(perform: viewModel.copyFingerprint)
     }
     
