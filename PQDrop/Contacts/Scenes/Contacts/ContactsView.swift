@@ -30,12 +30,15 @@ struct ContactsView: View {
     // MARK: - Subviews
     
     private var contentView: some View {
-        Group {
+        ScrollView(showsIndicators: false) {
             if viewModel.filteredContacts.isEmpty {
                 stubView
             } else {
-                listView
+                listContent
             }
+        }
+        .refreshable {
+            viewModel.loadContacts()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationBarTitleDisplayMode(.inline)
@@ -45,13 +48,33 @@ struct ContactsView: View {
                     .font(PQFont.B30)
                     .foregroundStyle(PQColor.base0.swiftUIColor)
             }
-            
+
             ToolbarItem(placement: .navigationBarTrailing) {
                 toolbarButtonsView
             }
         }
         .searchable(text: $viewModel.searchText, prompt: "Поиск")
         .searchToolbarBehavior(.minimize)
+        .alert(
+            "Удалить контакт?",
+            isPresented: Binding(
+                get: { viewModel.contactToDelete != nil },
+                set: { if !$0 { viewModel.contactToDelete = nil } }
+            ),
+            actions: {
+                Button("Удалить", role: .destructive) {
+                    if let contact = viewModel.contactToDelete {
+                        viewModel.delete(contact: contact)
+                    }
+                }
+                Button("Отмена", role: .cancel) {}
+            },
+            message: {
+                if let contact = viewModel.contactToDelete {
+                    Text("Контакт «\(contact.name)» будет удалён.")
+                }
+            }
+        )
     }
     
     private var toolbarButtonsView: some View {
@@ -93,56 +116,36 @@ struct ContactsView: View {
         Text("Пока нет контактов")
             .font(PQFont.R16)
             .foregroundStyle(PQColor.purple2.swiftUIColor)
+            .frame(maxWidth: .infinity)
+            .padding(.top, 80)
     }
     
-    private var listView: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 12) {
-                ForEach(viewModel.filteredContacts) { contact in
-                    ContactView(
-                        name: contact.name,
-                        isVerified: contact.isVerified
-                    )
-                    .frame(maxWidth: .infinity)
-                    .onTapGesture {
-                        viewModel.showDetails(of: contact)
-                    }
-                    .contextMenu {
-                        Button(role: .destructive) {
-                            viewModel.contactToDelete = contact
-                        } label: {
-                            Label("Удалить", systemImage: "trash")
-                        }
+    private var listContent: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            ForEach(viewModel.filteredContacts) { contact in
+                ContactView(
+                    name: contact.name,
+                    isVerified: contact.isVerified
+                )
+                .frame(maxWidth: .infinity)
+                .onTapGesture {
+                    viewModel.showDetails(of: contact)
+                }
+                .contextMenu {
+                    Button(role: .destructive) {
+                        viewModel.contactToDelete = contact
+                    } label: {
+                        Label("Удалить", systemImage: "trash")
                     }
                 }
-                
-                Text("Verified – ключ подтверждён по независимому каналу.")
-                    .font(PQFont.R12)
-                    .foregroundStyle(PQColor.purple2.swiftUIColor)
             }
-            .padding(.top)
-            .padding(.horizontal)
+            
+            Text("Verified – ключ подтверждён по независимому каналу.")
+                .font(PQFont.R12)
+                .foregroundStyle(PQColor.purple2.swiftUIColor)
         }
-        .alert(
-            "Удалить контакт?",
-            isPresented: Binding(
-                get: { viewModel.contactToDelete != nil },
-                set: { if !$0 { viewModel.contactToDelete = nil } }
-            ),
-            actions: {
-                Button("Удалить", role: .destructive) {
-                    if let contact = viewModel.contactToDelete {
-                        viewModel.delete(contact: contact)
-                    }
-                }
-                Button("Отмена", role: .cancel) {}
-            },
-            message: {
-                if let contact = viewModel.contactToDelete {
-                    Text("Контакт «\(contact.name)» будет удалён.")
-                }
-            }
-        )
+        .padding(.top)
+        .padding(.horizontal)
     }
     
     private var addContactButton: some View {

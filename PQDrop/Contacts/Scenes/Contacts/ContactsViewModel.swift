@@ -33,7 +33,7 @@ final class ContactsViewModel: ObservableObject {
         return base.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
     }
     
-    private var contacts: [Contact] = []
+    @Published private var contacts: [Contact] = []
     
     private let coordinator: ContactsCoordinatorProtocol
     private let contactRepository: ContactRepository
@@ -43,6 +43,7 @@ final class ContactsViewModel: ObservableObject {
     init(coordinator: ContactsCoordinatorProtocol, contactRepository: ContactRepository) {
         self.coordinator = coordinator
         self.contactRepository = contactRepository
+        loadContacts()
     }
     
     // MARK: - Methods
@@ -63,6 +64,7 @@ final class ContactsViewModel: ObservableObject {
     func addContact() {
         Task {
             await coordinator.showAddContact()
+            loadContacts()
         }
     }
     
@@ -79,6 +81,7 @@ final class ContactsViewModel: ObservableObject {
     func showDetails(of contact: Contact) {
         Task {
             await coordinator.showContactDetails(with: contact)
+            loadContacts()
         }
     }
 }
