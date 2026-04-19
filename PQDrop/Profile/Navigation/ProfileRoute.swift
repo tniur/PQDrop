@@ -22,7 +22,9 @@ enum ProfileRoute: RouteType {
             return AnyView(view)
 
         case .qrCode(let coordinator):
-            let viewModel = ProfileQRCodeViewModel(coordinator: coordinator)
+            let keychainService = KeychainService()
+            let keyPairManager = KeyPairManager(keychainService: keychainService)
+            let viewModel = ProfileQRCodeViewModel(coordinator: coordinator, keyPairManager: keyPairManager)
             let view = ProfileQRCodeView(viewModel: viewModel)
             return AnyView(view)
         }
