@@ -2,14 +2,17 @@
 //  ProfileViewModel.swift
 //  PQDrop
 //
-//  Created by Анастасия Журавлева on 27.02.2026.
+//  Created by Pavel Bobkov on 19.04.2026.
 //
 
 import Combine
 
+@MainActor
 final class ProfileViewModel: ObservableObject {
-    
+
     // MARK: - Properties
+
+    @Published var showResetAlert = false
 
     private let coordinator: ProfileCoordinatorProtocol
     
@@ -17,5 +20,13 @@ final class ProfileViewModel: ObservableObject {
 
     init(coordinator: ProfileCoordinatorProtocol) {
         self.coordinator = coordinator
+    }
+
+    // MARK: - Methods
+
+    func openQRCode() {
+        Task {
+            await coordinator.showQRCode()
+        }
     }
 }
