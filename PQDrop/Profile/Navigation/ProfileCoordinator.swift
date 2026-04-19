@@ -2,7 +2,7 @@
 //  ProfileCoordinator.swift
 //  PQDrop
 //
-//  Created by Анастасия Журавлева on 27.02.2026.
+//  Created by Pavel Bobkov on 19.04.2026.
 //
 
 import SwiftUI
@@ -21,5 +21,8 @@ final class ProfileCoordinator: Coordinator<ProfileRoute>, ProfileCoordinatorPro
     override func start() async {
         await startFlow(route: .profile(coordinator: self))
     }
-}
 
+    func showQRCode() async {
+        await navigate(toRoute: .qrCode(coordinator: self))
+    }
+}
