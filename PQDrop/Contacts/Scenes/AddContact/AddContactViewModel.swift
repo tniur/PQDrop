@@ -7,20 +7,26 @@
 
 import Combine
 import UIKit
+import PQContainerKit
 
 @MainActor
 final class AddContactViewModel: ObservableObject {
 
     // MARK: - Properties
 
-    private let coordinator: ContactsCoordinatorProtocol
+    @Published var showErrorAlert = false
+    @Published var errorMessage = ""
     
     private var isProcessing = false
     
+    private let coordinator: ContactsCoordinatorProtocol
+    private let contactRepository: ContactRepository
+    
     // MARK: - Initializer
 
-    init(coordinator: ContactsCoordinatorProtocol) {
+    init(coordinator: ContactsCoordinatorProtocol, contactRepository: ContactRepository) {
         self.coordinator = coordinator
+        self.contactRepository = contactRepository
     }
 
     // MARK: - Methods
@@ -28,23 +34,42 @@ final class AddContactViewModel: ObservableObject {
     func handleScanned(value: String) {
         guard !isProcessing else { return }
         isProcessing = true
-        showAddNameToContact(with: value)
+        validateAndProceed(with: value)
     }
 
     func pasteFromClipboard() {
         guard !isProcessing else { return }
         guard let value = UIPasteboard.general.string, !value.isEmpty else { return }
         isProcessing = true
-        showAddNameToContact(with: value)
+        validateAndProceed(with: value)
     }
 
     func resetProcessing() {
         isProcessing = false
     }
 
-    func showAddNameToContact(with id: String) {
-        Task {
-            await coordinator.showEditContactName(with: id)
+    // MARK: - Private
+
+    private func validateAndProceed(with value: String) {
+        do {
+            let pubKey = try XWing.PublicKey(base64: value)
+
+            if contactRepository.exists(publicKeyRaw: pubKey.rawRepresentation) {
+                showError("Контакт с таким ключом уже существует.")
+                return
+            }
+
+            Task {
+                await coordinator.showEditContactName(publicKeyData: pubKey.rawRepresentation)
+            }
+        } catch {
+            showError("Недопустимый формат ключа.")
         }
+    }
+    
+    private func showError(_ message: String) {
+        errorMessage = message
+        showErrorAlert = true
+        isProcessing = false
     }
 }

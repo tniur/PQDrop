@@ -6,10 +6,14 @@
 //
 
 import Foundation
+import PQContainerKit
 
 struct Contact: Identifiable {
-    let id: String
+    let id: UUID
     var name: String
     var isVerified: Bool
-    let fingerprint: String
+    let publicKeyRaw: Data
+    var fingerprint: String {
+        Fingerprint.fromPublicKeyRaw(publicKeyRaw).hexStringGrouped
+    }
 }

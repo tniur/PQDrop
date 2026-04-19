@@ -12,12 +12,13 @@ enum ContactsRoute: RouteType {
     case contacts(coordinator: ContactsCoordinatorProtocol)
     case contactsFiltersSheet(model: ContactsFilterSheetModel)
     case addContact(coordinator: ContactsCoordinatorProtocol)
-    case editContactName(coordinator: ContactsCoordinatorProtocol, id: String)
+    case createContactName(coordinator: ContactsCoordinatorProtocol, publicKeyData: Data)
+    case editContactName(coordinator: ContactsCoordinatorProtocol, contactId: UUID)
     case contactDetails(coordinator: ContactsCoordinatorProtocol, contact: Contact)
     
     var presentationStyle: TransitionPresentationStyle {
         switch self {
-        case .contacts, .addContact, .editContactName, .contactDetails:
+        case .contacts, .addContact, .createContactName, .editContactName, .contactDetails:
             .push
         case .contactsFiltersSheet:
             .sheet
@@ -27,7 +28,8 @@ enum ContactsRoute: RouteType {
     var body: some View {
         switch self {
         case .contacts(let coordinator):
-            let viewModel = ContactsViewModel(coordinator: coordinator)
+            let contactRepository = ContactRepository()
+            let viewModel = ContactsViewModel(coordinator: coordinator, contactRepository: contactRepository)
             let view = ContactsView(viewModel: viewModel)
             return AnyView(view)
             
@@ -36,17 +38,26 @@ enum ContactsRoute: RouteType {
             return AnyView(view)
             
         case .addContact(let coordinator):
-            let viewModel = AddContactViewModel(coordinator: coordinator)
+            let contactRepository = ContactRepository()
+            let viewModel = AddContactViewModel(coordinator: coordinator, contactRepository: contactRepository)
             let view = AddContactView(viewModel: viewModel)
             return AnyView(view)
             
-        case .editContactName(let coordinator, let id):
-            let viewModel = EditContactNameViewModel(coordinator: coordinator, id: id)
+        case .createContactName(let coordinator, let publicKeyData):
+            let contactRepository = ContactRepository()
+            let viewModel = EditContactNameViewModel(coordinator: coordinator, contactRepository: contactRepository, mode: .create(publicKeyData: publicKeyData))
+            let view = EditContactNameView(viewModel: viewModel)
+            return AnyView(view)
+            
+        case .editContactName(let coordinator, let contactId):
+            let contactRepository = ContactRepository()
+            let viewModel = EditContactNameViewModel(coordinator: coordinator, contactRepository: contactRepository, mode: .edit(contactId: contactId))
             let view = EditContactNameView(viewModel: viewModel)
             return AnyView(view)
             
         case .contactDetails(let coordinator, let contact):
-            let viewModel = ContactDetailsViewModel(coordinator: coordinator, contact: contact)
+            let contactRepository = ContactRepository()
+            let viewModel = ContactDetailsViewModel(coordinator: coordinator, contact: contact, contactRepository: contactRepository)
             let view = ContactDetailsView(viewModel: viewModel)
             return AnyView(view)
         }
