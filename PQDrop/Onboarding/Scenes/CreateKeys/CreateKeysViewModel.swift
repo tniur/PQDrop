@@ -7,6 +7,7 @@
 
 import Combine
 import Foundation
+import PQContainerKit
 
 @MainActor
 final class CreateKeysViewModel: ObservableObject {
@@ -30,11 +31,13 @@ final class CreateKeysViewModel: ObservableObject {
     private var workTask: Task<Void, Never>?
     
     private let coordinator: OnboardingCoordinatorProtocol
+    private let keyPairManager: KeyPairManager
 
     // MARK: - Initializer
 
-    init(coordinator: OnboardingCoordinatorProtocol) {
+    init(coordinator: OnboardingCoordinatorProtocol, keyPairManager: KeyPairManager) {
         self.coordinator = coordinator
+        self.keyPairManager = keyPairManager
     }
     
     // MARK: - Methods
@@ -74,8 +77,9 @@ final class CreateKeysViewModel: ObservableObject {
         workTask = Task { [weak self] in
             guard let self else { return }
 
-            // тут позже будет реальная генерация ключей
-            let result = await self.mockGenerateKeysUnknownDurationWithFailure()
+            let result = await Task.detached(priority: .userInitiated) { [keyPairManager = self.keyPairManager] in
+                Result { try keyPairManager.generateAndStore() }
+            }.value
 
             if Task.isCancelled { return }
 
@@ -106,21 +110,6 @@ final class CreateKeysViewModel: ObservableObject {
         Task {
             UserDefaults.standard.set(true, forKey: UserDefaultsKeys.onboardingCompleted)
             await coordinator.restartSplash()
-        }
-    }
-
-    // MARK: - Mock
-
-    private func mockGenerateKeysUnknownDurationWithFailure() async -> Result<Void, Error> {
-        let seconds = Double.random(in: 1.0...8.0)
-        try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
-
-        // Мок: иногда падаем
-        let shouldFail = Bool.random() && Bool.random() // ~25%
-        if shouldFail {
-            return .failure(NSError(domain: "CreateKeys", code: 1))
-        } else {
-            return .success(())
         }
     }
 
