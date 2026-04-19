@@ -39,7 +39,7 @@ struct ProfileQRCodeView: View {
                 qrTileView
                 fingerprintView
             }
-            .padding(.horizontal, 44)
+            .padding(.horizontal, 20)
             .padding(.vertical, 40)
             .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 34))
             .contentShape(.rect)
@@ -53,8 +53,9 @@ struct ProfileQRCodeView: View {
     private var qrTileView: some View {
         VStack(spacing: 8) {
             qrCodeImage
-                .frame(width: 200, height: 200)
-            
+                .frame(maxWidth: .infinity)
+                .aspectRatio(1, contentMode: .fit)
+
             Text("Нажмите, чтобы скопировать")
                 .font(PQFont.R12.italic())
                 .foregroundStyle(PQColor.base5.swiftUIColor)
