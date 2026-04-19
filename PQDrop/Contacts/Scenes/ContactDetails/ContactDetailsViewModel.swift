@@ -79,7 +79,7 @@ final class ContactDetailsViewModel: ObservableObject {
 
     func editName() {
         Task {
-            await coordinator.showEditContactName(with: contact.id.uuidString)
+            await coordinator.showEditContactName(contactId: contact.id)
         }
     }
     

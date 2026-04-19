@@ -30,8 +30,12 @@ final class ContactsCoordinator: Coordinator<ContactsRoute>, ContactsCoordinator
         await navigate(toRoute: .addContact(coordinator: self))
     }
     
-    func showEditContactName(with id: String) async {
-        await navigate(toRoute: .editContactName(coordinator: self, id: id))
+    func showEditContactName(publicKeyData: Data) async {
+        await navigate(toRoute: .createContactName(coordinator: self, publicKeyData: publicKeyData))
+    }
+
+    func showEditContactName(contactId: UUID) async {
+        await navigate(toRoute: .editContactName(coordinator: self, contactId: contactId))
     }
     
     func showContactDetails(with contact: Contact) async {

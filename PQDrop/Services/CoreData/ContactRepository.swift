@@ -15,6 +15,10 @@ final class ContactRepository {
         self.context = context
     }
 
+    func fetch(by id: UUID) -> Contact? {
+        fetchEntity(by: id).map(map)
+    }
+
     func fetchAll() -> [Contact] {
         let request = NSFetchRequest<ContactEntity>(entityName: "ContactEntity")
         request.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
