@@ -141,7 +141,7 @@ struct AccessControlView: View {
                 ForEach(viewModel.contacts) { contact in
                     AccessContactView(
                         name: contact.name,
-                        shortKey: contact.shortKey,
+                        shortKey: contact.shortFingerprint,
                         isVerified: contact.isVerified,
                         hasAccess: viewModel.hasAccess(contact.id),
                         isSelected: viewModel.isSelected(contact.id)

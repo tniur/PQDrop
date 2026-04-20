@@ -18,9 +18,9 @@ final class AccessControlViewModel: ObservableObject {
     @Published var activeAlert: AccessControlAlert?
 
     var contacts: [Recipient] = [
-        .init(id: "1", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: true),
-        .init(id: "2", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: true),
-        .init(id: "3", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: true),
+        .init(id: "1", name: "Петя Иванов", fingerprint: "GK4gR7f8gF", isVerified: true),
+        .init(id: "2", name: "Петя Иванов", fingerprint: "GK4gR7f8gF", isVerified: true),
+        .init(id: "3", name: "Петя Иванов", fingerprint: "GK4gR7f8gF", isVerified: true),
     ]
 
     var hasSelection: Bool {

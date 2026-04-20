@@ -8,6 +8,7 @@
 import Combine
 import UIKit
 import Foundation
+import PQContainerKit
 
 @MainActor
 final class ContainerDetailsViewModel: ObservableObject {
@@ -19,9 +20,11 @@ final class ContainerDetailsViewModel: ObservableObject {
     @Published var showShareSheet = false
     @Published var showHistorySheet = false
     @Published var isError = false
+    @Published var recipients: [Recipient] = []
 
     var isAvailable: Bool { container.isAvailable }
     var isOwned: Bool { container.isOwned }
+
     var historyEvents: [HistoryEvent] {
         guard isOwned, isAvailable else { return [] }
 
@@ -56,23 +59,24 @@ final class ContainerDetailsViewModel: ObservableObject {
         ]
     }
 
-    var recipients: [Recipient] = [
-        .init(id: "1", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: true),
-        .init(id: "2", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: false),
-        .init(id: "3", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: true),
-        .init(id: "4", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: false),
-        .init(id: "5", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: true),
-        .init(id: "6", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: false),
-        .init(id: "7", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: true),
-    ]
-
     private let coordinator: ContainersCoordinatorProtocol
+    private let containerService: ContainerService
+    private let contactRepository: ContactRepository
 
     // MARK: - Init
-
-    init(coordinator: ContainersCoordinatorProtocol, container: Container) {
+    
+    init(
+        coordinator: ContainersCoordinatorProtocol,
+        container: Container,
+        containerService: ContainerService,
+        contactRepository: ContactRepository
+    ) {
         self.coordinator = coordinator
         self.container = container
+        self.containerService = containerService
+        self.contactRepository = contactRepository
+
+        loadRecipients()
     }
 
     // MARK: - Methods
@@ -121,9 +125,7 @@ final class ContainerDetailsViewModel: ObservableObject {
         )
     }
 
-    func copyContainerToSelf() {
-        // TODO: - Copy container to self
-    }
+    func copyContainerToSelf() {}
 
     func confirmDelete() {
         showDeleteAlert = true
@@ -132,6 +134,35 @@ final class ContainerDetailsViewModel: ObservableObject {
     func deleteContainer() {
         Task {
             await coordinator.finish()
+        }
+    }
+
+    private func loadRecipients() {
+        guard let fileURL = container.fileURL else {
+            recipients = []
+            return
+        }
+
+        do {
+            let info = try containerService.inspectContainer(at: fileURL)
+            let contacts = contactRepository.fetchAll()
+
+            recipients = info.recipientKeyIds.map { fingerprint in
+                let hexFingerprint = fingerprint.rawValue.map { String(format: "%02x", $0) }.joined()
+
+                let matchedContact = contacts.first { contact in
+                    Fingerprint.fromPublicKeyRaw(contact.publicKeyRaw) == fingerprint
+                }
+
+                return Recipient(
+                    id: hexFingerprint,
+                    name: matchedContact?.name ?? "Неизвестный",
+                    fingerprint: hexFingerprint,
+                    isVerified: matchedContact?.isVerified ?? false
+                )
+            }
+        } catch {
+            recipients = []
         }
     }
 }

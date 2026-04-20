@@ -40,7 +40,17 @@ enum ContainersRoute: RouteType {
             return AnyView(view)
 
         case .containerDetails(let coordinator, let container):
-            let viewModel = ContainerDetailsViewModel(coordinator: coordinator, container: container)
+            let keychainService = KeychainService()
+            let keyPairManager = KeyPairManager(keychainService: keychainService)
+            let archiveService = ArchiveService()
+            let containerService = ContainerService(archiveService: archiveService, keyPairManager: keyPairManager)
+            let contactRepository = ContactRepository()
+            let viewModel = ContainerDetailsViewModel(
+                coordinator: coordinator,
+                container: container,
+                containerService: containerService,
+                contactRepository: contactRepository
+            )
             let view = ContainerDetailsView(viewModel: viewModel)
             return AnyView(view)
 
@@ -72,7 +82,15 @@ enum ContainersRoute: RouteType {
             return AnyView(view)
 
         case .containersContents(let coordinator, let container):
-            let viewModel = ContainerContentsViewModel(coordinator: coordinator, container: container)
+            let keychainService = KeychainService()
+            let keyPairManager = KeyPairManager(keychainService: keychainService)
+            let archiveService = ArchiveService()
+            let containerService = ContainerService(archiveService: archiveService, keyPairManager: keyPairManager)
+            let viewModel = ContainerContentsViewModel(
+                coordinator: coordinator,
+                container: container,
+                containerService: containerService
+            )
             let view = ContainerContentsView(viewModel: viewModel)
             return AnyView(view)
 

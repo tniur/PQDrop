@@ -10,11 +10,11 @@ import Foundation
 struct Recipient: Identifiable {
     let id: String
     let name: String
-    let publicKey: String
+    let fingerprint: String
     let isVerified: Bool
 
-    var shortKey: String {
-        guard publicKey.count > 7 else { return publicKey }
-        return "\(publicKey.prefix(4))...\(publicKey.suffix(3))"
+    var shortFingerprint: String {
+        guard fingerprint.count > 16 else { return fingerprint }
+        return "\(fingerprint.prefix(8))...\(fingerprint.suffix(8))"
     }
 }

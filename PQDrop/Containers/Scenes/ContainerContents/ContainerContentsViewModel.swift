@@ -21,6 +21,8 @@ final class ContainerContentsViewModel: ObservableObject {
     @Published var showShareSheet = false
     @Published var shareItem: Any?
     @Published var showSaveAlert = false
+    @Published var isDecrypting = false
+    @Published var decryptionFailed = false
 
     @Published var showAddFilesSheet = false
     @Published var showFilesImporter = false
@@ -51,12 +53,21 @@ final class ContainerContentsViewModel: ObservableObject {
     // MARK: - Private
 
     private let coordinator: ContainersCoordinatorProtocol
+    private let containerService: ContainerService
+    private var decryptedDir: URL?
 
     // MARK: - Init
 
-    init(coordinator: ContainersCoordinatorProtocol, container: Container) {
+    init(
+        coordinator: ContainersCoordinatorProtocol,
+        container: Container,
+        containerService: ContainerService
+    ) {
         self.coordinator = coordinator
         self.container = container
+        self.containerService = containerService
+        decryptContainer()
+        observeBackground()
     }
 
     // MARK: - Actions
@@ -78,7 +89,8 @@ final class ContainerContentsViewModel: ObservableObject {
     }
 
     func exportFile(_ file: ContainerFileItem) {
-        shareItem = file.name
+        guard let url = file.localURL else { return }
+        shareItem = url
         showShareSheet = true
     }
 
@@ -131,7 +143,6 @@ final class ContainerContentsViewModel: ObservableObject {
                     isDraftAdded: true
                 )
             } catch {
-                print("Import error:", error)
                 return nil
             }
         }
@@ -170,9 +181,7 @@ final class ContainerContentsViewModel: ObservableObject {
                         isDraftAdded: true
                     )
                 )
-            } catch {
-                print("Photo save error:", error)
-            }
+            } catch {}
         }
 
         container.files.append(contentsOf: pickedFiles)
@@ -206,6 +215,65 @@ final class ContainerContentsViewModel: ObservableObject {
 
         Task {
             await coordinator.showSaveContainer(with: container)
+        }
+    }
+
+    func cleanupDecryptedFiles() {
+        guard let dir = decryptedDir else { return }
+        try? FileManager.default.removeItem(at: dir)
+        decryptedDir = nil
+        container.files = []
+    }
+
+    private func decryptContainer() {
+        guard let fileURL = container.fileURL else {
+            decryptionFailed = true
+            return
+        }
+
+        isDecrypting = true
+
+        Task {
+            do {
+                let outputDir = FileManager.default.temporaryDirectory
+                    .appendingPathComponent("decrypted_\(UUID().uuidString)")
+
+                let fileURLs = try await Task.detached {
+                    try self.containerService.decryptContainer(at: fileURL, to: outputDir)
+                }.value
+
+                self.decryptedDir = outputDir
+
+                self.container.files = fileURLs.map { url in
+                    let values = try? url.resourceValues(forKeys: [.fileSizeKey])
+                    let fileSize = Int64(values?.fileSize ?? 0)
+                    let sizeText = ByteCountFormatter.string(fromByteCount: fileSize, countStyle: .file)
+
+                    return ContainerFileItem(
+                        id: UUID().uuidString,
+                        name: url.lastPathComponent,
+                        sizeText: sizeText,
+                        localURL: url
+                    )
+                }
+
+                self.isDecrypting = false
+            } catch {
+                self.isDecrypting = false
+                self.decryptionFailed = true
+            }
+        }
+    }
+
+    private func observeBackground() {
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.didEnterBackgroundNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.cleanupDecryptedFiles()
+            }
         }
     }
 }
