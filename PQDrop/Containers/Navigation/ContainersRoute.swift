@@ -45,7 +45,20 @@ enum ContainersRoute: RouteType {
             return AnyView(view)
 
         case .importContainer(let coordinator, let fileURL):
-            let viewModel = ImportContainerViewModel(coordinator: coordinator, fileURL: fileURL)
+            let keychainService = KeychainService()
+            let keyPairManager = KeyPairManager(keychainService: keychainService)
+            let archiveService = ArchiveService()
+            let containerService = ContainerService(archiveService: archiveService, keyPairManager: keyPairManager)
+            let containerRepository = ContainerRepository()
+            let historyRepository = HistoryRepository()
+            let viewModel = ImportContainerViewModel(
+                coordinator: coordinator,
+                containerService: containerService,
+                containerRepository: containerRepository,
+                historyRepository: historyRepository,
+                keyPairManager: keyPairManager,
+                fileURL: fileURL
+            )
             let view = ImportContainerView(viewModel: viewModel)
             return AnyView(view)
 

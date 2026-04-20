@@ -7,6 +7,7 @@
 
 import Combine
 import Foundation
+import PQContainerKit
 
 @MainActor
 final class ImportContainerViewModel: ObservableObject {
@@ -30,12 +31,27 @@ final class ImportContainerViewModel: ObservableObject {
     private var importedContainer: Container?
 
     private let coordinator: ContainersCoordinatorProtocol
+    private let containerService: ContainerService
+    private let containerRepository: ContainerRepository
+    private let historyRepository: HistoryRepository
+    private let keyPairManager: KeyPairManager
     private let fileURL: URL
 
     // MARK: - Initializer
-
-    init(coordinator: ContainersCoordinatorProtocol, fileURL: URL) {
+    
+    init(
+        coordinator: ContainersCoordinatorProtocol,
+        containerService: ContainerService,
+        containerRepository: ContainerRepository,
+        historyRepository: HistoryRepository,
+        keyPairManager: KeyPairManager,
+        fileURL: URL
+    ) {
         self.coordinator = coordinator
+        self.containerService = containerService
+        self.containerRepository = containerRepository
+        self.historyRepository = historyRepository
+        self.keyPairManager = keyPairManager
         self.fileURL = fileURL
         startValidation()
     }
@@ -43,7 +59,10 @@ final class ImportContainerViewModel: ObservableObject {
     // MARK: - Methods
 
     func openContainer() {
-        let container = persistImportedContainer(isAvailable: true)
+        guard let container = importedContainer else {
+            return
+        }
+        
         Task {
             await coordinator.finish()
             await coordinator.showContainerDetails(with: container)
@@ -51,7 +70,6 @@ final class ImportContainerViewModel: ObservableObject {
     }
 
     func goToList() {
-        _ = persistImportedContainer(isAvailable: true)
         Task {
             await coordinator.finish()
         }
@@ -59,7 +77,6 @@ final class ImportContainerViewModel: ObservableObject {
 
     func returnToList() {
         if phase == .accessDenied {
-            _ = persistImportedContainer(isAvailable: false)
             Task {
                 await coordinator.finish()
             }
@@ -82,11 +99,11 @@ final class ImportContainerViewModel: ObservableObject {
         uiTask = Task { [weak self] in
             guard let self else { return }
 
-            try? await Task.sleep(nanoseconds: 1_100_000_000)
+            try? await Task.sleep(nanoseconds: 800_000_000)
             if Task.isCancelled { return }
             self.status = .checkingFingerprint
 
-            try? await Task.sleep(nanoseconds: 1_100_000_000)
+            try? await Task.sleep(nanoseconds: 800_000_000)
             if Task.isCancelled { return }
             self.status = .checkingAccess
         }
@@ -94,49 +111,77 @@ final class ImportContainerViewModel: ObservableObject {
         workTask = Task { [weak self] in
             guard let self else { return }
 
-            try? await Task.sleep(nanoseconds: 3_300_000_000)
+            let result = await self.performValidation()
+
             if Task.isCancelled { return }
 
             self.uiTask?.cancel()
-            self.phase = self.mockValidationResult()
+
+            switch result {
+            case .success(let container):
+                self.importedContainer = container
+                self.phase = .success
+            case .invalidFormat:
+                self.phase = .invalidFormat
+            case .accessDenied(let container):
+                self.importedContainer = container
+                self.phase = .accessDenied
+            }
         }
     }
 
-    private func persistImportedContainer(isAvailable: Bool) -> Container {
-        if let importedContainer {
-            return importedContainer
-        }
+    private func performValidation() async -> ValidationResult {
+        do {
+            let hasAccess = fileURL.startAccessingSecurityScopedResource()
+            defer {
+                if hasAccess {
+                    fileURL.stopAccessingSecurityScopedResource()
+                }
+            }
 
-        let container = ContainersMockStore.addImportedContainer(
-            from: fileURL,
-            isAvailable: isAvailable
-        )
-        importedContainer = container
-        return container
-    }
+            let info = try containerService.inspectContainer(at: fileURL)
 
-    private func mockValidationResult() -> Phase {
-        let name = fileURL.deletingPathExtension().lastPathComponent.lowercased()
-        let fileExtension = fileURL.pathExtension.lowercased()
+            guard let myPublicKey = try keyPairManager.loadPublicKey() else {
+                return .invalidFormat
+            }
 
-        if name.contains("locked") ||
-            name.contains("denied") ||
-            name.contains("blocked") ||
-            name.contains("noaccess") ||
-            name.contains("недоступ") ||
-            name.contains("заблок") {
-            return .accessDenied
-        }
+            let containersDir = try Self.containersDirectory()
+            let fileName = fileURL.lastPathComponent
+            let destinationURL = containersDir.appendingPathComponent(UUID().uuidString + "_" + fileName)
+            try FileManager.default.copyItem(at: fileURL, to: destinationURL)
 
-        if name.contains("invalid") ||
-            name.contains("wrong") ||
-            name.contains("error") ||
-            name.contains("ошибка") ||
-            ["png", "jpg", "jpeg", "pdf", "txt", "rtf"].contains(fileExtension) {
+            let containerName = fileURL.deletingPathExtension().lastPathComponent
+            let isAvailable = info.containsRecipient(myPublicKey)
+
+            let container = try containerRepository.create(
+                name: containerName,
+                containerID: info.header.containerID.rawValue,
+                fileURL: destinationURL,
+                isOwned: false,
+                isAvailable: isAvailable
+            )
+
+            try? historyRepository.append(
+                type: .imported,
+                containerID: info.header.containerID.rawValue,
+                containerName: containerName
+            )
+
+            if isAvailable {
+                return .success(container)
+            } else {
+                return .accessDenied(container)
+            }
+        } catch {
             return .invalidFormat
         }
+    }
 
-        return .success
+    private static func containersDirectory() throws -> URL {
+        let documentsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let containersDir = documentsDir.appendingPathComponent("Containers")
+        try FileManager.default.createDirectory(at: containersDir, withIntermediateDirectories: true)
+        return containersDir
     }
 
     private func cancelTasks() {
@@ -150,4 +195,10 @@ final class ImportContainerViewModel: ObservableObject {
         uiTask?.cancel()
         workTask?.cancel()
     }
+}
+
+private enum ValidationResult {
+    case success(Container)
+    case invalidFormat
+    case accessDenied(Container)
 }
