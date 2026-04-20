@@ -33,12 +33,18 @@ final class EditContainerNameViewModel: ObservableObject {
 
     private let mode: Mode
     private let coordinator: ContainersCoordinatorProtocol
+    private let containerRepository: ContainerRepository
 
     // MARK: - Initializer
 
-    init(coordinator: ContainersCoordinatorProtocol, mode: Mode) {
+    init(
+        coordinator: ContainersCoordinatorProtocol,
+        mode: Mode,
+        containerRepository: ContainerRepository = ContainerRepository()
+    ) {
         self.coordinator = coordinator
         self.mode = mode
+        self.containerRepository = containerRepository
 
         if case .edit(let container) = mode {
             name = container.name
@@ -53,8 +59,8 @@ final class EditContainerNameViewModel: ObservableObject {
             Task {
                 await coordinator.showCreateContainerFiles(name: name)
             }
-        case .edit:
-            // TODO: - Save name to container
+        case .edit(let container):
+            try? containerRepository.updateName(name, for: container.id)
             Task {
                 await coordinator.pop()
             }

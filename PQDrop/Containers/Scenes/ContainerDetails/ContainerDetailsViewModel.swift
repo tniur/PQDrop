@@ -62,6 +62,8 @@ final class ContainerDetailsViewModel: ObservableObject {
     private let coordinator: ContainersCoordinatorProtocol
     private let containerService: ContainerService
     private let contactRepository: ContactRepository
+    private let containerRepository: ContainerRepository
+    private let historyRepository: HistoryRepository
 
     // MARK: - Init
     
@@ -69,12 +71,16 @@ final class ContainerDetailsViewModel: ObservableObject {
         coordinator: ContainersCoordinatorProtocol,
         container: Container,
         containerService: ContainerService,
-        contactRepository: ContactRepository
+        contactRepository: ContactRepository,
+        containerRepository: ContainerRepository,
+        historyRepository: HistoryRepository
     ) {
         self.coordinator = coordinator
         self.container = container
         self.containerService = containerService
         self.contactRepository = contactRepository
+        self.containerRepository = containerRepository
+        self.historyRepository = historyRepository
 
         loadRecipients()
     }
@@ -99,6 +105,11 @@ final class ContainerDetailsViewModel: ObservableObject {
 
     func exportContainer() {
         showShareSheet = true
+        try? historyRepository.append(
+            type: .export,
+            containerID: container.containerID,
+            containerName: container.name
+        )
     }
 
     func showRecipients() {
@@ -132,6 +143,12 @@ final class ContainerDetailsViewModel: ObservableObject {
     }
 
     func deleteContainer() {
+        if let fileURL = container.fileURL {
+            try? FileManager.default.removeItem(at: fileURL)
+        }
+
+        try? containerRepository.delete(by: container.id)
+
         Task {
             await coordinator.finish()
         }

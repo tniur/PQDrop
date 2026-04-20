@@ -40,7 +40,7 @@ struct ContainerDetailsView: View {
             Text("Доступ к его содержимому будет потерян.")
         }
         .sheet(isPresented: $viewModel.showShareSheet) {
-            ActivityViewControllerRepresentable(activityItems: [viewModel.container.name])
+            ActivityViewControllerRepresentable(activityItems: [viewModel.container.fileURL as Any].compactMap { $0 })
         }
         .sheet(isPresented: $viewModel.showHistorySheet) {
             ContainerHistorySheetView(

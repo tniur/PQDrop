@@ -45,11 +45,15 @@ enum ContainersRoute: RouteType {
             let archiveService = ArchiveService()
             let containerService = ContainerService(archiveService: archiveService, keyPairManager: keyPairManager)
             let contactRepository = ContactRepository()
+            let containerRepository = ContainerRepository()
+            let historyRepository = HistoryRepository()
             let viewModel = ContainerDetailsViewModel(
                 coordinator: coordinator,
                 container: container,
                 containerService: containerService,
-                contactRepository: contactRepository
+                contactRepository: contactRepository,
+                containerRepository: containerRepository,
+                historyRepository: historyRepository
             )
             let view = ContainerDetailsView(viewModel: viewModel)
             return AnyView(view)
