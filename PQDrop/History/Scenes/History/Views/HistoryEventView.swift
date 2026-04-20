@@ -45,7 +45,7 @@ struct HistoryEventView: View {
     // MARK: - Subviews
 
     private var iconView: some View {
-        event.icon.image
+        event.icon
             .resizable()
             .renderingMode(.template)
             .foregroundStyle(PQColor.base10.swiftUIColor)

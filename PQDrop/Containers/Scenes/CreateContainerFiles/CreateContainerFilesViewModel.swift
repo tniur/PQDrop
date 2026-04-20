@@ -88,7 +88,6 @@ final class CreateContainerFilesViewModel: ObservableObject {
                     localURL: destinationURL
                 )
             } catch {
-                print("Import error:", error)
                 return nil
             }
         }
@@ -126,9 +125,7 @@ final class CreateContainerFilesViewModel: ObservableObject {
                         localURL: destinationURL
                     )
                 )
-            } catch {
-                print("Photo save error:", error)
-            }
+            } catch {}
         }
 
         files.append(contentsOf: pickedFiles)

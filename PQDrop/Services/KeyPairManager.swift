@@ -25,7 +25,11 @@ final class KeyPairManager {
         try keychainService.loadPrivateKey()?.publicKey
     }
 
+    func loadPrivateKey() throws -> XWing.PrivateKey? {
+        try keychainService.loadPrivateKey()
+    }
+
     func hasKeyPair() -> Bool {
-        (try? keychainService.loadPrivateKey()) != nil
+        keychainService.hasPrivateKey()
     }
 }

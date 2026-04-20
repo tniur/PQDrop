@@ -29,12 +29,21 @@ final class SaveContainerViewModel: ObservableObject {
 
     private let coordinator: ContainersCoordinatorProtocol
     private let container: Container
+    private let containerService: ContainerService
+    private let historyRepository: HistoryRepository
 
     // MARK: - Initializer
-
-    init(coordinator: ContainersCoordinatorProtocol, container: Container) {
+    
+    init(
+        coordinator: ContainersCoordinatorProtocol,
+        container: Container,
+        containerService: ContainerService,
+        historyRepository: HistoryRepository
+    ) {
         self.coordinator = coordinator
         self.container = container
+        self.containerService = containerService
+        self.historyRepository = historyRepository
         startSaving()
     }
 
@@ -68,7 +77,6 @@ final class SaveContainerViewModel: ObservableObject {
         uiTask = Task { [weak self] in
             guard let self else { return }
 
-            // Меняем статус по таймеру, пока идёт реальная работа
             try? await Task.sleep(nanoseconds: 1_500_000_000)
             if Task.isCancelled { return }
             self.status = .updatingContainer
@@ -81,7 +89,7 @@ final class SaveContainerViewModel: ObservableObject {
         workTask = Task { [weak self] in
             guard let self else { return }
 
-            let result = await self.mockSaveContainer()
+            let result = await self.saveContainer()
 
             if Task.isCancelled { return }
 
@@ -96,25 +104,51 @@ final class SaveContainerViewModel: ObservableObject {
         }
     }
 
+    private func saveContainer() async -> Result<Void, Error> {
+        guard let fileURL = container.fileURL else {
+            return .failure(ContainerServiceError.noKeyPair)
+        }
+
+        let fileURLs = container.files.compactMap(\.localURL)
+        guard !fileURLs.isEmpty else {
+            return .failure(ContainerServiceError.noKeyPair)
+        }
+
+        let tempURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension("pqck")
+
+        do {
+            try await Task.detached {
+                try self.containerService.reencryptContainer(
+                    name: self.container.name,
+                    files: fileURLs,
+                    originalContainerURL: fileURL,
+                    destinationURL: tempURL
+                )
+            }.value
+
+            try FileManager.default.removeItem(at: fileURL)
+            try FileManager.default.moveItem(at: tempURL, to: fileURL)
+
+            try? historyRepository.append(
+                type: .export,
+                containerID: container.containerID,
+                containerName: container.name
+            )
+
+            return .success(())
+        } catch {
+            try? FileManager.default.removeItem(at: tempURL)
+            return .failure(error)
+        }
+    }
+
     private func cancelTasks() {
         uiTask?.cancel()
         workTask?.cancel()
         uiTask = nil
         workTask = nil
-    }
-
-    // MARK: - Mock
-
-    private func mockSaveContainer() async -> Result<Void, Error> {
-        let seconds = Double.random(in: 2.0...6.0)
-        try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
-
-        let shouldFail = Bool.random() && Bool.random() // ~25%
-        if shouldFail {
-            return .failure(NSError(domain: "SaveContainer", code: 1))
-        } else {
-            return .success(())
-        }
     }
 
     deinit {

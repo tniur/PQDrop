@@ -8,6 +8,7 @@
 import Combine
 import UIKit
 import Foundation
+import PQContainerKit
 
 @MainActor
 final class ContainerDetailsViewModel: ObservableObject {
@@ -19,75 +20,78 @@ final class ContainerDetailsViewModel: ObservableObject {
     @Published var showShareSheet = false
     @Published var showHistorySheet = false
     @Published var isError = false
+    @Published var recipients: [Recipient] = []
 
     var isAvailable: Bool { container.isAvailable }
-    var isCreated: Bool { container.isCreated }
+    var isOwned: Bool { container.isOwned }
+
     var historyEvents: [HistoryEvent] {
-        guard isCreated, isAvailable else { return [] }
+        guard isOwned, isAvailable else { return [] }
+
+        let calendar = Calendar.current
+        let baseDate = calendar.date(from: DateComponents(year: 2026, month: 3, day: 20))!
 
         return [
             .init(
-                id: "\(container.id)-export-1209",
+                id: UUID(),
                 type: .export,
-                icon: .export,
-                listTitle: "Экспорт \"\(container.name)\"",
-                detailsTitle: "Экспорт контейнера",
-                dateTitle: "20 марта 2026",
-                time: "12:09",
                 containerName: container.name,
-                containerID: container.id,
-                result: "Успешно"
+                containerID: container.containerID,
+                detail: nil,
+                timestamp: calendar.date(bySettingHour: 12, minute: 9, second: 0, of: baseDate)!
             ),
             .init(
-                id: "\(container.id)-import-1111",
+                id: UUID(),
                 type: .imported,
-                icon: .imported,
-                listTitle: "Импорт \"\(container.name)\"",
-                detailsTitle: "Импорт контейнера",
-                dateTitle: "20 марта 2026",
-                time: "11:11",
                 containerName: container.name,
-                containerID: container.id,
-                result: "Успешно"
+                containerID: container.containerID,
+                detail: nil,
+                timestamp: calendar.date(bySettingHour: 11, minute: 11, second: 0, of: baseDate)!
             ),
             .init(
-                id: "\(container.id)-access-1012",
-                type: .access,
-                icon: .accessGranted,
-                listTitle: "Доступ \"\(container.name)\"",
-                detailsTitle: "Доступ контейнера",
-                dateTitle: "20 марта 2026",
-                time: "10:12",
+                id: UUID(),
+                type: .accessGranted,
                 containerName: container.name,
-                containerID: container.id,
-                result: "Доступ выдан"
+                containerID: container.containerID,
+                detail: nil,
+                timestamp: calendar.date(bySettingHour: 10, minute: 12, second: 0, of: baseDate)!
             )
         ]
     }
 
-    var recipients: [Recipient] = [
-        .init(id: "1", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: true),
-        .init(id: "2", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: false),
-        .init(id: "3", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: true),
-        .init(id: "4", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: false),
-        .init(id: "5", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: true),
-        .init(id: "6", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: false),
-        .init(id: "7", name: "Петя Иванов", publicKey: "GK4gR7f8gF", isVerified: true),
-    ]
-
     private let coordinator: ContainersCoordinatorProtocol
+    private let containerService: ContainerService
+    private let contactRepository: ContactRepository
+    private let containerRepository: ContainerRepository
+    private let historyRepository: HistoryRepository
+    private let keyPairManager: KeyPairManager
 
     // MARK: - Init
-
-    init(coordinator: ContainersCoordinatorProtocol, container: Container) {
+    
+    init(
+        coordinator: ContainersCoordinatorProtocol,
+        container: Container,
+        containerService: ContainerService,
+        contactRepository: ContactRepository,
+        containerRepository: ContainerRepository,
+        historyRepository: HistoryRepository,
+        keyPairManager: KeyPairManager
+    ) {
         self.coordinator = coordinator
         self.container = container
+        self.containerService = containerService
+        self.contactRepository = contactRepository
+        self.containerRepository = containerRepository
+        self.historyRepository = historyRepository
+        self.keyPairManager = keyPairManager
+
+        loadRecipients()
     }
 
     // MARK: - Methods
 
     func copyId() {
-        UIPasteboard.general.string = container.id
+        UIPasteboard.general.string = container.id.uuidString
     }
 
     func editName() {
@@ -104,6 +108,11 @@ final class ContainerDetailsViewModel: ObservableObject {
 
     func exportContainer() {
         showShareSheet = true
+        try? historyRepository.append(
+            type: .export,
+            containerID: container.containerID,
+            containerName: container.name
+        )
     }
 
     func showRecipients() {
@@ -130,8 +139,60 @@ final class ContainerDetailsViewModel: ObservableObject {
         )
     }
 
+    @Published var isCopying = false
+
     func copyContainerToSelf() {
-        // TODO: - Copy container to self
+        guard let fileURL = container.fileURL else { return }
+
+        let containerName = container.name
+        let containerService = self.containerService
+
+        isCopying = true
+
+        Task {
+            do {
+                let tempDir = FileManager.default.temporaryDirectory
+                    .appendingPathComponent("copy_\(UUID().uuidString)")
+
+                let fileURLs = try await Task.detached {
+                    try containerService.decryptContainer(at: fileURL, to: tempDir)
+                }.value
+
+                let documentsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+                let containersDir = documentsDir.appendingPathComponent("Containers")
+                try FileManager.default.createDirectory(at: containersDir, withIntermediateDirectories: true)
+
+                let result = try await Task.detached {
+                    try containerService.createContainer(
+                        name: containerName,
+                        files: fileURLs,
+                        recipients: [],
+                        destinationDir: containersDir
+                    )
+                }.value
+
+                try? FileManager.default.removeItem(at: tempDir)
+
+                _ = try containerRepository.create(
+                    name: containerName,
+                    containerID: result.containerID,
+                    fileURL: result.fileURL,
+                    isOwned: true,
+                    isAvailable: true
+                )
+
+                try? historyRepository.append(
+                    type: .imported,
+                    containerID: result.containerID,
+                    containerName: containerName
+                )
+
+                isCopying = false
+                await coordinator.finish()
+            } catch {
+                isCopying = false
+            }
+        }
     }
 
     func confirmDelete() {
@@ -139,8 +200,62 @@ final class ContainerDetailsViewModel: ObservableObject {
     }
 
     func deleteContainer() {
+        if let fileURL = container.fileURL {
+            try? FileManager.default.removeItem(at: fileURL)
+        }
+
+        try? containerRepository.delete(by: container.id)
+
         Task {
             await coordinator.finish()
+        }
+    }
+
+    func reload() {
+        if let updated = containerRepository.fetch(by: container.id) {
+            container = updated
+        }
+
+        loadRecipients()
+    }
+
+    private func loadRecipients() {
+        guard let fileURL = container.fileURL else {
+            recipients = []
+            return
+        }
+
+        let ownerFingerprint = (try? keyPairManager.loadPublicKey())?.fingerprint
+
+        do {
+            let info = try containerService.inspectContainer(at: fileURL)
+            let contacts = contactRepository.fetchAll()
+
+            recipients = info.recipientKeyIds.map { fingerprint in
+                let hexFingerprint = fingerprint.rawValue.map { String(format: "%02x", $0) }.joined()
+
+                if fingerprint == ownerFingerprint {
+                    return Recipient(
+                        id: hexFingerprint,
+                        name: "Вы",
+                        fingerprint: hexFingerprint,
+                        isVerified: true
+                    )
+                }
+
+                let matchedContact = contacts.first { contact in
+                    Fingerprint.fromPublicKeyRaw(contact.publicKeyRaw) == fingerprint
+                }
+
+                return Recipient(
+                    id: hexFingerprint,
+                    name: matchedContact?.name ?? "Неизвестный",
+                    fingerprint: hexFingerprint,
+                    isVerified: matchedContact?.isVerified ?? false
+                )
+            }
+        } catch {
+            recipients = []
         }
     }
 }

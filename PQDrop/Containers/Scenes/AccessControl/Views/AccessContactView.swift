@@ -31,7 +31,7 @@ struct AccessContactView: View {
             PQImage.checkmarkCircle.swiftUIImage
                 .renderingMode(.template)
                 .foregroundStyle(
-                    hasAccess
+                    (hasAccess || isSelected)
                     ? PQColor.blue7.swiftUIColor
                     : PQColor.base3.swiftUIColor
                 )

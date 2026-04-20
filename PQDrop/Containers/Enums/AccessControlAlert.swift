@@ -8,6 +8,7 @@
 enum AccessControlAlert: Identifiable {
         case noSelection
         case applyAccessChanges
+        case unverifiedWarning
         case revokeAccess(contactId: String)
 
         var id: String {
@@ -16,6 +17,8 @@ enum AccessControlAlert: Identifiable {
                 return "noSelection"
             case .applyAccessChanges:
                 return "applyAccessChanges"
+            case .unverifiedWarning:
+                return "unverifiedWarning"
             case .revokeAccess(let contactId):
                 return "revokeAccess_\(contactId)"
             }

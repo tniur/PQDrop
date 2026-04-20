@@ -31,7 +31,7 @@ struct RecipientsSheetView: View {
                         ForEach(recipients) { recipient in
                             RecipientRowView(
                                 name: recipient.name,
-                                shortKey: recipient.shortKey,
+                                shortKey: recipient.shortFingerprint,
                                 isVerified: recipient.isVerified
                             )
                         }
@@ -61,6 +61,6 @@ struct RecipientsSheetView: View {
     // MARK: - Initializer
 
     init(recipients: [Recipient]) {
-        self.recipients = recipients + recipients
+        self.recipients = recipients
     }
 }

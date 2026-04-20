@@ -90,7 +90,7 @@ struct ContainerHistorySheetView: View {
     @ViewBuilder
     private func eventRow(for event: HistoryEvent) -> some View {
         HStack(spacing: 12) {
-            event.icon.image
+            event.icon
                 .resizable()
                 .renderingMode(.template)
                 .foregroundStyle(PQColor.base0.swiftUIColor)

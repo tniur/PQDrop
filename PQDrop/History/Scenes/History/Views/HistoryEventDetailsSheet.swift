@@ -34,7 +34,7 @@ struct HistoryEventDetailsSheet: View {
                 detailsBlock(
                     title: "Контейнер",
                     value: event.containerName,
-                    secondaryValue: "id: \(event.containerID)"
+                    secondaryValue: "id: \(event.containerIDHex)"
                 )
 
                 detailsBlock(
