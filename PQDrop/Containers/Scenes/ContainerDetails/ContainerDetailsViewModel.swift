@@ -25,42 +25,33 @@ final class ContainerDetailsViewModel: ObservableObject {
     var historyEvents: [HistoryEvent] {
         guard isOwned, isAvailable else { return [] }
 
+        let calendar = Calendar.current
+        let baseDate = calendar.date(from: DateComponents(year: 2026, month: 3, day: 20))!
+
         return [
             .init(
-                id: "\(container.id)-export-1209",
+                id: UUID(),
                 type: .export,
-                icon: .export,
-                listTitle: "Экспорт \"\(container.name)\"",
-                detailsTitle: "Экспорт контейнера",
-                dateTitle: "20 марта 2026",
-                time: "12:09",
                 containerName: container.name,
-                containerID: container.id.uuidString,
-                result: "Успешно"
+                containerID: container.containerID,
+                detail: nil,
+                timestamp: calendar.date(bySettingHour: 12, minute: 9, second: 0, of: baseDate)!
             ),
             .init(
-                id: "\(container.id)-import-1111",
+                id: UUID(),
                 type: .imported,
-                icon: .imported,
-                listTitle: "Импорт \"\(container.name)\"",
-                detailsTitle: "Импорт контейнера",
-                dateTitle: "20 марта 2026",
-                time: "11:11",
                 containerName: container.name,
-                containerID: container.id.uuidString,
-                result: "Успешно"
+                containerID: container.containerID,
+                detail: nil,
+                timestamp: calendar.date(bySettingHour: 11, minute: 11, second: 0, of: baseDate)!
             ),
             .init(
-                id: "\(container.id)-access-1012",
-                type: .access,
-                icon: .accessGranted,
-                listTitle: "Доступ \"\(container.name)\"",
-                detailsTitle: "Доступ контейнера",
-                dateTitle: "20 марта 2026",
-                time: "10:12",
+                id: UUID(),
+                type: .accessGranted,
                 containerName: container.name,
-                containerID: container.id.uuidString,
-                result: "Доступ выдан"
+                containerID: container.containerID,
+                detail: nil,
+                timestamp: calendar.date(bySettingHour: 10, minute: 12, second: 0, of: baseDate)!
             )
         ]
     }
