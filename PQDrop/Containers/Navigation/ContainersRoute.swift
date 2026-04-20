@@ -77,7 +77,19 @@ enum ContainersRoute: RouteType {
             return AnyView(view)
 
         case .accessControl(let coordinator, let container):
-            let viewModel = AccessControlViewModel(coordinator: coordinator, container: container)
+            let keychainService = KeychainService()
+            let keyPairManager = KeyPairManager(keychainService: keychainService)
+            let archiveService = ArchiveService()
+            let containerService = ContainerService(archiveService: archiveService, keyPairManager: keyPairManager)
+            let contactRepository = ContactRepository()
+            let historyRepository = HistoryRepository()
+            let viewModel = AccessControlViewModel(
+                coordinator: coordinator,
+                container: container,
+                containerService: containerService,
+                contactRepository: contactRepository,
+                historyRepository: historyRepository
+            )
             let view = AccessControlView(viewModel: viewModel)
             return AnyView(view)
 

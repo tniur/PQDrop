@@ -40,6 +40,18 @@ struct AccessControlView: View {
             }
         }
         .alert(item: $viewModel.activeAlert, content: makeAlert)
+        .overlay {
+            if viewModel.isProcessing {
+                Color.black.opacity(0.4)
+                    .ignoresSafeArea()
+                    .overlay {
+                        ProgressView()
+                            .tint(PQColor.base0.swiftUIColor)
+                            .scaleEffect(1.5)
+                    }
+            }
+        }
+        .allowsHitTesting(!viewModel.isProcessing)
     }
 
     // MARK: - Subviews
@@ -187,6 +199,16 @@ struct AccessControlView: View {
                 title: Text("Выбрано \(viewModel.selectedContactIds.count) из \(viewModel.contacts.count) контактов"),
                 message: Text("Добавление/удаление получателей требует перешифровки контейнера. Это может занять несколько минут."),
                 primaryButton: .default(Text("Применить")) {
+                    viewModel.applySelectedContacts()
+                },
+                secondaryButton: .cancel(Text("Отмена"))
+            )
+
+        case .unverifiedWarning:
+            return Alert(
+                title: Text("Неверифицированный контакт"),
+                message: Text("Среди выбранных есть неверифицированные контакты. Убедитесь, что вы доверяете их публичным ключам."),
+                primaryButton: .default(Text("Продолжить")) {
                     viewModel.applySelectedContacts()
                 },
                 secondaryButton: .cancel(Text("Отмена"))
