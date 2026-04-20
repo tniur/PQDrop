@@ -42,6 +42,9 @@ struct ContainerDetailsView: View {
         .sheet(isPresented: $viewModel.showShareSheet) {
             ActivityViewControllerRepresentable(activityItems: [viewModel.container.fileURL as Any].compactMap { $0 })
         }
+        .onAppear {
+            viewModel.reload()
+        }
         .sheet(isPresented: $viewModel.showHistorySheet) {
             ContainerHistorySheetView(
                 events: viewModel.historyEvents,

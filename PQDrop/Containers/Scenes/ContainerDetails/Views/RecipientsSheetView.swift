@@ -61,6 +61,6 @@ struct RecipientsSheetView: View {
     // MARK: - Initializer
 
     init(recipients: [Recipient]) {
-        self.recipients = recipients + recipients
+        self.recipients = recipients
     }
 }

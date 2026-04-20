@@ -32,6 +32,14 @@ struct ContainerCardView: View {
         isAvailable ? PQColor.base10.swiftUIColor : PQColor.base4.swiftUIColor
     }
 
+    private var shortId: String {
+        guard id.count > 12 else {
+            return id
+        }
+        
+        return "\(id.prefix(6))...\(id.suffix(6))"
+    }
+
     // MARK: - Body
 
     var body: some View {
@@ -45,7 +53,7 @@ struct ContainerCardView: View {
                     .font(PQFont.B16)
                     .foregroundStyle(nameColor)
 
-                Text("id: \(id)")
+                Text("id: \(shortId)")
                     .font(PQFont.R12)
                     .foregroundStyle(idColor)
             }

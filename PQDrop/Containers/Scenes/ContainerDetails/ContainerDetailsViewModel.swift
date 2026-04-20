@@ -64,6 +64,7 @@ final class ContainerDetailsViewModel: ObservableObject {
     private let contactRepository: ContactRepository
     private let containerRepository: ContainerRepository
     private let historyRepository: HistoryRepository
+    private let keyPairManager: KeyPairManager
 
     // MARK: - Init
     
@@ -73,7 +74,8 @@ final class ContainerDetailsViewModel: ObservableObject {
         containerService: ContainerService,
         contactRepository: ContactRepository,
         containerRepository: ContainerRepository,
-        historyRepository: HistoryRepository
+        historyRepository: HistoryRepository,
+        keyPairManager: KeyPairManager
     ) {
         self.coordinator = coordinator
         self.container = container
@@ -81,6 +83,7 @@ final class ContainerDetailsViewModel: ObservableObject {
         self.contactRepository = contactRepository
         self.containerRepository = containerRepository
         self.historyRepository = historyRepository
+        self.keyPairManager = keyPairManager
 
         loadRecipients()
     }
@@ -136,7 +139,61 @@ final class ContainerDetailsViewModel: ObservableObject {
         )
     }
 
-    func copyContainerToSelf() {}
+    @Published var isCopying = false
+
+    func copyContainerToSelf() {
+        guard let fileURL = container.fileURL else { return }
+
+        let containerName = container.name
+        let containerService = self.containerService
+
+        isCopying = true
+
+        Task {
+            do {
+                let tempDir = FileManager.default.temporaryDirectory
+                    .appendingPathComponent("copy_\(UUID().uuidString)")
+
+                let fileURLs = try await Task.detached {
+                    try containerService.decryptContainer(at: fileURL, to: tempDir)
+                }.value
+
+                let documentsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+                let containersDir = documentsDir.appendingPathComponent("Containers")
+                try FileManager.default.createDirectory(at: containersDir, withIntermediateDirectories: true)
+
+                let result = try await Task.detached {
+                    try containerService.createContainer(
+                        name: containerName,
+                        files: fileURLs,
+                        recipients: [],
+                        destinationDir: containersDir
+                    )
+                }.value
+
+                try? FileManager.default.removeItem(at: tempDir)
+
+                _ = try containerRepository.create(
+                    name: containerName,
+                    containerID: result.containerID,
+                    fileURL: result.fileURL,
+                    isOwned: true,
+                    isAvailable: true
+                )
+
+                try? historyRepository.append(
+                    type: .imported,
+                    containerID: result.containerID,
+                    containerName: containerName
+                )
+
+                isCopying = false
+                await coordinator.finish()
+            } catch {
+                isCopying = false
+            }
+        }
+    }
 
     func confirmDelete() {
         showDeleteAlert = true
@@ -154,11 +211,21 @@ final class ContainerDetailsViewModel: ObservableObject {
         }
     }
 
+    func reload() {
+        if let updated = containerRepository.fetch(by: container.id) {
+            container = updated
+        }
+
+        loadRecipients()
+    }
+
     private func loadRecipients() {
         guard let fileURL = container.fileURL else {
             recipients = []
             return
         }
+
+        let ownerFingerprint = (try? keyPairManager.loadPublicKey())?.fingerprint
 
         do {
             let info = try containerService.inspectContainer(at: fileURL)
@@ -166,6 +233,15 @@ final class ContainerDetailsViewModel: ObservableObject {
 
             recipients = info.recipientKeyIds.map { fingerprint in
                 let hexFingerprint = fingerprint.rawValue.map { String(format: "%02x", $0) }.joined()
+
+                if fingerprint == ownerFingerprint {
+                    return Recipient(
+                        id: hexFingerprint,
+                        name: "Вы",
+                        fingerprint: hexFingerprint,
+                        isVerified: true
+                    )
+                }
 
                 let matchedContact = contacts.first { contact in
                     Fingerprint.fromPublicKeyRaw(contact.publicKeyRaw) == fingerprint
