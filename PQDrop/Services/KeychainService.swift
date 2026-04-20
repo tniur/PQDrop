@@ -80,6 +80,15 @@ final class KeychainService {
         return try XWing.PrivateKey(rawRepresentation: data)
     }
 
+    func deletePrivateKey() {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: privateKeyService
+        ]
+
+        SecItemDelete(query as CFDictionary)
+    }
+
     func hasPrivateKey() -> Bool {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,

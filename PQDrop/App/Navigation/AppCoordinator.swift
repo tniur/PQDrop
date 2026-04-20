@@ -13,9 +13,12 @@ final class AppCoordinator: Coordinator<AppRoute>, AppCoordinatorProtocol {
 
     override init() {
         super.init()
+
         Task { [weak self] in
             await self?.start()
         }
+
+        observeReset()
     }
 
     override func start() async {
@@ -34,6 +37,18 @@ final class AppCoordinator: Coordinator<AppRoute>, AppCoordinatorProtocol {
     
     func restartSplash() async {
         await router.popToRoot()
+    }
+
+    private func observeReset() {
+        NotificationCenter.default.addObserver(
+            forName: .appResetRequested,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                await self?.showOnboarding()
+            }
+        }
     }
 }
 

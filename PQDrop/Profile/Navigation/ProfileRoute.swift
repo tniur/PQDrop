@@ -17,7 +17,9 @@ enum ProfileRoute: RouteType {
     var body: some View {
         switch self {
         case .profile(let coordinator):
-            let viewModel = ProfileViewModel(coordinator: coordinator)
+            let keychainService = KeychainService()
+            let keyPairManager = KeyPairManager(keychainService: keychainService)
+            let viewModel = ProfileViewModel(coordinator: coordinator, keyPairManager: keyPairManager)
             let view = ProfileView(viewModel: viewModel)
             return AnyView(view)
 

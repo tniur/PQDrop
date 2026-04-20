@@ -29,6 +29,10 @@ final class KeyPairManager {
         try keychainService.loadPrivateKey()
     }
 
+    func deleteKeyPair() {
+        keychainService.deletePrivateKey()
+    }
+
     func hasKeyPair() -> Bool {
         keychainService.hasPrivateKey()
     }
