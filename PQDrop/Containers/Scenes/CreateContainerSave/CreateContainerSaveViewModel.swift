@@ -26,15 +26,27 @@ final class CreateContainerSaveViewModel: ObservableObject {
 
     private var uiTask: Task<Void, Never>?
     private var workTask: Task<Void, Never>?
+    private var createdContainer: Container?
 
     private let coordinator: ContainersCoordinatorProtocol
+    private let containerService: ContainerService
+    private let containerRepository: ContainerRepository
+    private let historyRepository: HistoryRepository
     private let name: String
     private let files: [ContainerFileItem]
 
-    // MARK: - Initializer
-
-    init(coordinator: ContainersCoordinatorProtocol, name: String, files: [ContainerFileItem]) {
+    init(
+        coordinator: ContainersCoordinatorProtocol,
+        containerService: ContainerService,
+        containerRepository: ContainerRepository,
+        historyRepository: HistoryRepository,
+        name: String,
+        files: [ContainerFileItem]
+    ) {
         self.coordinator = coordinator
+        self.containerService = containerService
+        self.containerRepository = containerRepository
+        self.historyRepository = historyRepository
         self.name = name
         self.files = files
         startCreating()
@@ -54,15 +66,11 @@ final class CreateContainerSaveViewModel: ObservableObject {
     }
 
     func openContainer() {
+        guard let container = createdContainer else {
+            return
+        }
+
         Task {
-            let container = Container(
-                id: UUID(),
-                containerID: Data(),
-                name: name,
-                isAvailable: true,
-                isOwned: true,
-                files: files
-            )
             await coordinator.finish()
             await coordinator.showContainerDetails(with: container)
         }
@@ -81,6 +89,7 @@ final class CreateContainerSaveViewModel: ObservableObject {
 
         phase = .loading
         status = .preparingFiles
+        createdContainer = nil
 
         uiTask = Task { [weak self] in
             guard let self else { return }
@@ -97,14 +106,15 @@ final class CreateContainerSaveViewModel: ObservableObject {
         workTask = Task { [weak self] in
             guard let self else { return }
 
-            let result = await self.mockCreateContainer()
+            let result = await self.performCreate()
 
             if Task.isCancelled { return }
 
             self.uiTask?.cancel()
 
             switch result {
-            case .success:
+            case .success(let container):
+                self.createdContainer = container
                 self.phase = .success
             case .failure:
                 self.phase = .failure
@@ -112,25 +122,53 @@ final class CreateContainerSaveViewModel: ObservableObject {
         }
     }
 
+    private func performCreate() async -> Result<Container, Error> {
+        do {
+            let fileURLs = files.compactMap(\.localURL)
+            let containersDir = try Self.containersDirectory()
+
+            let result = try await Task.detached {
+                try self.containerService.createContainer(
+                    name: self.name,
+                    files: fileURLs,
+                    recipients: [],
+                    destinationDir: containersDir
+                )
+            }.value
+
+            let container = try containerRepository.create(
+                name: name,
+                containerID: result.containerID,
+                fileURL: result.fileURL,
+                isOwned: true,
+                isAvailable: true
+            )
+
+            try? historyRepository.append(
+                type: .export,
+                containerID: result.containerID,
+                containerName: name
+            )
+
+            return .success(container)
+        } catch {
+            return .failure(error)
+        }
+    }
+
+    private static func containersDirectory() throws -> URL {
+        let documentsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let containersDir = documentsDir.appendingPathComponent("Containers")
+        try FileManager.default.createDirectory(at: containersDir, withIntermediateDirectories: true)
+
+        return containersDir
+    }
+
     private func cancelTasks() {
         uiTask?.cancel()
         workTask?.cancel()
         uiTask = nil
         workTask = nil
-    }
-
-    // MARK: - Mock
-
-    private func mockCreateContainer() async -> Result<Void, Error> {
-        let seconds = Double.random(in: 2.0...6.0)
-        try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
-
-        let shouldFail = Bool.random() && Bool.random() // ~25%
-        if shouldFail {
-            return .failure(NSError(domain: "CreateContainer", code: 1))
-        } else {
-            return .success(())
-        }
     }
 
     deinit {

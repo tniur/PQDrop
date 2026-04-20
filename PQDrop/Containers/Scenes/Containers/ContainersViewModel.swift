@@ -11,18 +11,12 @@ import Foundation
 @MainActor
 final class ContainersViewModel: ObservableObject {
 
-    // MARK: - Properties
-
     @Published var searchText: String = ""
-    @Published var selectedTab: ContainersTab = .created {
-        didSet {
-            ContainersMockStore.preferredTab = selectedTab
-        }
-    }
+    @Published var selectedTab: ContainersTab = .created
     @Published var containerToDelete: Container? = nil
     @Published var isFileImporterPresented = false
 
-    @Published private var containers: [Container]
+    @Published private var containers: [Container] = []
 
     var filteredContainers: [Container] {
         let tabFiltered: [Container]
@@ -45,20 +39,26 @@ final class ContainersViewModel: ObservableObject {
     }
 
     private let coordinator: ContainersCoordinatorProtocol
+    private let containerRepository: ContainerRepository
 
-    // MARK: - Initializer
-
-    init(coordinator: ContainersCoordinatorProtocol) {
+    init(coordinator: ContainersCoordinatorProtocol, containerRepository: ContainerRepository) {
         self.coordinator = coordinator
-        containers = ContainersMockStore.containers
-        selectedTab = ContainersMockStore.preferredTab
+        self.containerRepository = containerRepository
+        loadContainers()
     }
 
-    // MARK: - Methods
+    func loadContainers() {
+        containers = containerRepository.fetchAll()
+    }
 
     func delete(container: Container) {
-        ContainersMockStore.delete(container: container)
-        containers = ContainersMockStore.containers
+        if let fileURL = container.fileURL {
+            try? FileManager.default.removeItem(at: fileURL)
+        }
+        
+        try? containerRepository.delete(by: container.id)
+        
+        loadContainers()
     }
 
     func emptyTabAction() {

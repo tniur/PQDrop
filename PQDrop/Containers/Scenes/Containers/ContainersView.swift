@@ -35,6 +35,9 @@ struct ContainersView: View {
                 .searchable(text: $viewModel.searchText, prompt: "Поиск")
                 .searchToolbarBehavior(.minimize)
         }
+        .onAppear {
+            viewModel.loadContainers()
+        }
         .fileImporter(
             isPresented: $viewModel.isFileImporterPresented,
             allowedContentTypes: [.item],

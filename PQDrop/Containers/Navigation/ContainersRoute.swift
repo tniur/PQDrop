@@ -34,7 +34,8 @@ enum ContainersRoute: RouteType {
     var body: some View {
         switch self {
         case .containers(let coordinator):
-            let viewModel = ContainersViewModel(coordinator: coordinator)
+            let containerRepository = ContainerRepository()
+            let viewModel = ContainersViewModel(coordinator: coordinator, containerRepository: containerRepository)
             let view = ContainersView(viewModel: viewModel)
             return AnyView(view)
 
@@ -83,7 +84,20 @@ enum ContainersRoute: RouteType {
             return AnyView(view)
 
         case .createContainerSave(let coordinator, let name, let files):
-            let viewModel = CreateContainerSaveViewModel(coordinator: coordinator, name: name, files: files)
+            let keychainService = KeychainService()
+            let keyPairManager = KeyPairManager(keychainService: keychainService)
+            let archiveService = ArchiveService()
+            let containerService = ContainerService(archiveService: archiveService, keyPairManager: keyPairManager)
+            let containerRepository = ContainerRepository()
+            let historyRepository = HistoryRepository()
+            let viewModel = CreateContainerSaveViewModel(
+                coordinator: coordinator,
+                containerService: containerService,
+                containerRepository: containerRepository,
+                historyRepository: historyRepository,
+                name: name,
+                files: files
+            )
             let view = CreateContainerSaveView(viewModel: viewModel)
             return AnyView(view)
         }
