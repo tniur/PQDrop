@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import LocalAuthentication
 import PQContainerKit
 import Security
 
@@ -23,10 +24,21 @@ final class KeychainService {
 
         SecItemDelete(deleteQuery as CFDictionary)
 
+        var error: Unmanaged<CFError>?
+
+        guard let accessControl = SecAccessControlCreateWithFlags(
+            nil,
+            kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly,
+            .biometryCurrentSet,
+            &error
+        ) else {
+            throw KeychainError.saveFailed(errSecParam)
+        }
+
         let addQuery: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: privateKeyService,
-            kSecAttrAccessible as String: kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly,
+            kSecAttrAccessControl as String: accessControl,
             kSecValueData as String: data
         ]
 
@@ -38,11 +50,15 @@ final class KeychainService {
     }
 
     func loadPrivateKey() throws -> XWing.PrivateKey? {
+        let context = LAContext()
+        context.localizedReason = "Доступ к ключу шифрования"
+
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: privateKeyService,
             kSecReturnData as String: true,
-            kSecMatchLimit as String: kSecMatchLimitOne
+            kSecMatchLimit as String: kSecMatchLimitOne,
+            kSecUseAuthenticationContext as String: context
         ]
 
         var result: AnyObject?
@@ -62,6 +78,19 @@ final class KeychainService {
         }
 
         return try XWing.PrivateKey(rawRepresentation: data)
+    }
+
+    func hasPrivateKey() -> Bool {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: privateKeyService,
+            kSecReturnData as String: false,
+            kSecMatchLimit as String: kSecMatchLimitOne,
+            kSecUseAuthenticationUI as String: kSecUseAuthenticationUISkip
+        ]
+
+        let status = SecItemCopyMatching(query as CFDictionary, nil)
+        return status == errSecSuccess || status == errSecInteractionNotAllowed
     }
 }
 
