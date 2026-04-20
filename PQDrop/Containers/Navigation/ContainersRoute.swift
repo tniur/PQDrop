@@ -53,7 +53,8 @@ enum ContainersRoute: RouteType {
                 containerService: containerService,
                 contactRepository: contactRepository,
                 containerRepository: containerRepository,
-                historyRepository: historyRepository
+                historyRepository: historyRepository,
+                keyPairManager: keyPairManager
             )
             let view = ContainerDetailsView(viewModel: viewModel)
             return AnyView(view)

@@ -25,7 +25,9 @@ struct ProfileView: View {
             "Очистить все данные?",
             isPresented: $viewModel.showResetAlert
         ) {
-            Button("Очистить", role: .destructive) {}
+            Button("Очистить", role: .destructive) {
+                viewModel.resetAllData()
+            }
             Button("Отмена", role: .cancel) {}
         } message: {
             Text("Будут удалены ключи, контейнеры, контакты и история. Это действие необратимо.")

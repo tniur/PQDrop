@@ -83,7 +83,10 @@ final class CreateKeysViewModel: ObservableObject {
 
             if Task.isCancelled { return }
 
-            self.uiTask?.cancel()
+            await self.uiTask?.value
+
+            if Task.isCancelled { return }
+
             self.progress = 1
 
             switch result {
