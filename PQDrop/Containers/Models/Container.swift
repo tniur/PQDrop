@@ -8,9 +8,11 @@
 import Foundation
 
 struct Container: Identifiable {
-    let id: String
+    let id: UUID
+    let containerID: Data
     var name: String
+    var fileURL: URL?
     var isAvailable: Bool
-    var isCreated: Bool
+    var isOwned: Bool
     var files: [ContainerFileItem] = []
 }

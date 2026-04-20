@@ -56,10 +56,11 @@ final class CreateContainerSaveViewModel: ObservableObject {
     func openContainer() {
         Task {
             let container = Container(
-                id: UUID().uuidString,
+                id: UUID(),
+                containerID: Data(),
                 name: name,
                 isAvailable: true,
-                isCreated: true,
+                isOwned: true,
                 files: files
             )
             await coordinator.finish()

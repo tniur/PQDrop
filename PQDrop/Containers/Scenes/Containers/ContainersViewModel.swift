@@ -28,15 +28,15 @@ final class ContainersViewModel: ObservableObject {
         let tabFiltered: [Container]
         switch selectedTab {
         case .created:
-            tabFiltered = containers.filter { $0.isCreated }
+            tabFiltered = containers.filter { $0.isOwned }
         case .received:
-            tabFiltered = containers.filter { !$0.isCreated }
+            tabFiltered = containers.filter { !$0.isOwned }
         }
 
         guard !searchText.isEmpty else { return tabFiltered }
         return tabFiltered.filter {
             $0.name.localizedCaseInsensitiveContains(searchText) ||
-            $0.id.localizedCaseInsensitiveContains(searchText)
+            $0.id.uuidString.localizedCaseInsensitiveContains(searchText)
         }
     }
 

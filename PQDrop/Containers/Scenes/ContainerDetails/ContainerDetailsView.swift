@@ -97,7 +97,7 @@ struct ContainerDetailsView: View {
                         .onTapGesture(perform: viewModel.editName)
                 }
                 
-                Text("id: \(viewModel.container.id)")
+                Text("id: \(viewModel.container.id.uuidString)")
                     .font(PQFont.R15)
                     .foregroundStyle(PQColor.base5.swiftUIColor)
                     .onTapGesture(perform: viewModel.copyId)
@@ -158,7 +158,7 @@ struct ContainerDetailsView: View {
 
     @ViewBuilder
     private var menuRowsView: some View {
-        if viewModel.isCreated {
+        if viewModel.isOwned {
             VStack(spacing: 12) {
                 ChevronRowView(
                     icon: PQImage.contacts.swiftUIImage,

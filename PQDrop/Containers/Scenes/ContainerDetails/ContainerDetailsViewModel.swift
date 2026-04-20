@@ -21,9 +21,9 @@ final class ContainerDetailsViewModel: ObservableObject {
     @Published var isError = false
 
     var isAvailable: Bool { container.isAvailable }
-    var isCreated: Bool { container.isCreated }
+    var isOwned: Bool { container.isOwned }
     var historyEvents: [HistoryEvent] {
-        guard isCreated, isAvailable else { return [] }
+        guard isOwned, isAvailable else { return [] }
 
         return [
             .init(
@@ -35,7 +35,7 @@ final class ContainerDetailsViewModel: ObservableObject {
                 dateTitle: "20 марта 2026",
                 time: "12:09",
                 containerName: container.name,
-                containerID: container.id,
+                containerID: container.id.uuidString,
                 result: "Успешно"
             ),
             .init(
@@ -47,7 +47,7 @@ final class ContainerDetailsViewModel: ObservableObject {
                 dateTitle: "20 марта 2026",
                 time: "11:11",
                 containerName: container.name,
-                containerID: container.id,
+                containerID: container.id.uuidString,
                 result: "Успешно"
             ),
             .init(
@@ -59,7 +59,7 @@ final class ContainerDetailsViewModel: ObservableObject {
                 dateTitle: "20 марта 2026",
                 time: "10:12",
                 containerName: container.name,
-                containerID: container.id,
+                containerID: container.id.uuidString,
                 result: "Доступ выдан"
             )
         ]
@@ -87,7 +87,7 @@ final class ContainerDetailsViewModel: ObservableObject {
     // MARK: - Methods
 
     func copyId() {
-        UIPasteboard.general.string = container.id
+        UIPasteboard.general.string = container.id.uuidString
     }
 
     func editName() {

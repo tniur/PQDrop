@@ -123,7 +123,7 @@ struct ContainerContentsView: View {
                         .onTapGesture(perform: viewModel.editName)
                 }
 
-                Text("id: \(viewModel.container.id)")
+                Text("id: \(viewModel.container.id.uuidString)")
                     .font(PQFont.R15)
                     .foregroundStyle(PQColor.base5.swiftUIColor)
                     .onTapGesture(perform: viewModel.copyId)

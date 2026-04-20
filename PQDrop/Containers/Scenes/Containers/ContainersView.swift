@@ -139,7 +139,7 @@ struct ContainersView: View {
             ForEach(viewModel.filteredContainers) { container in
                 ContainerCardView(
                     name: container.name,
-                    id: container.id,
+                    id: container.id.uuidString,
                     isAvailable: container.isAvailable
                 )
                 .frame(maxWidth: .infinity)

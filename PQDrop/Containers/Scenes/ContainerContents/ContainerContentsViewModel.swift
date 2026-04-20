@@ -68,7 +68,7 @@ final class ContainerContentsViewModel: ObservableObject {
     }
 
     func copyId() {
-        UIPasteboard.general.string = container.id
+        UIPasteboard.general.string = container.id.uuidString
     }
 
     func openFile(_ file: ContainerFileItem) {
