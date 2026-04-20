@@ -112,7 +112,17 @@ enum ContainersRoute: RouteType {
             return AnyView(view)
 
         case .saveContainer(let coordinator, let container):
-            let viewModel = SaveContainerViewModel(coordinator: coordinator, container: container)
+            let keychainService = KeychainService()
+            let keyPairManager = KeyPairManager(keychainService: keychainService)
+            let archiveService = ArchiveService()
+            let containerService = ContainerService(archiveService: archiveService, keyPairManager: keyPairManager)
+            let historyRepository = HistoryRepository()
+            let viewModel = SaveContainerViewModel(
+                coordinator: coordinator,
+                container: container,
+                containerService: containerService,
+                historyRepository: historyRepository
+            )
             let view = SaveContainerView(viewModel: viewModel)
             return AnyView(view)
 
