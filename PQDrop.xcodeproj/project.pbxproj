@@ -10,6 +10,7 @@
 		7B883B912F42849E00E6C81D /* PQUIComponents in Frameworks */ = {isa = PBXBuildFile; productRef = 7B883B902F42849E00E6C81D /* PQUIComponents */; };
 		7BC738692F476A05005BF78C /* SUICoordinator in Frameworks */ = {isa = PBXBuildFile; productRef = 7BC738682F476A05005BF78C /* SUICoordinator */; };
 		7BC7390A2F476BFF005BF78C /* FactoryKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7BC739092F476BFF005BF78C /* FactoryKit */; };
+		89336C2A2F93F4970015E9A1 /* PQContainerKit in Frameworks */ = {isa = PBXBuildFile; productRef = 89336C292F93F4970015E9A1 /* PQContainerKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 			files = (
 				7BC7390A2F476BFF005BF78C /* FactoryKit in Frameworks */,
 				7B883B912F42849E00E6C81D /* PQUIComponents in Frameworks */,
+				89336C2A2F93F4970015E9A1 /* PQContainerKit in Frameworks */,
 				7BC738692F476A05005BF78C /* SUICoordinator in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -87,6 +89,7 @@
 				7B883B902F42849E00E6C81D /* PQUIComponents */,
 				7BC738682F476A05005BF78C /* SUICoordinator */,
 				7BC739092F476BFF005BF78C /* FactoryKit */,
+				89336C292F93F4970015E9A1 /* PQContainerKit */,
 			);
 			productName = PQDrop;
 			productReference = 89B58CEA2F268EE300D437F7 /* PQDrop.app */;
@@ -120,6 +123,7 @@
 			packageReferences = (
 				7BC738672F476A05005BF78C /* XCRemoteSwiftPackageReference "SUICoordinator" */,
 				7BC739082F476BFF005BF78C /* XCRemoteSwiftPackageReference "Factory" */,
+				89336C282F93F4970015E9A1 /* XCRemoteSwiftPackageReference "PQContainerKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 89B58CEB2F268EE300D437F7 /* Products */;
@@ -279,13 +283,14 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = PHYKY943Y2;
+				DEVELOPMENT_TEAM = ZYGWB3DRUK;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Для сканирования QR-кода контакта";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Для доступа к приватному ключу пользователя";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -324,13 +329,14 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = PHYKY943Y2;
+				DEVELOPMENT_TEAM = ZYGWB3DRUK;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Для сканирования QR-кода контакта";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Для доступа к приватному ключу пользователя";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -402,6 +408,14 @@
 				version = 2.5.3;
 			};
 		};
+		89336C282F93F4970015E9A1 /* XCRemoteSwiftPackageReference "PQContainerKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tniur/PQContainerKit";
+			requirement = {
+				kind = exactVersion;
+				version = 1.1.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -418,6 +432,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 7BC739082F476BFF005BF78C /* XCRemoteSwiftPackageReference "Factory" */;
 			productName = FactoryKit;
+		};
+		89336C292F93F4970015E9A1 /* PQContainerKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 89336C282F93F4970015E9A1 /* XCRemoteSwiftPackageReference "PQContainerKit" */;
+			productName = PQContainerKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

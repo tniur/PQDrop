@@ -40,7 +40,10 @@ struct ContainerDetailsView: View {
             Text(String(localized: "containers.details.delete.alert.message"))
         }
         .sheet(isPresented: $viewModel.showShareSheet) {
-            ActivityViewControllerRepresentable(activityItems: [viewModel.container.name])
+            ActivityViewControllerRepresentable(activityItems: [viewModel.container.fileURL as Any].compactMap { $0 })
+        }
+        .onAppear {
+            viewModel.reload()
         }
         .sheet(isPresented: $viewModel.showHistorySheet) {
             ContainerHistorySheetView(
@@ -97,7 +100,7 @@ struct ContainerDetailsView: View {
                         .onTapGesture(perform: viewModel.editName)
                 }
                 
-                Text(String(localized: "shared.id\(viewModel.container.id)"))
+                Text("id: \(viewModel.container.id.uuidString)")
                     .font(PQFont.R15)
                     .foregroundStyle(PQColor.base5.swiftUIColor)
                     .onTapGesture(perform: viewModel.copyId)
@@ -158,7 +161,7 @@ struct ContainerDetailsView: View {
 
     @ViewBuilder
     private var menuRowsView: some View {
-        if viewModel.isCreated {
+        if viewModel.isOwned {
             VStack(spacing: 12) {
                 ChevronRowView(
                     icon: PQImage.contacts.swiftUIImage,

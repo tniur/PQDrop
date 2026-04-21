@@ -27,11 +27,10 @@ struct EditContactNameView: View {
                 
                 Spacer()
                 
-                // добавить изменение текста кнопки если контакт уже есть
                 PQButton(
-                    String(localized: "shared.create"),
+                    viewModel.buttonTitle,
                     style: PQButtonStyle(.purple),
-                    action: viewModel.create
+                    action: viewModel.save
                 )
                 .disabled(viewModel.name.isEmpty)
             }

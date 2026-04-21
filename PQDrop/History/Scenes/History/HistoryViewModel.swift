@@ -43,145 +43,49 @@ final class HistoryViewModel: ObservableObject {
     }
 
     private let coordinator: HistoryCoordinatorProtocol
-    private let sections: [HistoryEventSection] = [
-        .init(
-            dateTitle: "20 марта 2026",
-            events: [
-                .init(
-                    id: "export-20-1209",
-                    type: .export,
-                    icon: .export,
-                    listTitle: "Экспорт \"Название контейнера\"",
-                    detailsTitle: "Экспорт контейнера",
-                    dateTitle: "20 марта 2026",
-                    time: "12:09",
-                    containerName: "Название контейнера",
-                    containerID: "999999999",
-                    result: "Успешно"
-                ),
-                .init(
-                    id: "import-20-1111",
-                    type: .imported,
-                    icon: .imported,
-                    listTitle: "Импорт \"Название контейнера\"",
-                    detailsTitle: "Импорт контейнера",
-                    dateTitle: "20 марта 2026",
-                    time: "11:11",
-                    containerName: "Название контейнера",
-                    containerID: "999999999",
-                    result: "Успешно"
-                ),
-                .init(
-                    id: "access-20-1012",
-                    type: .access,
-                    icon: .accessGranted,
-                    listTitle: "Доступ \"Название контейнера\"",
-                    detailsTitle: "Доступ контейнера",
-                    dateTitle: "20 марта 2026",
-                    time: "10:12",
-                    containerName: "Название контейнера",
-                    containerID: "999999999",
-                    result: "Доступ выдан"
-                ),
-                .init(
-                    id: "access-20-0956",
-                    type: .access,
-                    icon: .accessRevoked,
-                    listTitle: "Доступ \"Название контейнера\"",
-                    detailsTitle: "Доступ контейнера",
-                    dateTitle: "20 марта 2026",
-                    time: "09:56",
-                    containerName: "Название контейнера",
-                    containerID: "999999999",
-                    result: "Доступ закрыт"
-                )
-            ]
-        ),
-        .init(
-            dateTitle: "19 марта 2026",
-            events: [
-                .init(
-                    id: "export-19-1012",
-                    type: .export,
-                    icon: .export,
-                    listTitle: "Экспорт \"Название контейнера\"",
-                    detailsTitle: "Экспорт контейнера",
-                    dateTitle: "19 марта 2026",
-                    time: "10:12",
-                    containerName: "Название контейнера",
-                    containerID: "999999999",
-                    result: "Успешно"
-                ),
-                .init(
-                    id: "import-19-1010",
-                    type: .imported,
-                    icon: .imported,
-                    listTitle: "Импорт \"Название контейнера\"",
-                    detailsTitle: "Импорт контейнера",
-                    dateTitle: "19 марта 2026",
-                    time: "10:10",
-                    containerName: "Название контейнера",
-                    containerID: "999999999",
-                    result: "Успешно"
-                ),
-                .init(
-                    id: "access-19-1003",
-                    type: .access,
-                    icon: .accessGranted,
-                    listTitle: "Доступ \"Название контейнера\"",
-                    detailsTitle: "Доступ контейнера",
-                    dateTitle: "19 марта 2026",
-                    time: "10:03",
-                    containerName: "Название контейнера",
-                    containerID: "999999999",
-                    result: "Доступ выдан"
-                ),
-                .init(
-                    id: "access-19-1000",
-                    type: .access,
-                    icon: .accessRevoked,
-                    listTitle: "Доступ \"Название контейнера\"",
-                    detailsTitle: "Доступ контейнера",
-                    dateTitle: "19 марта 2026",
-                    time: "10:00",
-                    containerName: "Название контейнера",
-                    containerID: "999999999",
-                    result: "Доступ закрыт"
-                )
-            ]
-        ),
-        .init(
-            dateTitle: "17 марта 2026",
-            events: [
-                .init(
-                    id: "export-17-1148",
-                    type: .export,
-                    icon: .export,
-                    listTitle: "Экспорт \"Название контейнера\"",
-                    detailsTitle: "Экспорт контейнера",
-                    dateTitle: "17 марта 2026",
-                    time: "11:48",
-                    containerName: "Название контейнера",
-                    containerID: "999999999",
-                    result: "Успешно"
-                ),
-                .init(
-                    id: "access-17-1055",
-                    type: .access,
-                    icon: .accessGranted,
-                    listTitle: "Доступ \"Название контейнера\"",
-                    detailsTitle: "Доступ контейнера",
-                    dateTitle: "17 марта 2026",
-                    time: "10:55",
-                    containerName: "Название контейнера",
-                    containerID: "999999999",
-                    result: "Доступ выдан"
-                )
-            ]
-        )
-    ]
 
-    // MARK: - Initializer
+    private var sections: [HistoryEventSection] {
+        let calendar = Calendar.current
+        let march20 = calendar.date(from: DateComponents(year: 2026, month: 3, day: 20))!
+        let march19 = calendar.date(from: DateComponents(year: 2026, month: 3, day: 19))!
+        let march17 = calendar.date(from: DateComponents(year: 2026, month: 3, day: 17))!
+        let containerID = Data(repeating: 0, count: 16)
+
+        let events20: [HistoryEvent] = [
+            .init(id: UUID(), type: .export, containerName: "Название контейнера", containerID: containerID, detail: nil,
+                  timestamp: calendar.date(bySettingHour: 12, minute: 9, second: 0, of: march20)!),
+            .init(id: UUID(), type: .imported, containerName: "Название контейнера", containerID: containerID, detail: nil,
+                  timestamp: calendar.date(bySettingHour: 11, minute: 11, second: 0, of: march20)!),
+            .init(id: UUID(), type: .accessGranted, containerName: "Название контейнера", containerID: containerID, detail: nil,
+                  timestamp: calendar.date(bySettingHour: 10, minute: 12, second: 0, of: march20)!),
+            .init(id: UUID(), type: .accessRevoked, containerName: "Название контейнера", containerID: containerID, detail: nil,
+                  timestamp: calendar.date(bySettingHour: 9, minute: 56, second: 0, of: march20)!)
+        ]
+
+        let events19: [HistoryEvent] = [
+            .init(id: UUID(), type: .export, containerName: "Название контейнера", containerID: containerID, detail: nil,
+                  timestamp: calendar.date(bySettingHour: 10, minute: 12, second: 0, of: march19)!),
+            .init(id: UUID(), type: .imported, containerName: "Название контейнера", containerID: containerID, detail: nil,
+                  timestamp: calendar.date(bySettingHour: 10, minute: 10, second: 0, of: march19)!),
+            .init(id: UUID(), type: .accessGranted, containerName: "Название контейнера", containerID: containerID, detail: nil,
+                  timestamp: calendar.date(bySettingHour: 10, minute: 3, second: 0, of: march19)!),
+            .init(id: UUID(), type: .accessRevoked, containerName: "Название контейнера", containerID: containerID, detail: nil,
+                  timestamp: calendar.date(bySettingHour: 10, minute: 0, second: 0, of: march19)!)
+        ]
+
+        let events17: [HistoryEvent] = [
+            .init(id: UUID(), type: .export, containerName: "Название контейнера", containerID: containerID, detail: nil,
+                  timestamp: calendar.date(bySettingHour: 11, minute: 48, second: 0, of: march17)!),
+            .init(id: UUID(), type: .accessGranted, containerName: "Название контейнера", containerID: containerID, detail: nil,
+                  timestamp: calendar.date(bySettingHour: 10, minute: 55, second: 0, of: march17)!)
+        ]
+
+        return [
+            HistoryEventSection(dateTitle: events20.first!.dateTitle, events: events20),
+            HistoryEventSection(dateTitle: events19.first!.dateTitle, events: events19),
+            HistoryEventSection(dateTitle: events17.first!.dateTitle, events: events17)
+        ]
+    }
 
     init(coordinator: HistoryCoordinatorProtocol) {
         self.coordinator = coordinator

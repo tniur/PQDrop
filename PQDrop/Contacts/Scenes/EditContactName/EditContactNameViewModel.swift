@@ -6,33 +6,56 @@
 //
 
 import Combine
+import Foundation
 
 @MainActor
 final class EditContactNameViewModel: ObservableObject {
     
+    // MARK: - Types
+
+    enum Mode {
+        case create(publicKeyData: Data)
+        case edit(contactId: UUID)
+    }
+
     // MARK: - Properties
 
     @Published var name: String = ""
     
+    var buttonTitle: String {
+        switch mode {
+        case .create: "Создать"
+        case .edit: "Сохранить"
+        }
+    }
+
     private let coordinator: ContactsCoordinatorProtocol
-    private var id: String
+    private let contactRepository: ContactRepository
+    private let mode: Mode
 
     // MARK: - Initializer
 
-    init(coordinator: ContactsCoordinatorProtocol, id: String) {
+    init(coordinator: ContactsCoordinatorProtocol, contactRepository: ContactRepository, mode: Mode) {
         self.coordinator = coordinator
-        self.id = id
+        self.contactRepository = contactRepository
+        self.mode = mode
+
+        if case .edit(let contactId) = mode, let contact = contactRepository.fetch(by: contactId) {
+            self.name = contact.name
+        }
     }
     
     // MARK: - Methods
     
-    func create() {
+    func save() {
+        switch mode {
+        case .create(let publicKeyData):
+            try? contactRepository.create(name: name, publicKeyRaw: publicKeyData)
+        case .edit(let contactId):
+            try? contactRepository.updateName(name, for: contactId)
+        }
         Task {
             await coordinator.finish()
         }
-    }
-    
-    func edit() {
-        //поп на экран деталки контакта и сохранение нового имени
     }
 }

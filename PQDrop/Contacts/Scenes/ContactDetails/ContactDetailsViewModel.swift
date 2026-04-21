@@ -33,7 +33,10 @@ final class ContactDetailsViewModel: ObservableObject {
     }
     
     var fingerprintBlocks: [FingerprintBlock] {
-        contact.fingerprint.chunked(into: 6)
+        contact.fingerprint
+            .components(separatedBy: " ")
+            .enumerated()
+            .map { FingerprintBlock(id: $0.offset, text: $0.element) }
     }
     
     var verificationAlertTitle: String {
@@ -64,19 +67,21 @@ final class ContactDetailsViewModel: ObservableObject {
     }
     
     private let coordinator: ContactsCoordinatorProtocol
+    private let contactRepository: ContactRepository
     
     // MARK: - Init
 
-    init(coordinator: ContactsCoordinatorProtocol, contact: Contact) {
+    init(coordinator: ContactsCoordinatorProtocol, contact: Contact, contactRepository: ContactRepository) {
         self.coordinator = coordinator
         self.contact = contact
+        self.contactRepository = contactRepository
     }
     
     // MARK: - Methods
 
     func editName() {
         Task {
-            await coordinator.showEditContactName(with: contact.id)
+            await coordinator.showEditContactName(contactId: contact.id)
         }
     }
     
@@ -85,6 +90,7 @@ final class ContactDetailsViewModel: ObservableObject {
     }
     
     func deleteContact() {
+        try? contactRepository.delete(by: contact.id)
         Task {
             await coordinator.finish()
         }
@@ -93,13 +99,16 @@ final class ContactDetailsViewModel: ObservableObject {
     func confirmVerificationChange() {
         guard let pendingVerificationValue else { return }
         contact.isVerified = pendingVerificationValue
+        try? contactRepository.updateVerification(pendingVerificationValue, for: contact.id)
         self.pendingVerificationValue = nil
     }
     
     func cancelVerificationChange() {
         pendingVerificationValue = nil
     }
-    
+
+    // MARK: - Private
+
     private func handleVerificationSelectionChange(_ newValue: Int) {
         let newIsVerified = (newValue == 0)
         

@@ -33,30 +33,24 @@ final class ContactsViewModel: ObservableObject {
         return base.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
     }
     
-    private var contacts: [Contact] = [
-        .init(id: "0", name: "odoaosd", isVerified: true, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000"),
-        .init(id: "1", name: "smdks", isVerified: false, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000"),
-        .init(id: "2", name: "smdks", isVerified: false, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000"),
-        .init(id: "3", name: "smdks", isVerified: true, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000"),
-        .init(id: "4", name: "smdks", isVerified: true, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000"),
-        .init(id: "5", name: "smdks", isVerified: false, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000"),
-        .init(id: "6", name: "smdks", isVerified: false, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000"),
-        .init(id: "7", name: "smdks", isVerified: true, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000"),
-        .init(id: "8", name: "smdks", isVerified: true, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000"),
-        .init(id: "9", name: "smdks", isVerified: true, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000"),
-        .init(id: "10", name: "smdks", isVerified: false, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000"),
-        .init(id: "11", name: "smdks", isVerified: true, fingerprint: "000000000000000000000000000000000000000000000000000000000000000000000000")
-    ]
+    @Published private var contacts: [Contact] = []
     
     private let coordinator: ContactsCoordinatorProtocol
+    private let contactRepository: ContactRepository
     
     // MARK: - Initializer
 
-    init(coordinator: ContactsCoordinatorProtocol) {
+    init(coordinator: ContactsCoordinatorProtocol, contactRepository: ContactRepository) {
         self.coordinator = coordinator
+        self.contactRepository = contactRepository
+        loadContacts()
     }
     
     // MARK: - Methods
+
+    func loadContacts() {
+        contacts = contactRepository.fetchAll()
+    }
 
     func showFilters() {
         Task {
@@ -70,20 +64,24 @@ final class ContactsViewModel: ObservableObject {
     func addContact() {
         Task {
             await coordinator.showAddContact()
+            loadContacts()
         }
     }
     
     func delete(contact: Contact) {
-        contacts.removeAll { $0.id == contact.id }
+        try? contactRepository.delete(by: contact.id)
+        loadContacts()
     }
     
     func clearContacts() {
-        contacts.removeAll()
+        try? contactRepository.deleteAll()
+        loadContacts()
     }
     
     func showDetails(of contact: Contact) {
         Task {
             await coordinator.showContactDetails(with: contact)
+            loadContacts()
         }
     }
 }

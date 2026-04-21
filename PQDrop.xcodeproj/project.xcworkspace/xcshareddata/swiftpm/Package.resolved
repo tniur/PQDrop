@@ -1,5 +1,5 @@
 {
-  "originHash" : "bdcff02f82208dd38a82e58beedb05a61d7435d299024c2647bd8beff23e64f5",
+  "originHash" : "a8be3cce92e305de9b5ec31db87f04083381559fc61d9914d7379a810bbb55c1",
   "pins" : [
     {
       "identity" : "factory",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "ccc898f21992ebc130bc04cc197460a5ae230bcf",
         "version" : "2.5.3"
+      }
+    },
+    {
+      "identity" : "pqcontainerkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tniur/PQContainerKit",
+      "state" : {
+        "revision" : "733688b57a9bcbfce0cffbe042beffcfce7c31cd",
+        "version" : "1.1.0"
       }
     },
     {

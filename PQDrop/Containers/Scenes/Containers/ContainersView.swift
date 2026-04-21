@@ -35,6 +35,9 @@ struct ContainersView: View {
                 .searchable(text: $viewModel.searchText, prompt: String(localized: "shared.search"))
                 .searchToolbarBehavior(.minimize)
         }
+        .onAppear {
+            viewModel.loadContainers()
+        }
         .fileImporter(
             isPresented: $viewModel.isFileImporterPresented,
             allowedContentTypes: [.item],
@@ -52,22 +55,29 @@ struct ContainersView: View {
     // MARK: - Subviews
 
     private var contentView: some View {
-        ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: 20) {
-                segmentedControl
-                
-                if viewModel.filteredContainers.isEmpty {
+        VStack(alignment: .leading, spacing: 20) {
+            segmentedControl
+                .padding(.horizontal)
+
+            if viewModel.filteredContainers.isEmpty {
+                Spacer()
+                Group {
                     if viewModel.isSearchActive {
                         emptySearchView
                     } else {
                         emptyTabView
                     }
-                } else {
+                }
+                .frame(maxWidth: .infinity)
+                Spacer()
+            } else {
+                ScrollView(showsIndicators: false) {
                     containersList
+                        .padding(.horizontal)
                 }
             }
-            .padding()
         }
+        .padding(.top)
     }
     
     private var toolbarButtonsView: some View {
@@ -109,7 +119,7 @@ struct ContainersView: View {
                 .foregroundStyle(PQColor.blue2.swiftUIColor)
         }
         .multilineTextAlignment(.center)
-        .containerRelativeFrame([.vertical], alignment: .center)
+        .frame(maxWidth: .infinity)
     }
 
     private var emptyTabView: some View {
@@ -131,7 +141,7 @@ struct ContainersView: View {
                 action: viewModel.emptyTabAction,
             )
         }
-        .containerRelativeFrame([.vertical], alignment: .center)
+        .frame(maxWidth: .infinity)
     }
 
     private var containersList: some View {
@@ -139,7 +149,7 @@ struct ContainersView: View {
             ForEach(viewModel.filteredContainers) { container in
                 ContainerCardView(
                     name: container.name,
-                    id: container.id,
+                    id: container.id.uuidString,
                     isAvailable: container.isAvailable
                 )
                 .frame(maxWidth: .infinity)

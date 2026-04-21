@@ -29,6 +29,11 @@ struct AddContactView: View {
             .padding(.vertical, 4)
         }
         .toolbar(.hidden, for: .tabBar)
+        .alert("Ошибка", isPresented: $viewModel.showErrorAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(viewModel.errorMessage)
+        }
     }
 
     // MARK: - Subviews

@@ -34,17 +34,46 @@ enum ContainersRoute: RouteType {
     var body: some View {
         switch self {
         case .containers(let coordinator):
-            let viewModel = ContainersViewModel(coordinator: coordinator)
+            let containerRepository = ContainerRepository()
+            let viewModel = ContainersViewModel(coordinator: coordinator, containerRepository: containerRepository)
             let view = ContainersView(viewModel: viewModel)
             return AnyView(view)
 
         case .containerDetails(let coordinator, let container):
-            let viewModel = ContainerDetailsViewModel(coordinator: coordinator, container: container)
+            let keychainService = KeychainService()
+            let keyPairManager = KeyPairManager(keychainService: keychainService)
+            let archiveService = ArchiveService()
+            let containerService = ContainerService(archiveService: archiveService, keyPairManager: keyPairManager)
+            let contactRepository = ContactRepository()
+            let containerRepository = ContainerRepository()
+            let historyRepository = HistoryRepository()
+            let viewModel = ContainerDetailsViewModel(
+                coordinator: coordinator,
+                container: container,
+                containerService: containerService,
+                contactRepository: contactRepository,
+                containerRepository: containerRepository,
+                historyRepository: historyRepository,
+                keyPairManager: keyPairManager
+            )
             let view = ContainerDetailsView(viewModel: viewModel)
             return AnyView(view)
 
         case .importContainer(let coordinator, let fileURL):
-            let viewModel = ImportContainerViewModel(coordinator: coordinator, fileURL: fileURL)
+            let keychainService = KeychainService()
+            let keyPairManager = KeyPairManager(keychainService: keychainService)
+            let archiveService = ArchiveService()
+            let containerService = ContainerService(archiveService: archiveService, keyPairManager: keyPairManager)
+            let containerRepository = ContainerRepository()
+            let historyRepository = HistoryRepository()
+            let viewModel = ImportContainerViewModel(
+                coordinator: coordinator,
+                containerService: containerService,
+                containerRepository: containerRepository,
+                historyRepository: historyRepository,
+                keyPairManager: keyPairManager,
+                fileURL: fileURL
+            )
             let view = ImportContainerView(viewModel: viewModel)
             return AnyView(view)
 
@@ -53,12 +82,32 @@ enum ContainersRoute: RouteType {
             return AnyView(view)
 
         case .accessControl(let coordinator, let container):
-            let viewModel = AccessControlViewModel(coordinator: coordinator, container: container)
+            let keychainService = KeychainService()
+            let keyPairManager = KeyPairManager(keychainService: keychainService)
+            let archiveService = ArchiveService()
+            let containerService = ContainerService(archiveService: archiveService, keyPairManager: keyPairManager)
+            let contactRepository = ContactRepository()
+            let historyRepository = HistoryRepository()
+            let viewModel = AccessControlViewModel(
+                coordinator: coordinator,
+                container: container,
+                containerService: containerService,
+                contactRepository: contactRepository,
+                historyRepository: historyRepository
+            )
             let view = AccessControlView(viewModel: viewModel)
             return AnyView(view)
 
         case .containersContents(let coordinator, let container):
-            let viewModel = ContainerContentsViewModel(coordinator: coordinator, container: container)
+            let keychainService = KeychainService()
+            let keyPairManager = KeyPairManager(keychainService: keychainService)
+            let archiveService = ArchiveService()
+            let containerService = ContainerService(archiveService: archiveService, keyPairManager: keyPairManager)
+            let viewModel = ContainerContentsViewModel(
+                coordinator: coordinator,
+                container: container,
+                containerService: containerService
+            )
             let view = ContainerContentsView(viewModel: viewModel)
             return AnyView(view)
 
@@ -68,7 +117,17 @@ enum ContainersRoute: RouteType {
             return AnyView(view)
 
         case .saveContainer(let coordinator, let container):
-            let viewModel = SaveContainerViewModel(coordinator: coordinator, container: container)
+            let keychainService = KeychainService()
+            let keyPairManager = KeyPairManager(keychainService: keychainService)
+            let archiveService = ArchiveService()
+            let containerService = ContainerService(archiveService: archiveService, keyPairManager: keyPairManager)
+            let historyRepository = HistoryRepository()
+            let viewModel = SaveContainerViewModel(
+                coordinator: coordinator,
+                container: container,
+                containerService: containerService,
+                historyRepository: historyRepository
+            )
             let view = SaveContainerView(viewModel: viewModel)
             return AnyView(view)
 
@@ -83,7 +142,20 @@ enum ContainersRoute: RouteType {
             return AnyView(view)
 
         case .createContainerSave(let coordinator, let name, let files):
-            let viewModel = CreateContainerSaveViewModel(coordinator: coordinator, name: name, files: files)
+            let keychainService = KeychainService()
+            let keyPairManager = KeyPairManager(keychainService: keychainService)
+            let archiveService = ArchiveService()
+            let containerService = ContainerService(archiveService: archiveService, keyPairManager: keyPairManager)
+            let containerRepository = ContainerRepository()
+            let historyRepository = HistoryRepository()
+            let viewModel = CreateContainerSaveViewModel(
+                coordinator: coordinator,
+                containerService: containerService,
+                containerRepository: containerRepository,
+                historyRepository: historyRepository,
+                name: name,
+                files: files
+            )
             let view = CreateContainerSaveView(viewModel: viewModel)
             return AnyView(view)
         }
