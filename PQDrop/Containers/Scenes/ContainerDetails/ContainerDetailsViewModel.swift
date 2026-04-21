@@ -21,6 +21,7 @@ final class ContainerDetailsViewModel: ObservableObject {
     @Published var showHistorySheet = false
     @Published var isError = false
     @Published var recipients: [Recipient] = []
+    @Published var isOpening = false
 
     var isAvailable: Bool { container.isAvailable }
     var isOwned: Bool { container.isOwned }
@@ -101,8 +102,45 @@ final class ContainerDetailsViewModel: ObservableObject {
     }
 
     func openContainer() {
+        guard !isOpening else { return }
+
+        guard let fileURL = container.fileURL else {
+            isError = true
+            return
+        }
+
+        guard let privateKey = try? keyPairManager.loadPrivateKey() else {
+            isError = true
+            return
+        }
+
+        let containerService = self.containerService
+        let baseContainer = container
+        let outputDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("decrypted_\(UUID().uuidString)")
+
+        isOpening = true
+
         Task {
-            await coordinator.showContainerContents(with: container)
+            do {
+                let fileURLs = try await Task.detached {
+                    try containerService.decryptContainer(
+                        at: fileURL,
+                        to: outputDir,
+                        privateKey: privateKey
+                    )
+                }.value
+
+                var openedContainer = baseContainer
+                openedContainer.files = Self.makeFileItems(from: fileURLs)
+
+                isOpening = false
+                await coordinator.showContainerContents(with: openedContainer, decryptedDir: outputDir)
+            } catch {
+                try? FileManager.default.removeItem(at: outputDir)
+                isOpening = false
+                isError = true
+            }
         }
     }
 
@@ -143,6 +181,7 @@ final class ContainerDetailsViewModel: ObservableObject {
 
     func copyContainerToSelf() {
         guard let fileURL = container.fileURL else { return }
+        guard let privateKey = try? keyPairManager.loadPrivateKey() else { return }
 
         let containerName = container.name
         let containerService = self.containerService
@@ -155,7 +194,11 @@ final class ContainerDetailsViewModel: ObservableObject {
                     .appendingPathComponent("copy_\(UUID().uuidString)")
 
                 let fileURLs = try await Task.detached {
-                    try containerService.decryptContainer(at: fileURL, to: tempDir)
+                    try containerService.decryptContainer(
+                        at: fileURL,
+                        to: tempDir,
+                        privateKey: privateKey
+                    )
                 }.value
 
                 let documentsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -256,6 +299,21 @@ final class ContainerDetailsViewModel: ObservableObject {
             }
         } catch {
             recipients = []
+        }
+    }
+
+    private static func makeFileItems(from urls: [URL]) -> [ContainerFileItem] {
+        urls.map { url in
+            let values = try? url.resourceValues(forKeys: [.fileSizeKey])
+            let fileSize = Int64(values?.fileSize ?? 0)
+            let sizeText = ByteCountFormatter.string(fromByteCount: fileSize, countStyle: .file)
+
+            return ContainerFileItem(
+                id: UUID().uuidString,
+                name: url.lastPathComponent,
+                sizeText: sizeText,
+                localURL: url
+            )
         }
     }
 }

@@ -21,8 +21,6 @@ final class ContainerContentsViewModel: ObservableObject {
     @Published var showShareSheet = false
     @Published var shareItem: Any?
     @Published var showSaveAlert = false
-    @Published var isDecrypting = false
-    @Published var decryptionFailed = false
 
     @Published var showAddFilesSheet = false
     @Published var showFilesImporter = false
@@ -42,6 +40,10 @@ final class ContainerContentsViewModel: ObservableObject {
         container.files.isEmpty
     }
 
+    var canEditContents: Bool {
+        container.isOwned && container.isAvailable
+    }
+
     var addedFilesCount: Int {
         container.files.filter(\.isDraftAdded).count
     }
@@ -53,20 +55,19 @@ final class ContainerContentsViewModel: ObservableObject {
     // MARK: - Private
 
     private let coordinator: ContainersCoordinatorProtocol
-    private let containerService: ContainerService
     private var decryptedDir: URL?
+    private var backgroundObserver: NSObjectProtocol?
 
     // MARK: - Init
 
     init(
         coordinator: ContainersCoordinatorProtocol,
         container: Container,
-        containerService: ContainerService
+        decryptedDir: URL
     ) {
         self.coordinator = coordinator
         self.container = container
-        self.containerService = containerService
-        decryptContainer()
+        self.decryptedDir = decryptedDir
         observeBackground()
     }
 
@@ -95,20 +96,25 @@ final class ContainerContentsViewModel: ObservableObject {
     }
 
     func presentAddFilesSheet() {
+        guard canEditContents else { return }
         showAddFilesSheet = true
     }
 
     func openFilesImporter() {
+        guard canEditContents else { return }
         showAddFilesSheet = false
         showFilesImporter = true
     }
 
     func openPhotosPicker() {
+        guard canEditContents else { return }
         showAddFilesSheet = false
         showPhotosPicker = true
     }
 
     func handleImportedFiles(urls: [URL]) {
+        guard canEditContents else { return }
+
         let importedFiles: [ContainerFileItem] = urls.compactMap { sourceURL in
             let hasAccess = sourceURL.startAccessingSecurityScopedResource()
             defer {
@@ -151,6 +157,8 @@ final class ContainerContentsViewModel: ObservableObject {
     }
 
     func handlePickedPhotos(_ items: [PhotosPickerItem]) async {
+        guard canEditContents else { return }
+
         var pickedFiles: [ContainerFileItem] = []
 
         for (index, item) in items.enumerated() {
@@ -188,6 +196,8 @@ final class ContainerContentsViewModel: ObservableObject {
     }
 
     func toggleDeletion(for file: ContainerFileItem) {
+        guard canEditContents else { return }
+
         guard let index = container.files.firstIndex(where: { $0.id == file.id }) else {
             return
         }
@@ -201,11 +211,13 @@ final class ContainerContentsViewModel: ObservableObject {
     }
 
     func confirmSave() {
-        guard hasUnsavedChanges else { return }
+        guard canEditContents, hasUnsavedChanges else { return }
         showSaveAlert = true
     }
 
     func save() {
+        guard canEditContents else { return }
+
         container.files.removeAll(where: \.isMarkedForDeletion)
 
         for index in container.files.indices {
@@ -225,48 +237,8 @@ final class ContainerContentsViewModel: ObservableObject {
         container.files = []
     }
 
-    private func decryptContainer() {
-        guard let fileURL = container.fileURL else {
-            decryptionFailed = true
-            return
-        }
-
-        isDecrypting = true
-
-        Task {
-            do {
-                let outputDir = FileManager.default.temporaryDirectory
-                    .appendingPathComponent("decrypted_\(UUID().uuidString)")
-
-                let fileURLs = try await Task.detached {
-                    try self.containerService.decryptContainer(at: fileURL, to: outputDir)
-                }.value
-
-                self.decryptedDir = outputDir
-
-                self.container.files = fileURLs.map { url in
-                    let values = try? url.resourceValues(forKeys: [.fileSizeKey])
-                    let fileSize = Int64(values?.fileSize ?? 0)
-                    let sizeText = ByteCountFormatter.string(fromByteCount: fileSize, countStyle: .file)
-
-                    return ContainerFileItem(
-                        id: UUID().uuidString,
-                        name: url.lastPathComponent,
-                        sizeText: sizeText,
-                        localURL: url
-                    )
-                }
-
-                self.isDecrypting = false
-            } catch {
-                self.isDecrypting = false
-                self.decryptionFailed = true
-            }
-        }
-    }
-
     private func observeBackground() {
-        NotificationCenter.default.addObserver(
+        backgroundObserver = NotificationCenter.default.addObserver(
             forName: UIApplication.didEnterBackgroundNotification,
             object: nil,
             queue: .main
@@ -274,6 +246,16 @@ final class ContainerContentsViewModel: ObservableObject {
             Task { @MainActor in
                 self?.cleanupDecryptedFiles()
             }
+        }
+    }
+
+    deinit {
+        if let backgroundObserver {
+            NotificationCenter.default.removeObserver(backgroundObserver)
+        }
+
+        if let decryptedDir {
+            try? FileManager.default.removeItem(at: decryptedDir)
         }
     }
 }

@@ -7,6 +7,7 @@
 
 import Combine
 import Foundation
+import PQContainerKit
 
 @MainActor
 final class SaveContainerViewModel: ObservableObject {
@@ -31,6 +32,7 @@ final class SaveContainerViewModel: ObservableObject {
     private let container: Container
     private let containerService: ContainerService
     private let historyRepository: HistoryRepository
+    private let contactRepository: ContactRepository
 
     // MARK: - Initializer
     
@@ -38,12 +40,14 @@ final class SaveContainerViewModel: ObservableObject {
         coordinator: ContainersCoordinatorProtocol,
         container: Container,
         containerService: ContainerService,
-        historyRepository: HistoryRepository
+        historyRepository: HistoryRepository,
+        contactRepository: ContactRepository
     ) {
         self.coordinator = coordinator
         self.container = container
         self.containerService = containerService
         self.historyRepository = historyRepository
+        self.contactRepository = contactRepository
         startSaving()
     }
 
@@ -119,12 +123,15 @@ final class SaveContainerViewModel: ObservableObject {
             .appendingPathExtension("pqck")
 
         do {
+            let recipients = try knownRecipientKeys(for: fileURL)
+
             try await Task.detached {
                 try self.containerService.reencryptContainer(
                     name: self.container.name,
                     files: fileURLs,
                     originalContainerURL: fileURL,
-                    destinationURL: tempURL
+                    destinationURL: tempURL,
+                    recipients: recipients
                 )
             }.value
 
@@ -141,6 +148,20 @@ final class SaveContainerViewModel: ObservableObject {
         } catch {
             try? FileManager.default.removeItem(at: tempURL)
             return .failure(error)
+        }
+    }
+
+    private func knownRecipientKeys(for fileURL: URL) throws -> [XWing.PublicKey] {
+        let info = try containerService.inspectContainer(at: fileURL)
+        let recipientFingerprints = Set(info.recipientKeyIds)
+
+        return contactRepository.fetchAll().compactMap { contact in
+            guard let publicKey = try? XWing.PublicKey(rawRepresentation: contact.publicKeyRaw),
+                  recipientFingerprints.contains(publicKey.fingerprint) else {
+                return nil
+            }
+
+            return publicKey
         }
     }
 

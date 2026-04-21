@@ -42,8 +42,8 @@ final class ContainersCoordinator: Coordinator<ContainersRoute>, ContainersCoord
         await navigate(toRoute: .accessControl(coordinator: self, container: container))
     }
     
-    func showContainerContents(with container: Container) async {
-        await navigate(toRoute: .containersContents(coordinator: self, container: container))
+    func showContainerContents(with container: Container, decryptedDir: URL) async {
+        await navigate(toRoute: .containersContents(coordinator: self, container: container, decryptedDir: decryptedDir))
     }
     
     func showFileViewer(with item: ContainerFileItem) async {

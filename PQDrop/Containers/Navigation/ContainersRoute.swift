@@ -14,7 +14,7 @@ enum ContainersRoute: RouteType {
     case importContainer(coordinator: ContainersCoordinatorProtocol, fileURL: URL)
     case recipientsSheet(recipients: [Recipient])
     case accessControl(coordinator: ContainersCoordinatorProtocol, container: Container)
-    case containersContents(coordinator: ContainersCoordinatorProtocol, container: Container)
+    case containersContents(coordinator: ContainersCoordinatorProtocol, container: Container, decryptedDir: URL)
     case fileViewer(item: ContainerFileItem)
     case saveContainer(coordinator: ContainersCoordinatorProtocol, container: Container)
     case editContainerName(coordinator: ContainersCoordinatorProtocol, mode: EditContainerNameViewModel.Mode)
@@ -93,20 +93,17 @@ enum ContainersRoute: RouteType {
                 container: container,
                 containerService: containerService,
                 contactRepository: contactRepository,
-                historyRepository: historyRepository
+                historyRepository: historyRepository,
+                keyPairManager: keyPairManager
             )
             let view = AccessControlView(viewModel: viewModel)
             return AnyView(view)
 
-        case .containersContents(let coordinator, let container):
-            let keychainService = KeychainService()
-            let keyPairManager = KeyPairManager(keychainService: keychainService)
-            let archiveService = ArchiveService()
-            let containerService = ContainerService(archiveService: archiveService, keyPairManager: keyPairManager)
+        case .containersContents(let coordinator, let container, let decryptedDir):
             let viewModel = ContainerContentsViewModel(
                 coordinator: coordinator,
                 container: container,
-                containerService: containerService
+                decryptedDir: decryptedDir
             )
             let view = ContainerContentsView(viewModel: viewModel)
             return AnyView(view)
@@ -122,11 +119,13 @@ enum ContainersRoute: RouteType {
             let archiveService = ArchiveService()
             let containerService = ContainerService(archiveService: archiveService, keyPairManager: keyPairManager)
             let historyRepository = HistoryRepository()
+            let contactRepository = ContactRepository()
             let viewModel = SaveContainerViewModel(
                 coordinator: coordinator,
                 container: container,
                 containerService: containerService,
-                historyRepository: historyRepository
+                historyRepository: historyRepository,
+                contactRepository: contactRepository
             )
             let view = SaveContainerView(viewModel: viewModel)
             return AnyView(view)

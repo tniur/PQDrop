@@ -164,17 +164,19 @@ struct ContainerContentsView: View {
                             Label(String(localized: "shared.export"), systemImage: "square.and.arrow.up")
                         }
 
-                        if file.isMarkedForDeletion {
-                            Button {
-                                viewModel.toggleDeletion(for: file)
-                            } label: {
-                                Label(String(localized: "shared.restore"), systemImage: "arrow.uturn.backward")
-                            }
-                        } else {
-                            Button(role: .destructive) {
-                                viewModel.toggleDeletion(for: file)
-                            } label: {
-                                Label(String(localized: "shared.delete"), systemImage: "trash")
+                        if viewModel.canEditContents {
+                            if file.isMarkedForDeletion {
+                                Button {
+                                    viewModel.toggleDeletion(for: file)
+                                } label: {
+                                    Label(String(localized: "shared.restore"), systemImage: "arrow.uturn.backward")
+                                }
+                            } else {
+                                Button(role: .destructive) {
+                                    viewModel.toggleDeletion(for: file)
+                                } label: {
+                                    Label(String(localized: "shared.delete"), systemImage: "trash")
+                                }
                             }
                         }
                     }
@@ -184,39 +186,41 @@ struct ContainerContentsView: View {
 
     @ViewBuilder
     private var footerView: some View {
-        if viewModel.hasUnsavedChanges {
-            VStack(spacing: 10) {
-                Text(String(localized: "containers.contents.unsaved.title"))
-                    .font(PQFont.B16)
-                    .foregroundStyle(PQColor.blue1.swiftUIColor)
-
-                VStack(spacing: 8) {
-                    PQButton(
-                        String(localized: "shared.add.files"),
-                        icon: PQImage.import.swiftUIImage,
-                        style: .init(.purple),
-                        action: viewModel.presentAddFilesSheet
-                    )
-
-                    PQButton(
-                        String(localized: "shared.save"),
-                        style: .init(.primary),
-                        action: viewModel.confirmSave
-                    )
-
-                    Text(String(localized: "containers.contents.unsaved.subtitle"))
-                        .font(PQFont.R12)
+        if viewModel.canEditContents {
+            if viewModel.hasUnsavedChanges {
+                VStack(spacing: 10) {
+                    Text(String(localized: "containers.contents.unsaved.title"))
+                        .font(PQFont.B16)
                         .foregroundStyle(PQColor.blue1.swiftUIColor)
-                        .multilineTextAlignment(.center)
+
+                    VStack(spacing: 8) {
+                        PQButton(
+                            String(localized: "shared.add.files"),
+                            icon: PQImage.import.swiftUIImage,
+                            style: .init(.purple),
+                            action: viewModel.presentAddFilesSheet
+                        )
+
+                        PQButton(
+                            String(localized: "shared.save"),
+                            style: .init(.primary),
+                            action: viewModel.confirmSave
+                        )
+
+                        Text(String(localized: "containers.contents.unsaved.subtitle"))
+                            .font(PQFont.R12)
+                            .foregroundStyle(PQColor.blue1.swiftUIColor)
+                            .multilineTextAlignment(.center)
+                    }
                 }
+            } else {
+                PQButton(
+                    String(localized: "shared.add.files"),
+                    icon: PQImage.import.swiftUIImage,
+                    style: .init(.purple),
+                    action: viewModel.presentAddFilesSheet
+                )
             }
-        } else {
-            PQButton(
-                String(localized: "shared.add.files"),
-                icon: PQImage.import.swiftUIImage,
-                style: .init(.purple),
-                action: viewModel.presentAddFilesSheet
-            )
         }
     }
 

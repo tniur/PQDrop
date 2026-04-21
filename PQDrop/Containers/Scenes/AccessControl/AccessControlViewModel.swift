@@ -33,6 +33,7 @@ final class AccessControlViewModel: ObservableObject {
     private let containerService: ContainerService
     private let contactRepository: ContactRepository
     private let historyRepository: HistoryRepository
+    private let keyPairManager: KeyPairManager
     private var contactPublicKeys: [String: Data] = [:]
 
     // MARK: - Init
@@ -42,13 +43,15 @@ final class AccessControlViewModel: ObservableObject {
         container: Container,
         containerService: ContainerService,
         contactRepository: ContactRepository,
-        historyRepository: HistoryRepository
+        historyRepository: HistoryRepository,
+        keyPairManager: KeyPairManager
     ) {
         self.coordinator = coordinator
         self.container = container
         self.containerService = containerService
         self.contactRepository = contactRepository
         self.historyRepository = historyRepository
+        self.keyPairManager = keyPairManager
 
         loadContacts()
     }
@@ -100,9 +103,7 @@ final class AccessControlViewModel: ObservableObject {
             do {
                 let info = try containerService.inspectContainer(at: fileURL)
 
-                var recipientKeys: [XWing.PublicKey] = info.recipientKeyIds.compactMap { fingerprint in
-                    try? XWing.PublicKey(rawRepresentation: fingerprint.rawValue)
-                }
+                var recipientKeys = knownContactKeys(in: info.recipientKeyIds)
 
                 for contactId in idsToGrant {
                     guard let keyData = contactPublicKeys[contactId],
@@ -114,6 +115,11 @@ final class AccessControlViewModel: ObservableObject {
                     }
                 }
 
+                guard let privateKey = try keyPairManager.loadPrivateKey() else {
+                    isProcessing = false
+                    return
+                }
+
                 let tempURL = FileManager.default.temporaryDirectory
                     .appendingPathComponent(UUID().uuidString)
                     .appendingPathExtension("pqck")
@@ -122,7 +128,8 @@ final class AccessControlViewModel: ObservableObject {
                     try self.containerService.rekeyContainer(
                         at: fileURL,
                         to: tempURL,
-                        remainingRecipients: recipientKeys
+                        remainingRecipients: recipientKeys,
+                        privateKey: privateKey
                     )
                 }.value
 
@@ -171,9 +178,13 @@ final class AccessControlViewModel: ObservableObject {
 
                 let revokedFingerprint = revokedKey.fingerprint
 
-                let remainingKeys: [XWing.PublicKey] = info.recipientKeyIds.compactMap { fingerprint in
-                    guard fingerprint != revokedFingerprint else { return nil }
-                    return try? XWing.PublicKey(rawRepresentation: fingerprint.rawValue)
+                let remainingKeys = knownContactKeys(in: info.recipientKeyIds).filter { publicKey in
+                    publicKey.fingerprint != revokedFingerprint
+                }
+
+                guard let privateKey = try keyPairManager.loadPrivateKey() else {
+                    isProcessing = false
+                    return
                 }
 
                 let tempURL = FileManager.default.temporaryDirectory
@@ -184,7 +195,8 @@ final class AccessControlViewModel: ObservableObject {
                     try self.containerService.rekeyContainer(
                         at: fileURL,
                         to: tempURL,
-                        remainingRecipients: remainingKeys
+                        remainingRecipients: remainingKeys,
+                        privateKey: privateKey
                     )
                 }.value
 
@@ -236,5 +248,18 @@ final class AccessControlViewModel: ObservableObject {
                 }
             }
         } catch {}
+    }
+
+    private func knownContactKeys(in recipientKeyIds: [Fingerprint]) -> [XWing.PublicKey] {
+        let recipientFingerprints = Set(recipientKeyIds)
+
+        return contactPublicKeys.values.compactMap { rawPublicKey in
+            guard let publicKey = try? XWing.PublicKey(rawRepresentation: rawPublicKey),
+                  recipientFingerprints.contains(publicKey.fingerprint) else {
+                return nil
+            }
+
+            return publicKey
+        }
     }
 }

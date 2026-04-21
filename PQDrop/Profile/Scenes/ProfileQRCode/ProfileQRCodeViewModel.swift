@@ -42,7 +42,9 @@ final class ProfileQRCodeViewModel: ObservableObject {
 
     private func loadPublicKey() {
         Task {
-            guard let publicKey = try? keyPairManager.loadPublicKey() else { return }
+            guard let publicKey = try? keyPairManager.loadPublicKeyRequiringAuthentication(
+                reason: "Показать QR профиля"
+            ) else { return }
             let base64 = publicKey.base64
 
             qrPayload = base64
