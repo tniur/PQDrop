@@ -19,7 +19,7 @@ struct EditContactNameView: View {
     var body: some View {
         BackgroundView {
             VStack(alignment: .leading, spacing: 20) {
-                Text("Имя контакта")
+                Text(String(localized: "contacts.edit.name.title"))
                     .font(PQFont.B30)
                     .foregroundStyle(PQColor.base10.swiftUIColor)
                 
@@ -45,11 +45,11 @@ struct EditContactNameView: View {
     private var contentView: some View {
         VStack(alignment: .leading, spacing: 8) {
             PQTextField(
-                placeholderText: "Введите имя контакта",
+                placeholderText: String(localized: "contacts.edit.name.placeholder"),
                 text: $viewModel.name
             )
             
-            Text("Имя видно только вам.")
+            Text(String(localized: "contacts.edit.name.hint"))
                 .font(PQFont.R14)
                 .foregroundStyle(PQColor.base5.swiftUIColor)
         }

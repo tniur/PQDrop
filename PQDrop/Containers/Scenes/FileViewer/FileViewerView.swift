@@ -65,11 +65,11 @@ struct FileViewerView: View {
         VStack(spacing: 12) {
             Spacer()
 
-            Text("Не удалось открыть файл")
+            Text(String(localized: "files.viewer.error.title"))
                 .font(PQFont.B24)
                 .foregroundStyle(PQColor.base7.swiftUIColor)
 
-            Text("Этот формат пока не поддерживается для предпросмотра. Файл можно экспортировать и открыть в другом приложении.")
+            Text(String(localized: "files.viewer.error.message"))
                 .font(PQFont.R14)
                 .foregroundStyle(PQColor.base5.swiftUIColor)
                 .multilineTextAlignment(.center)

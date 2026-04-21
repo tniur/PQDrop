@@ -82,7 +82,7 @@ struct CreateContainerFilesView: View {
         .safeAreaInset(edge: .bottom) {
             if viewModel.hasFiles {
                 PQButton(
-                    "Создать",
+                    String(localized: "shared.create"),
                     style: .init(.purple),
                     action: viewModel.create
                 )
@@ -94,17 +94,17 @@ struct CreateContainerFilesView: View {
     private var headerView: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Файлы контейнера")
+                Text(String(localized: "containers.create.files.title"))
                     .font(PQFont.B30)
                     .foregroundStyle(PQColor.base10.swiftUIColor)
                 
-                Text("Выберите файлы, которые войдут в контейнер.")
+                Text(String(localized: "containers.create.files.subtitle"))
                     .font(PQFont.R14)
                     .foregroundStyle(PQColor.base5.swiftUIColor)
             }
             
             PQButton(
-                "Добавить файлы",
+                String(localized: "shared.add.files"),
                 icon: PQImage.import.swiftUIImage,
                 style: .init(.primary),
                 action: viewModel.presentAddFilesSheet
@@ -124,7 +124,7 @@ struct CreateContainerFilesView: View {
                         Button(role: .destructive) {
                             viewModel.removeFile(file)
                         } label: {
-                            Label("Удалить", systemImage: "trash")
+                            Label(String(localized: "shared.delete"), systemImage: "trash")
                         }
                     }
             }

@@ -23,7 +23,7 @@ struct ContainersView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .principal) {
-                        Text("Контейнеры")
+                        Text(String(localized: "containers.title"))
                             .font(PQFont.B30)
                             .foregroundStyle(PQColor.base0.swiftUIColor)
                     }
@@ -32,7 +32,7 @@ struct ContainersView: View {
                         toolbarButtonsView
                     }
                 }
-                .searchable(text: $viewModel.searchText, prompt: "Поиск")
+                .searchable(text: $viewModel.searchText, prompt: String(localized: "shared.search"))
                 .searchToolbarBehavior(.minimize)
         }
         .onAppear {
@@ -102,19 +102,19 @@ struct ContainersView: View {
 
     private var segmentedControl: some View {
         Picker("", selection: $viewModel.selectedTab) {
-            Text("Созданные").tag(ContainersTab.created)
-            Text("Полученные").tag(ContainersTab.received)
+            Text(String(localized: "containers.tab.created")).tag(ContainersTab.created)
+            Text(String(localized: "containers.tab.received")).tag(ContainersTab.received)
         }
         .pickerStyle(.segmented)
     }
 
     private var emptySearchView: some View {
         VStack(spacing: 8) {
-            Text("Ничего не найдено")
+            Text(String(localized: "shared.nothing.found"))
                 .font(PQFont.B16)
                 .foregroundStyle(PQColor.base0.swiftUIColor)
 
-            Text("Попробуйте другое имя или id")
+            Text(String(localized: "containers.search.empty.subtitle"))
                 .font(PQFont.R12)
                 .foregroundStyle(PQColor.blue2.swiftUIColor)
         }
@@ -160,28 +160,28 @@ struct ContainersView: View {
                     Button(role: .destructive) {
                         viewModel.containerToDelete = container
                     } label: {
-                        Label("Удалить", systemImage: "trash")
+                        Label(String(localized: "shared.delete"), systemImage: "trash")
                     }
                 }
             }
         }
         .alert(
-            "Удалить контейнер?",
+            String(localized: "containers.delete.alert.title"),
             isPresented: Binding(
                 get: { viewModel.containerToDelete != nil },
                 set: { if !$0 { viewModel.containerToDelete = nil } }
             ),
             actions: {
-                Button("Удалить", role: .destructive) {
+                Button(String(localized: "shared.delete"), role: .destructive) {
                     if let container = viewModel.containerToDelete {
                         viewModel.delete(container: container)
                     }
                 }
-                Button("Отмена", role: .cancel) {}
+                Button(String(localized: "shared.cancel"), role: .cancel) {}
             },
             message: {
                 if let container = viewModel.containerToDelete {
-                    Text("Контейнер «\(container.name)» будет удалён.")
+                    Text(String(localized: "containers.delete.alert.message\(container.name)"))
                 }
             }
         )

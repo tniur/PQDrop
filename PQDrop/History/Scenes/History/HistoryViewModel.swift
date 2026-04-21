@@ -19,7 +19,7 @@ final class HistoryViewModel: ObservableObject {
     @Published var filter: HistoryEventFilter = .all
 
     var retentionSubtitle: String {
-        "Логи хранятся \(selectedRetentionPeriod.title)"
+        String(localized: "history.retention.subtitle\(selectedRetentionPeriod.title)")
     }
 
     var retentionAlertMessage: String {
@@ -28,10 +28,10 @@ final class HistoryViewModel: ObservableObject {
         }
 
         if pendingRetentionPeriod.rawValue < selectedRetentionPeriod.rawValue {
-            return "При сокращении срока хранения будет сложнее отслеживать действия"
+            return String(localized: "history.retention.alert.message.decrease")
         }
 
-        return "История будет храниться \(pendingRetentionPeriod.title)."
+        return String(localized: "history.retention.alert.message.increase\(pendingRetentionPeriod.title)")
     }
 
     var visibleSections: [HistoryEventSection] {

@@ -5,6 +5,8 @@
 //  Created by Анастасия Журавлева on 13.04.2026.
 //
 
+import Foundation
+
 enum CreateContainerStatus: Equatable {
     case preparingFiles
     case encrypting
@@ -13,11 +15,11 @@ enum CreateContainerStatus: Equatable {
     var text: String {
         switch self {
         case .preparingFiles:
-            return "Подготавливаем файлы..."
+            return String(localized: "containers.create.status.preparing.files")
         case .encrypting:
-            return "Шифруем содержимое..."
+            return String(localized: "containers.create.status.encrypting")
         case .savingContainer:
-            return "Сохраняем контейнер..."
+            return String(localized: "containers.create.status.saving")
         }
     }
 }

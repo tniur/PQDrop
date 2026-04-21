@@ -17,11 +17,11 @@ struct CreateKeysView: View {
     private var title: String {
         switch viewModel.phase {
         case .idle, .creating:
-            return "Создание ключей"
+            return String(localized: "onboarding.keys.title.creating")
         case .success:
-            return "Ключи созданы"
+            return String(localized: "onboarding.keys.title.success")
         case .failure:
-            return "Не удалось создать ключи"
+            return String(localized: "onboarding.keys.title.failure")
         }
     }
     
@@ -81,13 +81,13 @@ struct CreateKeysView: View {
 
     private var idleBlock: some View {
         VStack(spacing: .zero) {
-            Text("Ключи нужны для шифрования контейнеров и выдачи доступа другим людям. Они сохраняются в защищённом хранилище iOS.")
+            Text(String(localized: "onboarding.keys.description"))
                 .font(PQFont.R14)
                 .foregroundStyle(PQColor.blue2.swiftUIColor)
                 .multilineTextAlignment(.center)
                 .padding(.bottom, 24)
 
-            PQButton("Сгенерировать ключи") {
+            PQButton(String(localized: "onboarding.keys.generate")) {
                 viewModel.createKeys()
             }
         }
@@ -116,7 +116,7 @@ struct CreateKeysView: View {
 
     private var successBlock: some View {
         VStack(spacing: .zero) {
-            Text("Теперь вы можете шифровать файлы и выдавать доступ через QR‑коды.")
+            Text(String(localized: "onboarding.keys.success.description"))
                 .font(PQFont.R14)
                 .foregroundStyle(PQColor.blue2.swiftUIColor)
                 .multilineTextAlignment(.center)
@@ -124,7 +124,7 @@ struct CreateKeysView: View {
             Spacer()
             
             PQButton(
-                "Далее",
+                String(localized: "shared.next"),
                 action: viewModel.finish
             )
         }
@@ -132,14 +132,14 @@ struct CreateKeysView: View {
 
     private var failureBlock: some View {
         VStack(spacing: .zero) {
-            Text("Попробуйте ещё раз. Если ошибка повторится — проверьте свободное место и настройки безопасности устройства.")
+            Text(String(localized: "onboarding.keys.failure.description"))
                 .font(PQFont.R14)
                 .foregroundStyle(PQColor.blue2.swiftUIColor)
                 .multilineTextAlignment(.center)
 
             Spacer()
 
-            PQButton("Повторить", action: viewModel.retry)
+            PQButton(String(localized: "shared.retry"), action: viewModel.retry)
         }
     }
 

@@ -24,7 +24,7 @@ struct HistoryView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text("История")
+                Text(String(localized: "history.title"))
                     .font(PQFont.B30)
                     .foregroundStyle(PQColor.base0.swiftUIColor)
             }
@@ -33,12 +33,12 @@ struct HistoryView: View {
                 filterButton
             }
         }
-        .alert("Изменить срок хранения?", isPresented: $viewModel.showRetentionAlert) {
-            Button("Изменить") {
+        .alert(String(localized: "history.retention.alert.title"), isPresented: $viewModel.showRetentionAlert) {
+            Button(String(localized: "shared.change")) {
                 viewModel.confirmRetentionChange()
             }
 
-            Button("Отмена", role: .cancel) {
+            Button(String(localized: "shared.cancel"), role: .cancel) {
                 viewModel.cancelRetentionChange()
             }
         } message: {
@@ -121,11 +121,11 @@ struct HistoryView: View {
 
     private var emptyView: some View {
         VStack(spacing: 8) {
-            Text("История пока пуста")
+            Text(String(localized: "history.empty.title"))
                 .font(PQFont.B16)
                 .foregroundStyle(PQColor.base0.swiftUIColor)
 
-            Text("Здесь появятся действия с контейнерами и доступом.")
+            Text(String(localized: "history.empty.subtitle"))
                 .font(PQFont.R12)
                 .foregroundStyle(PQColor.blue2.swiftUIColor)
                 .multilineTextAlignment(.center)

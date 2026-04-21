@@ -5,6 +5,8 @@
 //  Created by Анастасия Журавлева on 19.02.2026.
 //
 
+import Foundation
+
 enum CreateKeysStatus: Equatable {
     case generating
     case saving
@@ -13,11 +15,11 @@ enum CreateKeysStatus: Equatable {
     var text: String {
         switch self {
         case .generating:
-            return "Генерируем ключи..."
+            return String(localized: "onboarding.keys.status.generating")
         case .saving: 
-            return "Сохраняем в защищённое хранилище…"
+            return String(localized: "onboarding.keys.status.saving")
         case .slowDeviceHint: 
-            return "На некоторых устройствах это может занять немного больше времени."
+            return String(localized: "onboarding.keys.status.slow.device")
         }
     }
 }

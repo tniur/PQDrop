@@ -44,7 +44,7 @@ struct ContactsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text("Контакты")
+                Text(String(localized: "contacts.title"))
                     .font(PQFont.B30)
                     .foregroundStyle(PQColor.base0.swiftUIColor)
             }
@@ -53,25 +53,25 @@ struct ContactsView: View {
                 toolbarButtonsView
             }
         }
-        .searchable(text: $viewModel.searchText, prompt: "Поиск")
+        .searchable(text: $viewModel.searchText, prompt: String(localized: "shared.search"))
         .searchToolbarBehavior(.minimize)
         .alert(
-            "Удалить контакт?",
+            String(localized: "contacts.delete.alert.title"),
             isPresented: Binding(
                 get: { viewModel.contactToDelete != nil },
                 set: { if !$0 { viewModel.contactToDelete = nil } }
             ),
             actions: {
-                Button("Удалить", role: .destructive) {
+                Button(String(localized: "shared.delete"), role: .destructive) {
                     if let contact = viewModel.contactToDelete {
                         viewModel.delete(contact: contact)
                     }
                 }
-                Button("Отмена", role: .cancel) {}
+                Button(String(localized: "shared.cancel"), role: .cancel) {}
             },
             message: {
                 if let contact = viewModel.contactToDelete {
-                    Text("Контакт «\(contact.name)» будет удалён.")
+                    Text(String(localized: "contacts.delete.alert.message\(contact.name)"))
                 }
             }
         )
@@ -90,7 +90,7 @@ struct ContactsView: View {
                 Button(role: .destructive) {
                     viewModel.showClearAlert = true
                 } label: {
-                    Label("Очистить контакты", systemImage: "trash")
+                    Label(String(localized: "contacts.clear.menu"), systemImage: "trash")
                 }
             } label: {
                 PQImage.dots.swiftUIImage
@@ -102,18 +102,18 @@ struct ContactsView: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .alert("Очистить все контакты?", isPresented: $viewModel.showClearAlert) {
-            Button("Удалить все", role: .destructive) {
+        .alert(String(localized: "contacts.clear.alert.title"), isPresented: $viewModel.showClearAlert) {
+            Button(String(localized: "contacts.clear.alert.confirm"), role: .destructive) {
                 viewModel.clearContacts()
             }
-            Button("Отмена", role: .cancel) {}
+            Button(String(localized: "shared.cancel"), role: .cancel) {}
         } message: {
-            Text("Все контакты будут удалены.")
+            Text(String(localized: "contacts.clear.alert.message"))
         }
     }
     
     private var stubView: some View {
-        Text("Пока нет контактов")
+        Text(String(localized: "contacts.empty.title"))
             .font(PQFont.R16)
             .foregroundStyle(PQColor.purple2.swiftUIColor)
             .frame(maxWidth: .infinity)
@@ -135,12 +135,12 @@ struct ContactsView: View {
                     Button(role: .destructive) {
                         viewModel.contactToDelete = contact
                     } label: {
-                        Label("Удалить", systemImage: "trash")
+                        Label(String(localized: "shared.delete"), systemImage: "trash")
                     }
                 }
             }
             
-            Text("Verified – ключ подтверждён по независимому каналу.")
+            Text(String(localized: "contacts.verified.hint"))
                 .font(PQFont.R12)
                 .foregroundStyle(PQColor.purple2.swiftUIColor)
         }

@@ -19,11 +19,11 @@ struct ImportContainerView: View {
         case .loading:
             return ""
         case .success:
-            return "Контейнер\nимпортирован"
+            return String(localized: "containers.import.result.success.title")
         case .invalidFormat:
-            return "Это не контейнер"
+            return String(localized: "containers.import.result.invalid.title")
         case .accessDenied:
-            return "Нет доступа\nк этому контейнеру"
+            return String(localized: "containers.import.result.access.denied.title")
         }
     }
 
@@ -111,7 +111,7 @@ struct ImportContainerView: View {
 
     private var successBlock: some View {
         VStack(spacing: .zero) {
-            Text("Вы получили доступ к контейнеру.\nЕго можно открыть или найти\nв разделе \"Полученные\"")
+            Text(String(localized: "containers.import.result.success.message"))
                 .font(PQFont.R14)
                 .foregroundStyle(PQColor.blue2.swiftUIColor)
                 .multilineTextAlignment(.center)
@@ -120,13 +120,13 @@ struct ImportContainerView: View {
 
             VStack(spacing: 8) {
                 PQButton(
-                    "Открыть контейнер",
+                    String(localized: "containers.open"),
                     style: .init(.primary),
                     action: viewModel.openContainer
                 )
 
                 PQButton(
-                    "Перейти к списку",
+                    String(localized: "shared.go.to.list"),
                     style: .init(.secondary),
                     action: viewModel.goToList
                 )
@@ -136,7 +136,7 @@ struct ImportContainerView: View {
 
     private var invalidFormatBlock: some View {
         VStack(spacing: .zero) {
-            Text("Выбранный файл не является контейнером\nэтого приложения. Выберите другой файл.")
+            Text(String(localized: "containers.import.result.invalid.message"))
                 .font(PQFont.R14)
                 .foregroundStyle(PQColor.blue2.swiftUIColor)
                 .multilineTextAlignment(.center)
@@ -144,7 +144,7 @@ struct ImportContainerView: View {
             Spacer()
 
             PQButton(
-                "Ok",
+                String(localized: "shared.ok"),
                 style: .init(.primary),
                 action: viewModel.returnToList
             )
@@ -153,7 +153,7 @@ struct ImportContainerView: View {
 
     private var accessDeniedBlock: some View {
         VStack(spacing: .zero) {
-            Text("Этот контейнер зашифрован\nдля другого списка получателей.\nВы не можете открыть его содержимое.")
+            Text(String(localized: "containers.import.result.access.denied.message"))
                 .font(PQFont.R14)
                 .foregroundStyle(PQColor.blue2.swiftUIColor)
                 .multilineTextAlignment(.center)
@@ -161,7 +161,7 @@ struct ImportContainerView: View {
             Spacer()
 
             PQButton(
-                "Вернуться к контейнерам",
+                String(localized: "containers.return.to.list"),
                 style: .init(.primary),
                 action: viewModel.returnToList
             )

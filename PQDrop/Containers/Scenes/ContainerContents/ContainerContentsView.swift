@@ -70,16 +70,16 @@ struct ContainerContentsView: View {
             }
         }
         .alert(
-            "Сохранить изменения?",
+            String(localized: "containers.contents.save.alert.title"),
             isPresented: $viewModel.showSaveAlert
         ) {
-            Button("Сохранить") {
+            Button(String(localized: "shared.save")) {
                 viewModel.save()
             }
 
-            Button("Отмена", role: .cancel) {}
+            Button(String(localized: "shared.cancel"), role: .cancel) {}
         } message: {
-            Text("Файлы в контейнере будут обновлены. После этого начнётся перешифровка, и это может занять некоторое время.")
+            Text(String(localized: "containers.contents.save.alert.message"))
         }
     }
 
@@ -137,11 +137,11 @@ struct ContainerContentsView: View {
 
     private var emptyStateView: some View {
         VStack(spacing: 8) {
-            Text("Контейнер пуст")
+            Text(String(localized: "containers.contents.empty.title"))
                 .font(PQFont.B16)
                 .foregroundStyle(PQColor.base0.swiftUIColor)
 
-            Text("Добавьте файлы, чтобы сохранить их в зашифрованном контейнере")
+            Text(String(localized: "containers.contents.empty.subtitle"))
                 .font(PQFont.R12)
                 .foregroundStyle(PQColor.blue2.swiftUIColor)
                 .multilineTextAlignment(.center)
@@ -161,20 +161,20 @@ struct ContainerContentsView: View {
                         Button {
                             viewModel.exportFile(file)
                         } label: {
-                            Label("Экспортировать", systemImage: "square.and.arrow.up")
+                            Label(String(localized: "shared.export"), systemImage: "square.and.arrow.up")
                         }
 
                         if file.isMarkedForDeletion {
                             Button {
                                 viewModel.toggleDeletion(for: file)
                             } label: {
-                                Label("Вернуть", systemImage: "arrow.uturn.backward")
+                                Label(String(localized: "shared.restore"), systemImage: "arrow.uturn.backward")
                             }
                         } else {
                             Button(role: .destructive) {
                                 viewModel.toggleDeletion(for: file)
                             } label: {
-                                Label("Удалить", systemImage: "trash")
+                                Label(String(localized: "shared.delete"), systemImage: "trash")
                             }
                         }
                     }
@@ -186,25 +186,25 @@ struct ContainerContentsView: View {
     private var footerView: some View {
         if viewModel.hasUnsavedChanges {
             VStack(spacing: 10) {
-                Text("Изменения не сохранены")
+                Text(String(localized: "containers.contents.unsaved.title"))
                     .font(PQFont.B16)
                     .foregroundStyle(PQColor.blue1.swiftUIColor)
 
                 VStack(spacing: 8) {
                     PQButton(
-                        "Добавить файлы",
+                        String(localized: "shared.add.files"),
                         icon: PQImage.import.swiftUIImage,
                         style: .init(.purple),
                         action: viewModel.presentAddFilesSheet
                     )
 
                     PQButton(
-                        "Сохранить",
+                        String(localized: "shared.save"),
                         style: .init(.primary),
                         action: viewModel.confirmSave
                     )
 
-                    Text("После сохранения контейнер будет перешифрован")
+                    Text(String(localized: "containers.contents.unsaved.subtitle"))
                         .font(PQFont.R12)
                         .foregroundStyle(PQColor.blue1.swiftUIColor)
                         .multilineTextAlignment(.center)
@@ -212,7 +212,7 @@ struct ContainerContentsView: View {
             }
         } else {
             PQButton(
-                "Добавить файлы",
+                String(localized: "shared.add.files"),
                 icon: PQImage.import.swiftUIImage,
                 style: .init(.purple),
                 action: viewModel.presentAddFilesSheet

@@ -29,15 +29,15 @@ struct ContainerDetailsView: View {
         .toolbar(.hidden, for: .tabBar)
         .navigationBarTitleDisplayMode(.inline)
         .alert(
-            "Удалить контейнер?",
+            String(localized: "containers.delete.alert.title"),
             isPresented: $viewModel.showDeleteAlert
         ) {
-            Button("Удалить", role: .destructive) {
+            Button(String(localized: "shared.delete"), role: .destructive) {
                 viewModel.deleteContainer()
             }
-            Button("Отмена", role: .cancel) {}
+            Button(String(localized: "shared.cancel"), role: .cancel) {}
         } message: {
-            Text("Доступ к его содержимому будет потерян.")
+            Text(String(localized: "containers.details.delete.alert.message"))
         }
         .sheet(isPresented: $viewModel.showShareSheet) {
             ActivityViewControllerRepresentable(activityItems: [viewModel.container.fileURL as Any].compactMap { $0 })
@@ -62,14 +62,14 @@ struct ContainerDetailsView: View {
             menuRowsView
             
             if !viewModel.isAvailable {
-                Text("Нет доступа к содержимому")
+                Text(String(localized: "containers.details.no.access"))
                     .font(PQFont.R14)
                     .foregroundStyle(PQColor.base0.swiftUIColor)
                     .multilineTextAlignment(.center)
             }
             
             PQButton(
-                "Удалить",
+                String(localized: "shared.delete"),
                 style: .init(.secondary),
                 action: viewModel.confirmDelete
             )
@@ -125,7 +125,7 @@ struct ContainerDetailsView: View {
             .frame(width: 18, height: 18)
             .foregroundStyle(PQColor.base0.swiftUIColor)
             
-            Text(viewModel.isAvailable ? "Доступен" : "Недоступен")
+            Text(String(localized: viewModel.isAvailable ? "shared.available" : "shared.unavailable"))
                 .font(PQFont.B14)
                 .foregroundStyle(PQColor.base0.swiftUIColor)
         }
@@ -144,14 +144,14 @@ struct ContainerDetailsView: View {
     private var actionButtonsRow: some View {
         HStack(spacing: 8) {
             PQButton(
-                "Открыть",
+                String(localized: "containers.open"),
                 icon: PQImage.box.swiftUIImage,
                 action: viewModel.openContainer
             )
             .disabled(!viewModel.isAvailable)
 
             PQButton(
-                "Экспорт",
+                String(localized: "shared.export"),
                 icon: PQImage.export.swiftUIImage,
                 action: viewModel.exportContainer
             )
@@ -165,26 +165,26 @@ struct ContainerDetailsView: View {
             VStack(spacing: 12) {
                 ChevronRowView(
                     icon: PQImage.contacts.swiftUIImage,
-                    title: "Получатели"
+                    title: String(localized: "containers.recipients.title")
                 )
                 .onTapGesture(perform: viewModel.showRecipients)
 
                 ChevronRowView(
                     icon: PQImage.export.swiftUIImage,
-                    title: "Управление доступом",
+                    title: String(localized: "containers.access.management"),
                     isEnabled: viewModel.isAvailable
                 )
                 .onTapGesture(perform: viewModel.isAvailable ? viewModel.showAccessManagement : {})
 
                 ChevronRowView(
                     icon: PQImage.clock.swiftUIImage,
-                    title: "История контейнера"
+                    title: String(localized: "containers.history.title")
                 )
                 .onTapGesture(perform: viewModel.showContainerHistory)
             }
         } else {
             PQButton(
-                "Сделать копию себе",
+                String(localized: "containers.copy.to.self"),
                 icon: PQImage.copy.swiftUIImage,
                 action: viewModel.copyContainerToSelf
             )
@@ -195,7 +195,7 @@ struct ContainerDetailsView: View {
     private var errorView: some View {
         VStack {
             Spacer()
-            Text("Не удалось загрузить контейнер")
+            Text(String(localized: "containers.details.load.error"))
                 .font(PQFont.R16)
                 .foregroundStyle(PQColor.blue2.swiftUIColor)
                 .multilineTextAlignment(.center)

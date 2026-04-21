@@ -30,12 +30,12 @@ struct OnboardingView: View {
                 
                 VStack(spacing: 8) {
                     PQButton(
-                        viewModel.isLast ? "Создать ключи" : "Далее",
+                        viewModel.isLast ? String(localized: "onboarding.create.keys") : String(localized: "shared.next"),
                         action: viewModel.topButtonAction
                     )
                     
                     PQButton(
-                        viewModel.isFirst ? "Пропустить" : "Назад",
+                        viewModel.isFirst ? String(localized: "shared.skip") : String(localized: "shared.back"),
                         style: PQButtonStyle(.tertiary),
                         action: viewModel.bottomButtonAction
                     )
