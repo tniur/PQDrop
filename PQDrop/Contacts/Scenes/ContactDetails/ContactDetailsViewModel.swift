@@ -8,6 +8,7 @@
 import SwiftUI
 import Combine
 import UIKit
+import PQUIComponents
 
 @MainActor
 final class ContactDetailsViewModel: ObservableObject {
@@ -87,6 +88,7 @@ final class ContactDetailsViewModel: ObservableObject {
     
     func copyFingerprint() {
         UIPasteboard.general.string = contact.fingerprint
+        PQToast.show(with: String(localized: "shared.copied"))
     }
     
     func deleteContact() {
