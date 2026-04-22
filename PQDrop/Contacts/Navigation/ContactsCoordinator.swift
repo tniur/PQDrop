@@ -45,5 +45,8 @@ final class ContactsCoordinator: Coordinator<ContactsRoute>, ContactsCoordinator
     func finish() async {
         await restart()
     }
-}
 
+    func pop() async {
+        await router.pop(animated: true)
+    }
+}

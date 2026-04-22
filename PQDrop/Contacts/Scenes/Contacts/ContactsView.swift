@@ -19,7 +19,7 @@ struct ContactsView: View {
     var body: some View {
         BackgroundView(isImage: true) {
             contentView
-                .safeAreaInset(edge: .bottom) {
+                .overlay(alignment: .bottom) {
                     addContactButton
                         .padding(12)
                 }
@@ -30,15 +30,17 @@ struct ContactsView: View {
     // MARK: - Subviews
     
     private var contentView: some View {
-        ScrollView(showsIndicators: false) {
+        Group {
             if viewModel.filteredContacts.isEmpty {
                 stubView
             } else {
-                listContent
+                ScrollView(showsIndicators: false) {
+                    listContent
+                }
+                .refreshable {
+                    viewModel.loadContacts()
+                }
             }
-        }
-        .refreshable {
-            viewModel.loadContacts()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationBarTitleDisplayMode(.inline)
@@ -116,8 +118,8 @@ struct ContactsView: View {
         Text(String(localized: "contacts.empty.title"))
             .font(PQFont.R16)
             .foregroundStyle(PQColor.purple2.swiftUIColor)
-            .frame(maxWidth: .infinity)
-            .padding(.top, 80)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     private var listContent: some View {
@@ -146,6 +148,7 @@ struct ContactsView: View {
         }
         .padding(.top)
         .padding(.horizontal)
+        .padding(.bottom, 80)
     }
     
     private var addContactButton: some View {

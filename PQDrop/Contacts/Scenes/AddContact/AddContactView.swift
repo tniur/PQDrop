@@ -28,9 +28,13 @@ struct AddContactView: View {
             .padding(.horizontal)
             .padding(.vertical, 4)
         }
+        .safeAreaInset(edge: .bottom) {
+            pasteButton
+                .padding(.horizontal)
+        }
         .toolbar(.hidden, for: .tabBar)
-        .alert("Ошибка", isPresented: $viewModel.showErrorAlert) {
-            Button("OK", role: .cancel) {}
+        .alert(String(localized: "contacts.add.error.title"), isPresented: $viewModel.showErrorAlert) {
+            Button(String(localized: "shared.ok"), role: .cancel) {}
         } message: {
             Text(viewModel.errorMessage)
         }
@@ -51,29 +55,29 @@ struct AddContactView: View {
     }
     
     private var contentView: some View {
-        VStack(spacing: 12) {
-            QRScannerView(isActive: $isScannerActive) { value in
-                viewModel.handleScanned(value: value)
-            }
-            .clipShape(RoundedRectangle(cornerRadius: 32))
-            .frame(maxWidth: .infinity)
-            .aspectRatio(1, contentMode: .fit)
-            .background(
-                RoundedRectangle(cornerRadius: 32)
-                    .foregroundStyle(PQColor.base2.swiftUIColor)
-            )
-            .onAppear {
-                isScannerActive = true
-                viewModel.resetProcessing()
-            }
-            .onDisappear { isScannerActive = false }
-
-            PQButton(
-                String(localized: "contacts.add.paste"),
-                style: PQButtonStyle(.purple),
-                action: viewModel.pasteFromClipboard
-            )
+        QRScannerView(isActive: $isScannerActive) { value in
+            viewModel.handleScanned(value: value)
         }
+        .clipShape(RoundedRectangle(cornerRadius: 32))
+        .frame(maxWidth: .infinity)
+        .aspectRatio(1, contentMode: .fit)
+        .background(
+            RoundedRectangle(cornerRadius: 32)
+                .foregroundStyle(PQColor.base2.swiftUIColor)
+        )
+        .onAppear {
+            isScannerActive = true
+            viewModel.resetProcessing()
+        }
+        .onDisappear { isScannerActive = false }
+    }
+
+    private var pasteButton: some View {
+        PQButton(
+            String(localized: "contacts.add.paste"),
+            style: PQButtonStyle(.purple),
+            action: viewModel.pasteFromClipboard
+        )
     }
     
     // MARK: - Initializer

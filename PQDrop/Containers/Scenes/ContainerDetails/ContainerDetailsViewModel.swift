@@ -303,7 +303,7 @@ final class ContainerDetailsViewModel: ObservableObject {
                 if fingerprint == ownerFingerprint {
                     return Recipient(
                         id: hexFingerprint,
-                        name: "Вы",
+                        name: String(localized: "shared.you"),
                         fingerprint: hexFingerprint,
                         isVerified: true
                     )
@@ -315,7 +315,7 @@ final class ContainerDetailsViewModel: ObservableObject {
 
                 return Recipient(
                     id: hexFingerprint,
-                    name: matchedContact?.name ?? "Неизвестный",
+                    name: matchedContact?.name ?? String(localized: "contacts.unknown"),
                     fingerprint: hexFingerprint,
                     isVerified: matchedContact?.isVerified ?? false
                 )

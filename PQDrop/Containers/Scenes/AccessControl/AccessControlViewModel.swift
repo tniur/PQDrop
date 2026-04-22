@@ -329,32 +329,32 @@ final class AccessControlViewModel: ObservableObject {
         if let accessError = error as? AccessUpdateError {
             switch accessError {
             case .noKeyPair:
-                return "Не найден ключ шифрования. Проверьте профиль и повторите действие."
+                return String(localized: "containers.access.error.no.key.pair")
             case .currentKeyHasNoAccess:
-                return "Текущий ключ не является получателем этого контейнера. Поэтому приложение не может изменить список доступа."
+                return String(localized: "containers.access.error.current.key.has.no.access")
             case .contactKeyUnavailable:
-                return "Не удалось прочитать публичный ключ выбранного контакта."
+                return String(localized: "containers.access.error.contact.key.unavailable")
             case .verificationFailed:
-                return "Контейнер был обновлен, но проверка нового списка получателей не прошла. Исходный файл сохранен без изменений."
+                return String(localized: "containers.access.error.verification.failed")
             }
         }
 
         if let containerError = error as? ContainerError {
             switch containerError {
             case .accessDenied:
-                return "У текущего ключа нет доступа к этому контейнеру. Изменить получателей может только ключ, который уже есть в контейнере."
+                return String(localized: "containers.access.error.access.denied")
             case .invalidFormat, .unsupportedVersion:
-                return "Файл контейнера имеет неподдерживаемый или поврежденный формат."
+                return String(localized: "containers.access.error.invalid.format")
             case .limitsExceeded:
-                return "В контейнере превышен лимит получателей."
+                return String(localized: "containers.access.error.limits.exceeded")
             case .ioError:
-                return "Не удалось записать обновленный файл контейнера."
+                return String(localized: "containers.access.error.io")
             case .cannotOpen:
-                return "Не удалось открыть контейнер для изменения доступа."
+                return String(localized: "containers.access.error.cannot.open")
             }
         }
 
-        return "Не удалось обновить контейнер. Проверьте, что файл доступен, и повторите действие."
+        return String(localized: "containers.access.error.generic")
     }
 }
 

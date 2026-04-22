@@ -85,6 +85,12 @@ final class ContactDetailsViewModel: ObservableObject {
             await coordinator.showEditContactName(contactId: contact.id)
         }
     }
+
+    func reload() {
+        if let updated = contactRepository.fetch(by: contact.id) {
+            contact = updated
+        }
+    }
     
     func copyFingerprint() {
         UIPasteboard.general.string = contact.fingerprint

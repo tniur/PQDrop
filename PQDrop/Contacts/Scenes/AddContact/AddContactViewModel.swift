@@ -55,7 +55,7 @@ final class AddContactViewModel: ObservableObject {
             let pubKey = try XWing.PublicKey(base64: value)
 
             if contactRepository.exists(publicKeyRaw: pubKey.rawRepresentation) {
-                showError("Контакт с таким ключом уже существует.")
+                showError(String(localized: "contacts.add.error.duplicate"))
                 return
             }
 
@@ -63,7 +63,7 @@ final class AddContactViewModel: ObservableObject {
                 await coordinator.showEditContactName(publicKeyData: pubKey.rawRepresentation)
             }
         } catch {
-            showError("Недопустимый формат ключа.")
+            showError(String(localized: "contacts.add.error.invalid.key"))
         }
     }
     

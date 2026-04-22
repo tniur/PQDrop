@@ -69,6 +69,7 @@ struct ContainersView: View {
                     }
                 }
                 .frame(maxWidth: .infinity)
+                .padding(.horizontal)
                 Spacer()
             } else {
                 ScrollView(showsIndicators: false) {
@@ -134,6 +135,7 @@ struct ContainersView: View {
                     .foregroundStyle(PQColor.blue2.swiftUIColor)
             }
             .multilineTextAlignment(.center)
+            .frame(maxWidth: 260)
 
             PQButton(
                 viewModel.selectedTab.emptyButtonTitle,

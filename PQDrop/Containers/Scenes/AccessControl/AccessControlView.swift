@@ -210,12 +210,12 @@ struct AccessControlView: View {
 
         case .unverifiedWarning:
             return Alert(
-                title: Text("Неверифицированный контакт"),
-                message: Text("Среди выбранных есть неверифицированные контакты. Убедитесь, что вы доверяете их публичным ключам."),
-                primaryButton: .default(Text("Продолжить")) {
+                title: Text(String(localized: "containers.access.alert.unverified.title")),
+                message: Text(String(localized: "containers.access.alert.unverified.message")),
+                primaryButton: .default(Text(String(localized: "shared.continue"))) {
                     viewModel.applySelectedContacts()
                 },
-                secondaryButton: .cancel(Text("Отмена"))
+                secondaryButton: .cancel(Text(String(localized: "shared.cancel")))
             )
 
         case .revokeAccess(let contactId):
@@ -230,7 +230,7 @@ struct AccessControlView: View {
 
         case .operationFailed(let message):
             return Alert(
-                title: Text("Не удалось обновить доступ"),
+                title: Text(String(localized: "containers.access.alert.operation.failed.title")),
                 message: Text(message),
                 dismissButton: .default(Text(String(localized: "shared.got.it")))
             )
