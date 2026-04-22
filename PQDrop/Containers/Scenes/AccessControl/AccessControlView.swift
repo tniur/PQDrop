@@ -227,6 +227,13 @@ struct AccessControlView: View {
                 },
                 secondaryButton: .cancel(Text(String(localized: "shared.cancel")))
             )
+
+        case .operationFailed(let message):
+            return Alert(
+                title: Text("Не удалось обновить доступ"),
+                message: Text(message),
+                dismissButton: .default(Text(String(localized: "shared.got.it")))
+            )
         }
     }
 }

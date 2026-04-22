@@ -259,7 +259,30 @@ final class ContainerDetailsViewModel: ObservableObject {
             container = updated
         }
 
+        refreshAvailability()
         loadRecipients()
+    }
+
+    private func refreshAvailability() {
+        guard let fileURL = container.fileURL,
+              let publicKey = try? keyPairManager.loadPublicKey() else {
+            return
+        }
+
+        do {
+            let info = try containerService.inspectContainer(at: fileURL)
+            let isAvailable = info.containsRecipient(publicKey)
+
+            guard container.isAvailable != isAvailable else { return }
+
+            container.isAvailable = isAvailable
+            try? containerRepository.updateAvailability(isAvailable, for: container.id)
+        } catch {
+            guard container.isAvailable else { return }
+
+            container.isAvailable = false
+            try? containerRepository.updateAvailability(false, for: container.id)
+        }
     }
 
     private func loadRecipients() {
