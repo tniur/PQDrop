@@ -141,7 +141,7 @@ final class ImportContainerViewModel: ObservableObject {
 
             let info = try containerService.inspectContainer(at: fileURL)
 
-            guard let myPublicKey = try keyPairManager.loadPublicKey() else {
+            guard let myPublicKey = try keyPairManager.loadOrMigratePublicKey() else {
                 return .invalidFormat
             }
 

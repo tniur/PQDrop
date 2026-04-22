@@ -6,21 +6,24 @@
 //
 
 enum AccessControlAlert: Identifiable {
-        case noSelection
-        case applyAccessChanges
-        case unverifiedWarning
-        case revokeAccess(contactId: String)
-
-        var id: String {
-            switch self {
-            case .noSelection:
-                return "noSelection"
-            case .applyAccessChanges:
-                return "applyAccessChanges"
-            case .unverifiedWarning:
-                return "unverifiedWarning"
-            case .revokeAccess(let contactId):
-                return "revokeAccess_\(contactId)"
-            }
+    case noSelection
+    case applyAccessChanges
+    case unverifiedWarning
+    case revokeAccess(contactId: String)
+    case operationFailed(message: String)
+    
+    var id: String {
+        switch self {
+        case .noSelection:
+            return "noSelection"
+        case .applyAccessChanges:
+            return "applyAccessChanges"
+        case .unverifiedWarning:
+            return "unverifiedWarning"
+        case .revokeAccess(let contactId):
+            return "revokeAccess_\(contactId)"
+        case .operationFailed(let message):
+            return "operationFailed_\(message)"
         }
     }
+}

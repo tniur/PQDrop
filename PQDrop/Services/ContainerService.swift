@@ -35,7 +35,7 @@ final class ContainerService {
         
         try archiveService.pack(files: files, to: archiveURL)
         
-        guard let ownerKey = try keyPairManager.loadPublicKey() else {
+        guard let ownerKey = try keyPairManager.loadOrMigratePublicKey() else {
             throw ContainerServiceError.noKeyPair
         }
         
@@ -70,7 +70,15 @@ final class ContainerService {
         guard let privateKey = try keyPairManager.loadPrivateKey() else {
             throw ContainerServiceError.noKeyPair
         }
-        
+
+        return try decryptContainer(at: url, to: destinationDir, privateKey: privateKey)
+    }
+
+    func decryptContainer(
+        at url: URL,
+        to destinationDir: URL,
+        privateKey: XWing.PrivateKey
+    ) throws -> [URL] {
         let decryptedURL = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
             .appendingPathExtension("aar")
@@ -102,7 +110,21 @@ final class ContainerService {
         guard let privateKey = try keyPairManager.loadPrivateKey() else {
             throw ContainerServiceError.noKeyPair
         }
-        
+
+        try rekeyContainer(
+            at: sourceURL,
+            to: destinationURL,
+            remainingRecipients: remainingRecipients,
+            privateKey: privateKey
+        )
+    }
+
+    func rekeyContainer(
+        at sourceURL: URL,
+        to destinationURL: URL,
+        remainingRecipients: [XWing.PublicKey],
+        privateKey: XWing.PrivateKey
+    ) throws {
         try ContainerV1.rekeyFile(
             sourceURL: sourceURL,
             destinationURL: destinationURL,
@@ -116,11 +138,12 @@ final class ContainerService {
         name: String,
         files: [URL],
         originalContainerURL: URL,
-        destinationURL: URL
+        destinationURL: URL,
+        recipients: [XWing.PublicKey]
     ) throws {
         let info = try ContainerV1.inspectFile(originalContainerURL)
         
-        guard let privateKey = try keyPairManager.loadPrivateKey() else {
+        guard let ownerKey = try keyPairManager.loadOrMigratePublicKey() else {
             throw ContainerServiceError.noKeyPair
         }
         
@@ -133,16 +156,12 @@ final class ContainerService {
         }
         
         try archiveService.pack(files: files, to: archiveURL)
-        
-        let recipientKeys: [XWing.PublicKey] = info.recipientKeyIds.compactMap { fingerprint in
-            try? XWing.PublicKey(rawRepresentation: fingerprint.rawValue)
-        }
-        
+
         try ContainerV1.encryptFile(
             sourceURL: archiveURL,
             destinationURL: destinationURL,
-            recipients: recipientKeys.isEmpty ? [privateKey.publicKey] : recipientKeys,
-            owner: privateKey.publicKey,
+            recipients: recipients,
+            owner: ownerKey,
             containerID: info.header.containerID
         )
     }

@@ -148,7 +148,7 @@ struct ContainerDetailsView: View {
                 icon: PQImage.box.swiftUIImage,
                 action: viewModel.openContainer
             )
-            .disabled(!viewModel.isAvailable)
+            .disabled(!viewModel.isAvailable || viewModel.isOpening)
 
             PQButton(
                 String(localized: "shared.export"),

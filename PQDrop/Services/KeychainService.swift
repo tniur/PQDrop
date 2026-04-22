@@ -13,6 +13,7 @@ import Security
 final class KeychainService {
 
     private let privateKeyService = "pq.user.privateKey"
+    private let publicKeyService = "pq.user.publicKey"
 
     func storePrivateKey(_ privateKey: XWing.PrivateKey) throws {
         let data = privateKey.rawRepresentation
@@ -49,9 +50,33 @@ final class KeychainService {
         }
     }
 
-    func loadPrivateKey() throws -> XWing.PrivateKey? {
+    func storePublicKey(_ publicKey: XWing.PublicKey) throws {
+        let data = publicKey.rawRepresentation
+
+        let deleteQuery: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: publicKeyService
+        ]
+
+        SecItemDelete(deleteQuery as CFDictionary)
+
+        let addQuery: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: publicKeyService,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+            kSecValueData as String: data
+        ]
+
+        let status = SecItemAdd(addQuery as CFDictionary, nil)
+
+        guard status == errSecSuccess else {
+            throw KeychainError.saveFailed(status)
+        }
+    }
+
+    func loadPrivateKey(reason: String = "Доступ к ключу шифрования") throws -> XWing.PrivateKey? {
         let context = LAContext()
-        context.localizedReason = "Доступ к ключу шифрования"
+        context.localizedReason = reason
 
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -80,10 +105,46 @@ final class KeychainService {
         return try XWing.PrivateKey(rawRepresentation: data)
     }
 
+    func loadPublicKey() throws -> XWing.PublicKey? {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: publicKeyService,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+
+        var result: AnyObject?
+
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+
+        if status == errSecItemNotFound {
+            return nil
+        }
+
+        guard status == errSecSuccess else {
+            throw KeychainError.loadFailed(status)
+        }
+
+        guard let data = result as? Data else {
+            throw KeychainError.invalidData
+        }
+
+        return try XWing.PublicKey(rawRepresentation: data)
+    }
+
     func deletePrivateKey() {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: privateKeyService
+        ]
+
+        SecItemDelete(query as CFDictionary)
+    }
+
+    func deletePublicKey() {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: publicKeyService
         ]
 
         SecItemDelete(query as CFDictionary)
