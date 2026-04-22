@@ -21,8 +21,4 @@ final class ProfileCoordinator: Coordinator<ProfileRoute>, ProfileCoordinatorPro
     override func start() async {
         await startFlow(route: .profile(coordinator: self))
     }
-
-    func showQRCode() async {
-        await navigate(toRoute: .qrCode(coordinator: self))
-    }
 }

@@ -10,24 +10,24 @@ import SUICoordinator
 
 enum ProfileRoute: RouteType {
     case profile(coordinator: ProfileCoordinatorProtocol)
-    case qrCode(coordinator: ProfileCoordinatorProtocol)
 
     var presentationStyle: TransitionPresentationStyle { .push }
 
     var body: some View {
         switch self {
-        case .profile(let coordinator):
+        case .profile:
             let keychainService = KeychainService()
             let keyPairManager = KeyPairManager(keychainService: keychainService)
-            let viewModel = ProfileViewModel(coordinator: coordinator, keyPairManager: keyPairManager)
+            let containerRepository = ContainerRepository()
+            let contactRepository = ContactRepository()
+            let historyRepository = HistoryRepository()
+            let viewModel = ProfileViewModel(
+                keyPairManager: keyPairManager,
+                containerRepository: containerRepository,
+                contactRepository: contactRepository,
+                historyRepository: historyRepository
+            )
             let view = ProfileView(viewModel: viewModel)
-            return AnyView(view)
-
-        case .qrCode(let coordinator):
-            let keychainService = KeychainService()
-            let keyPairManager = KeyPairManager(keychainService: keychainService)
-            let viewModel = ProfileQRCodeViewModel(coordinator: coordinator, keyPairManager: keyPairManager)
-            let view = ProfileQRCodeView(viewModel: viewModel)
             return AnyView(view)
         }
     }
