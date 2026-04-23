@@ -9,11 +9,11 @@ import SwiftUI
 import PQUIComponents
 
 struct CreateKeysView: View {
-
+    
     // MARK: - Properties
-
+    
     @ObservedObject private var viewModel: CreateKeysViewModel
-
+    
     private var title: String {
         switch viewModel.phase {
         case .idle, .creating:
@@ -26,33 +26,56 @@ struct CreateKeysView: View {
     }
     
     // MARK: - Body
-
+    
     var body: some View {
         BackgroundView(isImage: true) {
             VStack(spacing: .zero) {
-                imageView
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 162)
-                    .padding(.bottom, 40)
-
-                Text(title)
-                    .font(PQFont.B30)
-                    .foregroundStyle(PQColor.base0.swiftUIColor)
-                    .multilineTextAlignment(.center)
-                    .padding(.bottom, 20)
-
-                content
+                topContent
+                    .id(viewModel.phase)
+                    .transition(topContentTransition)
 
                 Spacer()
             }
             .padding(.top, 40)
             .padding(.horizontal, 24)
             .padding(.bottom, 24)
+            .animation(.easeInOut(duration: 0.22), value: viewModel.phase)
+        }
+        .safeAreaInset(edge: .bottom) {
+            bottomButton
+                .padding(.horizontal, 24)
+                .animation(.easeInOut(duration: 0.2), value: viewModel.phase)
+        }
+    }
+    
+    // MARK: - Subviews
+
+    private var topContentTransition: AnyTransition {
+        switch viewModel.phase {
+        case .success:
+            return .opacity.combined(with: .scale(scale: 0.96))
+        case .idle, .creating, .failure:
+            return .opacity
         }
     }
 
-    // MARK: - Subviews
+    private var topContent: some View {
+        VStack(spacing: .zero) {
+            imageView
+                .frame(maxWidth: .infinity)
+                .frame(height: 162)
+                .padding(.bottom, 40)
 
+            Text(title)
+                .font(PQFont.B30)
+                .foregroundStyle(PQColor.base0.swiftUIColor)
+                .multilineTextAlignment(.center)
+                .padding(.bottom, 20)
+
+            content
+        }
+    }
+    
     @ViewBuilder
     private var imageView: some View {
         switch viewModel.phase {
@@ -64,7 +87,7 @@ struct CreateKeysView: View {
             PQImage.exclamationMark.swiftUIImage
         }
     }
-
+    
     @ViewBuilder
     private var content: some View {
         switch viewModel.phase {
@@ -78,21 +101,14 @@ struct CreateKeysView: View {
             failureBlock
         }
     }
-
+    
     private var idleBlock: some View {
-        VStack(spacing: .zero) {
-            Text(String(localized: "onboarding.keys.description"))
-                .font(PQFont.R14)
-                .foregroundStyle(PQColor.blue2.swiftUIColor)
-                .multilineTextAlignment(.center)
-                .padding(.bottom, 24)
-
-            PQButton(String(localized: "onboarding.keys.generate")) {
-                viewModel.createKeys()
-            }
-        }
+        Text(String(localized: "onboarding.keys.description"))
+            .font(PQFont.R14)
+            .foregroundStyle(PQColor.blue2.swiftUIColor)
+            .multilineTextAlignment(.center)
     }
-
+    
     private var creatingBlock: some View {
         VStack(spacing: 8) {
             ProgressView(value: viewModel.progress, total: 1.0)
@@ -104,7 +120,7 @@ struct CreateKeysView: View {
                     Capsule()
                         .fill(.ultraThinMaterial)
                 )
-
+            
             Text(viewModel.status.text)
                 .font(PQFont.R14)
                 .foregroundStyle(PQColor.blue2.swiftUIColor)
@@ -113,38 +129,43 @@ struct CreateKeysView: View {
         .transition(.opacity)
         .animation(.easeInOut, value: viewModel.status)
     }
-
+    
     private var successBlock: some View {
-        VStack(spacing: .zero) {
-            Text(String(localized: "onboarding.keys.success.description"))
-                .font(PQFont.R14)
-                .foregroundStyle(PQColor.blue2.swiftUIColor)
-                .multilineTextAlignment(.center)
-
-            Spacer()
-            
+        Text(String(localized: "onboarding.keys.success.description"))
+            .font(PQFont.R14)
+            .foregroundStyle(PQColor.blue2.swiftUIColor)
+            .multilineTextAlignment(.center)
+    }
+    
+    private var failureBlock: some View {
+        Text(String(localized: "onboarding.keys.failure.description"))
+            .font(PQFont.R14)
+            .foregroundStyle(PQColor.blue2.swiftUIColor)
+            .multilineTextAlignment(.center)
+    }
+    
+    @ViewBuilder
+    private var bottomButton: some View {
+        switch viewModel.phase {
+        case .idle:
+            PQButton(String(localized: "onboarding.keys.generate")) {
+                viewModel.createKeys()
+            }
+        case .creating:
+            EmptyView()
+        case .success:
             PQButton(
                 String(localized: "shared.next"),
                 action: viewModel.finish
             )
-        }
-    }
-
-    private var failureBlock: some View {
-        VStack(spacing: .zero) {
-            Text(String(localized: "onboarding.keys.failure.description"))
-                .font(PQFont.R14)
-                .foregroundStyle(PQColor.blue2.swiftUIColor)
-                .multilineTextAlignment(.center)
-
-            Spacer()
-
+            .transition(.opacity.combined(with: .move(edge: .bottom)))
+        case .failure:
             PQButton(String(localized: "shared.retry"), action: viewModel.retry)
         }
     }
-
+    
     // MARK: - Initializer
-
+    
     init(viewModel: CreateKeysViewModel) {
         self.viewModel = viewModel
     }

@@ -14,4 +14,5 @@ protocol ContactsCoordinatorProtocol: AnyObject {
     func showEditContactName(contactId: UUID) async
     func showContactDetails(with contact: Contact) async
     func finish() async
+    func pop() async
 }

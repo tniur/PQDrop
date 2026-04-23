@@ -29,6 +29,9 @@ struct ContainerContentsView: View {
         BackgroundView(isImage: true) {
            contentView
         }
+        .onAppear {
+            viewModel.reload()
+        }
         .toolbar(.hidden, for: .tabBar)
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $viewModel.showShareSheet) {
@@ -105,10 +108,12 @@ struct ContainerContentsView: View {
     private var headerCardView: some View {
         VStack(spacing: 16) {
             VStack(spacing: 4) {
-                HStack(spacing: 10) {
+                HStack(alignment: .top, spacing: 8) {
                     Text(viewModel.container.name)
                         .font(PQFont.B24)
                         .foregroundStyle(PQColor.base7.swiftUIColor)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
                     PQImage.pencil.swiftUIImage
                         .resizable()
@@ -122,10 +127,12 @@ struct ContainerContentsView: View {
                         )
                         .onTapGesture(perform: viewModel.editName)
                 }
+                .frame(maxWidth: .infinity)
 
-                Text("id: \(viewModel.container.id.uuidString)")
+                Text(String(localized: "shared.id\(viewModel.container.id.uuidString)"))
                     .font(PQFont.R15)
                     .foregroundStyle(PQColor.base5.swiftUIColor)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .onTapGesture(perform: viewModel.copyId)
             }
         }
@@ -154,6 +161,7 @@ struct ContainerContentsView: View {
         LazyVGrid(columns: columns, spacing: 12) {
             ForEach(viewModel.files) { file in
                 FileCardView(file: file)
+                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
                     .onTapGesture {
                         viewModel.openFile(file)
                     }
@@ -182,45 +190,45 @@ struct ContainerContentsView: View {
                     }
             }
         }
+        .animation(.easeInOut(duration: 0.22), value: viewModel.files)
     }
 
     @ViewBuilder
     private var footerView: some View {
         if viewModel.canEditContents {
-            if viewModel.hasUnsavedChanges {
-                VStack(spacing: 10) {
+            VStack(spacing: 10) {
+                if viewModel.hasUnsavedChanges {
                     Text(String(localized: "containers.contents.unsaved.title"))
                         .font(PQFont.B16)
                         .foregroundStyle(PQColor.blue1.swiftUIColor)
+                        .transition(.opacity)
+                }
 
-                    VStack(spacing: 8) {
-                        PQButton(
-                            String(localized: "shared.add.files"),
-                            icon: PQImage.import.swiftUIImage,
-                            style: .init(.purple),
-                            action: viewModel.presentAddFilesSheet
-                        )
+                VStack(spacing: 8) {
+                    PQButton(
+                        String(localized: "shared.add.files"),
+                        icon: PQImage.import.swiftUIImage,
+                        style: .init(.purple),
+                        action: viewModel.presentAddFilesSheet
+                    )
 
+                    if viewModel.hasUnsavedChanges {
                         PQButton(
                             String(localized: "shared.save"),
                             style: .init(.primary),
                             action: viewModel.confirmSave
                         )
+                        .transition(.opacity)
 
                         Text(String(localized: "containers.contents.unsaved.subtitle"))
                             .font(PQFont.R12)
                             .foregroundStyle(PQColor.blue1.swiftUIColor)
                             .multilineTextAlignment(.center)
+                            .transition(.opacity)
                     }
                 }
-            } else {
-                PQButton(
-                    String(localized: "shared.add.files"),
-                    icon: PQImage.import.swiftUIImage,
-                    style: .init(.purple),
-                    action: viewModel.presentAddFilesSheet
-                )
             }
+            .animation(.easeInOut(duration: 0.2), value: viewModel.hasUnsavedChanges)
         }
     }
 

@@ -67,7 +67,7 @@ struct ContainerDetailsView: View {
                     .foregroundStyle(PQColor.base0.swiftUIColor)
                     .multilineTextAlignment(.center)
             }
-            
+
             PQButton(
                 String(localized: "shared.delete"),
                 style: .init(.secondary),
@@ -82,11 +82,12 @@ struct ContainerDetailsView: View {
     private var headerCardView: some View {
         VStack(spacing: 16) {
             VStack(spacing: 4) {
-                HStack(spacing: 10) {
+                HStack(alignment: .top, spacing: 8) {
                     Text(viewModel.container.name)
                         .font(PQFont.B24)
                         .foregroundStyle(PQColor.base7.swiftUIColor)
-                    
+                        .multilineTextAlignment(.leading)
+
                     PQImage.pencil.swiftUIImage
                         .resizable()
                         .renderingMode(.template)
@@ -98,11 +99,15 @@ struct ContainerDetailsView: View {
                                 .foregroundStyle(PQColor.base0.swiftUIColor)
                         )
                         .onTapGesture(perform: viewModel.editName)
+
+                    Spacer(minLength: 0)
                 }
+                .frame(maxWidth: .infinity)
                 
-                Text("id: \(viewModel.container.id.uuidString)")
+                Text(String(localized: "shared.id\(viewModel.container.id.uuidString)"))
                     .font(PQFont.R15)
                     .foregroundStyle(PQColor.base5.swiftUIColor)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .onTapGesture(perform: viewModel.copyId)
             }
             

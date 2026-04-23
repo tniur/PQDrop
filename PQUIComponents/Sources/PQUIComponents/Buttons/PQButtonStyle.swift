@@ -43,6 +43,7 @@ public struct PQButtonStyle: ButtonStyle {
             .frame(maxWidth: isCompact ? nil : .infinity)
             .frame(height: height)
             .padding(.horizontal, isCompact ? 20 : 16)
+            .contentShape(RoundedRectangle(cornerRadius: Constant.cornerRadius))
             .foregroundStyle(isEnabled ? (configuration.isPressed ? type.pressedForegroundColor : type.foregroundColor) : type.disabledForegroundColor)
             .background {
                 RoundedRectangle(cornerRadius: Constant.cornerRadius)

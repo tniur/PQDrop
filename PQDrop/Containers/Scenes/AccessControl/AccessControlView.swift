@@ -20,6 +20,10 @@ struct AccessControlView: View {
         BackgroundView(isImage: true) {
             contentView
         }
+        .safeAreaInset(edge: .bottom) {
+            footerView
+        }
+        .animation(.easeInOut(duration: 0.2), value: viewModel.hasUnsavedChanges)
         .toolbar(.hidden, for: .tabBar)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -27,16 +31,6 @@ struct AccessControlView: View {
                 Text(String(localized: "containers.access.title"))
                     .font(PQFont.B16)
                     .foregroundStyle(PQColor.base0.swiftUIColor)
-            }
-
-            ToolbarItem(placement: .topBarTrailing) {
-                Button(action: viewModel.addContact) {
-                    PQImage.plus.swiftUIImage
-                        .resizable()
-                        .renderingMode(.template)
-                        .foregroundStyle(PQColor.base8.swiftUIColor)
-                        .frame(width: 32, height: 32)
-                }
             }
         }
         .alert(item: $viewModel.activeAlert, content: makeAlert)
@@ -64,87 +58,47 @@ struct AccessControlView: View {
             Text(String(localized: "containers.access.description"))
                 .font(PQFont.R14)
                 .foregroundStyle(PQColor.base0.swiftUIColor)
-                .padding(.horizontal)
-
-            countersView
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal)
 
             contactsListView
-
-            Spacer()
         }
     }
 
     private var headerCardView: some View {
-        VStack(spacing: 16) {
-            VStack(spacing: 4) {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(alignment: .top, spacing: 8) {
                 Text(viewModel.container.name)
                     .font(PQFont.B24)
                     .foregroundStyle(PQColor.base7.swiftUIColor)
+                    .multilineTextAlignment(.leading)
 
-                Text("id: \(viewModel.container.id.uuidString)")
-                    .font(PQFont.R15)
-                    .foregroundStyle(PQColor.base5.swiftUIColor)
+                PQImage.pencil.swiftUIImage
+                    .resizable()
+                    .renderingMode(.template)
+                    .foregroundStyle(PQColor.base7.swiftUIColor)
+                    .frame(width: 16, height: 16)
+                    .padding(9)
+                    .background(
+                        Circle()
+                            .foregroundStyle(PQColor.base0.swiftUIColor)
+                    )
+                    .onTapGesture(perform: viewModel.editName)
+
+                Spacer(minLength: 0)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
-            statusBadge
+            Text(String(localized: "shared.id\(viewModel.container.id.uuidString)"))
+                .font(PQFont.R15)
+                .foregroundStyle(PQColor.base5.swiftUIColor)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
         .padding(.vertical, 20)
         .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 34))
-    }
-
-    @ViewBuilder
-    private var statusBadge: some View {
-        HStack(spacing: 2) {
-            (viewModel.container.isAvailable
-             ? PQImage.done.swiftUIImage
-             : PQImage.xmark.swiftUIImage)
-            .resizable()
-            .renderingMode(.template)
-            .frame(width: 18, height: 18)
-            .foregroundStyle(PQColor.base0.swiftUIColor)
-
-            Text(String(localized: viewModel.container.isAvailable ? "shared.available" : "shared.unavailable"))
-                .font(PQFont.B14)
-                .foregroundStyle(PQColor.base0.swiftUIColor)
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4.5)
-        .background(
-            Capsule()
-                .foregroundStyle(
-                    viewModel.container.isAvailable
-                    ? PQColor.green5.swiftUIColor
-                    : PQColor.base4.swiftUIColor
-                )
-        )
-    }
-
-    private var countersView: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 4) {
-                Text(String(localized: "containers.access.has.access"))
-                    .font(PQFont.B16)
-                    .foregroundStyle(PQColor.base0.swiftUIColor)
-
-                Text("\(viewModel.hasAccessContactIds.count)/\(viewModel.contacts.count)")
-                    .font(PQFont.R16)
-                    .foregroundStyle(PQColor.base0.swiftUIColor)
-            }
-
-            HStack(spacing: 4) {
-                Text(String(localized: "containers.access.selected"))
-                    .font(PQFont.B16)
-                    .foregroundStyle(PQColor.base0.swiftUIColor)
-
-                Text("\(viewModel.selectedContactIds.count)/\(viewModel.contacts.count)")
-                    .font(PQFont.R16)
-                    .foregroundStyle(PQColor.base0.swiftUIColor)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var contactsListView: some View {
@@ -155,25 +109,29 @@ struct AccessControlView: View {
                         name: contact.name,
                         shortKey: contact.shortFingerprint,
                         isVerified: contact.isVerified,
-                        hasAccess: viewModel.hasAccess(contact.id),
                         isSelected: viewModel.isSelected(contact.id)
                     )
                     .onTapGesture {
                         viewModel.toggleContact(contact.id)
                     }
-                    .contextMenu {
-                        if viewModel.hasAccess(contact.id) {
-                            Button(role: .destructive) {
-                                viewModel.requestRevokeAccess(for: contact.id)
-                            } label: {
-                                Text(String(localized: "containers.access.restrict"))
-                                Image(systemName: "person.crop.circle.badge.minus")
-                            }
-                        }
-                    }
                 }
             }
             .padding(.horizontal)
+            .padding(.bottom, 24)
+        }
+    }
+
+    @ViewBuilder
+    private var footerView: some View {
+        if viewModel.hasUnsavedChanges {
+            PQButton(
+                String(localized: "shared.save"),
+                style: .init(.primary),
+                action: viewModel.confirmSaveChanges
+            )
+            .padding(.horizontal, 24)
+            .padding(.top, 8)
+            .transition(.opacity.combined(with: .move(edge: .bottom)))
         }
     }
 
@@ -187,13 +145,6 @@ struct AccessControlView: View {
 
     private func makeAlert(_ alert: AccessControlAlert) -> Alert {
         switch alert {
-        case .noSelection:
-            return Alert(
-                title: Text(String(localized: "containers.access.alert.no.selection.title")),
-                message: Text(String(localized: "containers.access.alert.no.selection.message")),
-                dismissButton: .cancel(Text(String(localized: "shared.got.it")))
-            )
-
         case .applyAccessChanges:
             return Alert(
                 title: Text(
@@ -210,27 +161,17 @@ struct AccessControlView: View {
 
         case .unverifiedWarning:
             return Alert(
-                title: Text("Неверифицированный контакт"),
-                message: Text("Среди выбранных есть неверифицированные контакты. Убедитесь, что вы доверяете их публичным ключам."),
-                primaryButton: .default(Text("Продолжить")) {
+                title: Text(String(localized: "containers.access.alert.unverified.title")),
+                message: Text(String(localized: "containers.access.alert.unverified.message")),
+                primaryButton: .default(Text(String(localized: "shared.continue"))) {
                     viewModel.applySelectedContacts()
-                },
-                secondaryButton: .cancel(Text("Отмена"))
-            )
-
-        case .revokeAccess(let contactId):
-            return Alert(
-                title: Text(String(localized: "containers.access.alert.restrict.title")),
-                message: Text(String(localized: "containers.access.alert.changes.message")),
-                primaryButton: .destructive(Text(String(localized: "shared.apply"))) {
-                    viewModel.revokeAccess(for: contactId)
                 },
                 secondaryButton: .cancel(Text(String(localized: "shared.cancel")))
             )
 
         case .operationFailed(let message):
             return Alert(
-                title: Text("Не удалось обновить доступ"),
+                title: Text(String(localized: "containers.access.alert.operation.failed.title")),
                 message: Text(message),
                 dismissButton: .default(Text(String(localized: "shared.got.it")))
             )

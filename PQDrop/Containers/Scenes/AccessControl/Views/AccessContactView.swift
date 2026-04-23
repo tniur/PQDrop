@@ -15,7 +15,6 @@ struct AccessContactView: View {
     private let name: String
     private let shortKey: String
     private let isVerified: Bool
-    private let hasAccess: Bool
     private let isSelected: Bool
 
     // MARK: - Body
@@ -34,7 +33,7 @@ struct AccessContactView: View {
             PQImage.checkmarkCircle.swiftUIImage
                 .renderingMode(.template)
                 .foregroundStyle(
-                    (hasAccess || isSelected)
+                    isSelected
                     ? PQColor.blue7.swiftUIColor
                     : PQColor.base3.swiftUIColor
                 )
@@ -73,13 +72,11 @@ struct AccessContactView: View {
         name: String,
         shortKey: String,
         isVerified: Bool,
-        hasAccess: Bool,
         isSelected: Bool
     ) {
         self.name = name
         self.shortKey = shortKey
         self.isVerified = isVerified
-        self.hasAccess = hasAccess
         self.isSelected = isSelected
     }
 }

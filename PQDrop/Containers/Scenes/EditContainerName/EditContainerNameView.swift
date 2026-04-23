@@ -27,15 +27,19 @@ struct EditContainerNameView: View {
 
                 Spacer()
 
-                PQButton(
-                    viewModel.buttonTitle,
-                    style: PQButtonStyle(.purple),
-                    action: viewModel.submit
-                )
-                .disabled(viewModel.name.isEmpty)
+                if viewModel.shouldShowSubmitButton {
+                    PQButton(
+                        viewModel.buttonTitle,
+                        style: PQButtonStyle(.purple),
+                        action: viewModel.submit
+                    )
+                    .disabled(viewModel.name.isEmpty)
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
+                }
             }
             .padding(.vertical, 4)
             .padding(.horizontal)
+            .animation(.easeInOut(duration: 0.2), value: viewModel.shouldShowSubmitButton)
         }
         .toolbar(.hidden, for: .tabBar)
     }

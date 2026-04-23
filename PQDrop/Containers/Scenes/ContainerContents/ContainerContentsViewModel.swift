@@ -55,6 +55,7 @@ final class ContainerContentsViewModel: ObservableObject {
     // MARK: - Private
 
     private let coordinator: ContainersCoordinatorProtocol
+    private let containerRepository: ContainerRepository
     private var decryptedDir: URL?
     private var backgroundObserver: NSObjectProtocol?
 
@@ -63,11 +64,14 @@ final class ContainerContentsViewModel: ObservableObject {
     init(
         coordinator: ContainersCoordinatorProtocol,
         container: Container,
-        decryptedDir: URL
+        decryptedDir: URL,
+        containerRepository: ContainerRepository
     ) {
         self.coordinator = coordinator
         self.container = container
         self.decryptedDir = decryptedDir
+        self.containerRepository = containerRepository
+
         observeBackground()
     }
 
@@ -77,6 +81,15 @@ final class ContainerContentsViewModel: ObservableObject {
         Task {
             await coordinator.showEditContainerName(mode: .edit(container: container))
         }
+    }
+
+    func reload() {
+        guard let updated = containerRepository.fetch(by: container.id) else { return }
+
+        container.name = updated.name
+        container.fileURL = updated.fileURL
+        container.isAvailable = updated.isAvailable
+        container.isOwned = updated.isOwned
     }
 
     func copyId() {
@@ -153,7 +166,9 @@ final class ContainerContentsViewModel: ObservableObject {
             }
         }
 
-        container.files.append(contentsOf: importedFiles)
+        withAnimation(.easeInOut(duration: 0.22)) {
+            container.files.append(contentsOf: importedFiles)
+        }
     }
 
     func handlePickedPhotos(_ items: [PhotosPickerItem]) async {
@@ -192,7 +207,9 @@ final class ContainerContentsViewModel: ObservableObject {
             } catch {}
         }
 
-        container.files.append(contentsOf: pickedFiles)
+        withAnimation(.easeInOut(duration: 0.22)) {
+            container.files.append(contentsOf: pickedFiles)
+        }
     }
 
     func toggleDeletion(for file: ContainerFileItem) {
@@ -202,12 +219,14 @@ final class ContainerContentsViewModel: ObservableObject {
             return
         }
 
-        if container.files[index].isDraftAdded {
-            container.files.remove(at: index)
-            return
-        }
+        withAnimation(.easeInOut(duration: 0.22)) {
+            if container.files[index].isDraftAdded {
+                container.files.remove(at: index)
+                return
+            }
 
-        container.files[index].isMarkedForDeletion.toggle()
+            container.files[index].isMarkedForDeletion.toggle()
+        }
     }
 
     func confirmSave() {

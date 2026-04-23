@@ -56,6 +56,9 @@ struct ContactDetailsView: View {
         } message: {
             Text(viewModel.verificationAlertMessage)
         }
+        .onAppear {
+            viewModel.reload()
+        }
     }
     
     // MARK: - Subviews
@@ -102,11 +105,12 @@ struct ContactDetailsView: View {
     
     private var titleView: some View {
         VStack(spacing: 8) {
-            HStack(spacing: 10) {
+            HStack(alignment: .top, spacing: 8) {
                 Text(viewModel.contact.name)
                     .font(PQFont.B30)
                     .foregroundStyle(PQColor.base7.swiftUIColor)
-                
+                    .multilineTextAlignment(.leading)
+
                 PQImage.pencil.swiftUIImage
                     .renderingMode(.template)
                     .foregroundStyle(PQColor.base7.swiftUIColor)
@@ -116,15 +120,19 @@ struct ContactDetailsView: View {
                             .foregroundStyle(PQColor.base0.swiftUIColor)
                     )
                     .onTapGesture(perform: viewModel.editName)
+
+                Spacer(minLength: 0)
             }
+            .frame(maxWidth: .infinity)
             
             Picker("", selection: viewModel.verifiedSelection) {
                 Text(String(localized: "shared.status.verified")).tag(0)
                 Text(String(localized: "shared.status.unverified")).tag(1)
             }
             .pickerStyle(.segmented)
-            .frame(width: 200)
+            .frame(maxWidth: .infinity)
         }
+        .frame(maxWidth: .infinity)
     }
     
     private var fingerprintView: some View {
@@ -140,7 +148,7 @@ struct ContactDetailsView: View {
             
             Text(String(localized: "contacts.details.fingerprint.hint"))
                 .font(PQFont.R12.italic())
-                .foregroundStyle(PQColor.blue3.swiftUIColor)
+                .foregroundStyle(PQColor.blue2.swiftUIColor)
                 .multilineTextAlignment(.center)
         }
         .contentShape(.rect)

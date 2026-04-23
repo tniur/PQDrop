@@ -24,8 +24,8 @@ final class EditContactNameViewModel: ObservableObject {
     
     var buttonTitle: String {
         switch mode {
-        case .create: "Создать"
-        case .edit: "Сохранить"
+        case .create: String(localized: "shared.create")
+        case .edit: String(localized: "shared.save")
         }
     }
 
@@ -50,12 +50,15 @@ final class EditContactNameViewModel: ObservableObject {
     func save() {
         switch mode {
         case .create(let publicKeyData):
-            try? contactRepository.create(name: name, publicKeyRaw: publicKeyData)
+            _ = try? contactRepository.create(name: name, publicKeyRaw: publicKeyData)
+            Task {
+                await coordinator.finish()
+            }
         case .edit(let contactId):
             try? contactRepository.updateName(name, for: contactId)
-        }
-        Task {
-            await coordinator.finish()
+            Task {
+                await coordinator.pop()
+            }
         }
     }
 }
