@@ -21,12 +21,16 @@ final class AccessControlViewModel: ObservableObject {
     @Published var contacts: [Recipient] = []
     @Published var isProcessing = false
 
-    var hasSelection: Bool {
-        !selectedContactIds.isEmpty
+    var hasUnsavedChanges: Bool {
+        selectedContactIds != hasAccessContactIds
     }
 
     private var idsToGrant: Set<String> {
         selectedContactIds.subtracting(hasAccessContactIds)
+    }
+
+    private var idsToRevoke: Set<String> {
+        hasAccessContactIds.subtracting(selectedContactIds)
     }
 
     private let coordinator: ContainersCoordinatorProtocol
@@ -62,13 +66,7 @@ final class AccessControlViewModel: ObservableObject {
         selectedContactIds.contains(id)
     }
 
-    func hasAccess(_ id: String) -> Bool {
-        hasAccessContactIds.contains(id)
-    }
-
     func toggleContact(_ id: String) {
-        guard !hasAccessContactIds.contains(id) else { return }
-
         if selectedContactIds.contains(id) {
             selectedContactIds.remove(id)
         } else {
@@ -76,9 +74,8 @@ final class AccessControlViewModel: ObservableObject {
         }
     }
 
-    func addContact() {
-        guard hasSelection else {
-            activeAlert = .noSelection
+    func confirmSaveChanges() {
+        guard hasUnsavedChanges else {
             return
         }
 
@@ -95,12 +92,9 @@ final class AccessControlViewModel: ObservableObject {
 
     func applySelectedContacts() {
         activeAlert = nil
-        let idsToGrant = self.idsToGrant
 
-        guard !idsToGrant.isEmpty else {
-            activeAlert = .noSelection
-            return
-        }
+        let idsToGrant = self.idsToGrant
+        let idsToRevoke = self.idsToRevoke
 
         guard let fileURL = container.fileURL else { return }
 
@@ -110,18 +104,7 @@ final class AccessControlViewModel: ObservableObject {
             do {
                 let info = try containerService.inspectContainer(at: fileURL)
                 let privateKey = try loadPrivateKeyForRekey(info: info)
-
-                var recipientKeys = knownContactKeys(in: info.recipientKeyIds)
-
-                for contactId in idsToGrant {
-                    guard let keyData = contactPublicKeys[contactId],
-                          let publicKey = try? XWing.PublicKey(rawRepresentation: keyData) else {
-                        continue
-                    }
-                    if !recipientKeys.contains(publicKey) {
-                        recipientKeys.append(publicKey)
-                    }
-                }
+                let recipientKeys = try selectedContactIds.map(publicKey(for:))
 
                 let tempURL = FileManager.default.temporaryDirectory
                     .appendingPathComponent(UUID().uuidString)
@@ -152,74 +135,18 @@ final class AccessControlViewModel: ObservableObject {
                     )
                 }
 
-                hasAccessContactIds.formUnion(idsToGrant)
-                selectedContactIds.removeAll()
-                reloadAccessState()
-                isProcessing = false
-            } catch {
-                isProcessing = false
-                activeAlert = .operationFailed(message: accessUpdateErrorMessage(error))
-            }
-        }
-    }
-
-    func requestRevokeAccess(for id: String) {
-        guard hasAccessContactIds.contains(id) else { return }
-        activeAlert = .revokeAccess(contactId: id)
-    }
-
-    func revokeAccess(for id: String) {
-        activeAlert = nil
-        guard let fileURL = container.fileURL else { return }
-
-        isProcessing = true
-
-        Task {
-            do {
-                let info = try containerService.inspectContainer(at: fileURL)
-                let privateKey = try loadPrivateKeyForRekey(info: info)
-
-                guard let revokedKeyData = contactPublicKeys[id],
-                      let revokedKey = try? XWing.PublicKey(rawRepresentation: revokedKeyData) else {
-                    throw AccessUpdateError.contactKeyUnavailable
-                }
-
-                let revokedFingerprint = revokedKey.fingerprint
-
-                let remainingKeys = knownContactKeys(in: info.recipientKeyIds).filter { publicKey in
-                    publicKey.fingerprint != revokedFingerprint
-                }
-
-                let tempURL = FileManager.default.temporaryDirectory
-                    .appendingPathComponent(UUID().uuidString)
-                    .appendingPathExtension("pqck")
-                defer {
-                    try? FileManager.default.removeItem(at: tempURL)
-                }
-
-                try await Task.detached {
-                    try self.containerService.rekeyContainer(
-                        at: fileURL,
-                        to: tempURL,
-                        remainingRecipients: remainingKeys,
-                        privateKey: privateKey
+                for contactId in idsToRevoke {
+                    let contactName = contacts.first(where: { $0.id == contactId })?.name ?? ""
+                    try? historyRepository.append(
+                        type: .accessRevoked,
+                        containerID: container.containerID,
+                        containerName: container.name,
+                        detail: contactName
                     )
-                }.value
+                }
 
-                try verifyRecipients(at: tempURL, recipientKeys: remainingKeys, ownerKey: privateKey.publicKey)
-                try replaceContainerFile(at: fileURL, with: tempURL)
-
-                let contactName = contacts.first(where: { $0.id == id })?.name ?? ""
-                try? historyRepository.append(
-                    type: .accessRevoked,
-                    containerID: container.containerID,
-                    containerName: container.name,
-                    detail: contactName
-                )
-
-                hasAccessContactIds.remove(id)
-                selectedContactIds.remove(id)
                 reloadAccessState()
+                selectedContactIds = hasAccessContactIds
                 isProcessing = false
             } catch {
                 isProcessing = false
@@ -229,7 +156,18 @@ final class AccessControlViewModel: ObservableObject {
     }
 
     private func loadContacts() {
-        let allContacts = contactRepository.fetchAll()
+        let ownPublicKeyRaw = try? keyPairManager.loadOrMigratePublicKey()?.rawRepresentation
+        let allContacts = contactRepository.fetchAll().filter { contact in
+            guard let ownPublicKeyRaw else {
+                return true
+            }
+
+            return contact.publicKeyRaw != ownPublicKeyRaw
+        }
+
+        hasAccessContactIds.removeAll()
+        selectedContactIds.removeAll()
+        contactPublicKeys.removeAll()
 
         contacts = allContacts.map { contact in
             let hexFingerprint = Fingerprint.fromPublicKeyRaw(contact.publicKeyRaw).hexStringGrouped
@@ -256,19 +194,17 @@ final class AccessControlViewModel: ObservableObject {
                 }
             }
         } catch {}
+
+        selectedContactIds = hasAccessContactIds
     }
 
-    private func knownContactKeys(in recipientKeyIds: [Fingerprint]) -> [XWing.PublicKey] {
-        let recipientFingerprints = Set(recipientKeyIds)
-
-        return contactPublicKeys.values.compactMap { rawPublicKey in
-            guard let publicKey = try? XWing.PublicKey(rawRepresentation: rawPublicKey),
-                  recipientFingerprints.contains(publicKey.fingerprint) else {
-                return nil
-            }
-
-            return publicKey
+    private func publicKey(for contactId: String) throws -> XWing.PublicKey {
+        guard let keyData = contactPublicKeys[contactId],
+              let publicKey = try? XWing.PublicKey(rawRepresentation: keyData) else {
+            throw AccessUpdateError.contactKeyUnavailable
         }
+
+        return publicKey
     }
 
     private func loadPrivateKeyForRekey(info: ContainerInfo) throws -> XWing.PrivateKey {
