@@ -16,6 +16,7 @@ struct PQDropApp: App {
     var body: some Scene {
         WindowGroup {
             coordinator.getView()
+                .preferredColorScheme(.light)
         }
     }
 }
