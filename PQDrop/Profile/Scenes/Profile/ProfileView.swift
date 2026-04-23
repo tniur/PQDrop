@@ -48,17 +48,14 @@ struct ProfileView: View {
                 .font(PQFont.B30)
                 .foregroundStyle(PQColor.base0.swiftUIColor)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 20)
 
             qrContentView
 
             Spacer()
 
             resetButton
-                .padding(.horizontal, 20)
-                .padding(.bottom, 24)
         }
-        .padding(.top, 20)
+        .padding()
     }
 
     private var qrContentView: some View {

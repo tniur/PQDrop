@@ -75,6 +75,7 @@ struct ContainersView: View {
                 ScrollView(showsIndicators: false) {
                     containersList
                         .padding(.horizontal)
+                        .padding(.bottom)
                 }
             }
         }
