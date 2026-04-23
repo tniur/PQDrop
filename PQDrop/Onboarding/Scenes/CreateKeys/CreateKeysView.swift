@@ -30,32 +30,51 @@ struct CreateKeysView: View {
     var body: some View {
         BackgroundView(isImage: true) {
             VStack(spacing: .zero) {
-                imageView
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 162)
-                    .padding(.bottom, 40)
-                
-                Text(title)
-                    .font(PQFont.B30)
-                    .foregroundStyle(PQColor.base0.swiftUIColor)
-                    .multilineTextAlignment(.center)
-                    .padding(.bottom, 20)
-                
-                content
-                
+                topContent
+                    .id(viewModel.phase)
+                    .transition(topContentTransition)
+
                 Spacer()
             }
             .padding(.top, 40)
             .padding(.horizontal, 24)
             .padding(.bottom, 24)
+            .animation(.easeInOut(duration: 0.22), value: viewModel.phase)
         }
         .safeAreaInset(edge: .bottom) {
             bottomButton
                 .padding(.horizontal, 24)
+                .animation(.easeInOut(duration: 0.2), value: viewModel.phase)
         }
     }
     
     // MARK: - Subviews
+
+    private var topContentTransition: AnyTransition {
+        switch viewModel.phase {
+        case .success:
+            return .opacity.combined(with: .scale(scale: 0.96))
+        case .idle, .creating, .failure:
+            return .opacity
+        }
+    }
+
+    private var topContent: some View {
+        VStack(spacing: .zero) {
+            imageView
+                .frame(maxWidth: .infinity)
+                .frame(height: 162)
+                .padding(.bottom, 40)
+
+            Text(title)
+                .font(PQFont.B30)
+                .foregroundStyle(PQColor.base0.swiftUIColor)
+                .multilineTextAlignment(.center)
+                .padding(.bottom, 20)
+
+            content
+        }
+    }
     
     @ViewBuilder
     private var imageView: some View {
@@ -139,6 +158,7 @@ struct CreateKeysView: View {
                 String(localized: "shared.next"),
                 action: viewModel.finish
             )
+            .transition(.opacity.combined(with: .move(edge: .bottom)))
         case .failure:
             PQButton(String(localized: "shared.retry"), action: viewModel.retry)
         }

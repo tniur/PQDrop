@@ -92,7 +92,9 @@ final class CreateContainerFilesViewModel: ObservableObject {
             }
         }
 
-        files.append(contentsOf: importedFiles)
+        withAnimation(.easeInOut(duration: 0.22)) {
+            files.append(contentsOf: importedFiles)
+        }
     }
 
     func handlePickedPhotos(_ items: [PhotosPickerItem]) async {
@@ -128,7 +130,9 @@ final class CreateContainerFilesViewModel: ObservableObject {
             } catch {}
         }
 
-        files.append(contentsOf: pickedFiles)
+        withAnimation(.easeInOut(duration: 0.22)) {
+            files.append(contentsOf: pickedFiles)
+        }
     }
 
     func openFile(_ file: ContainerFileItem) {
@@ -138,7 +142,9 @@ final class CreateContainerFilesViewModel: ObservableObject {
     }
 
     func removeFile(_ file: ContainerFileItem) {
-        files.removeAll { $0.id == file.id }
+        withAnimation(.easeInOut(duration: 0.22)) {
+            files.removeAll { $0.id == file.id }
+        }
     }
 
     func create() {

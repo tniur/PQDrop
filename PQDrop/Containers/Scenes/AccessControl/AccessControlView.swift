@@ -82,7 +82,7 @@ struct AccessControlView: View {
                     .font(PQFont.B24)
                     .foregroundStyle(PQColor.base7.swiftUIColor)
 
-                Text("id: \(viewModel.container.id.uuidString)")
+                Text(String(localized: "shared.id\(viewModel.container.id.uuidString)"))
                     .font(PQFont.R15)
                     .foregroundStyle(PQColor.base5.swiftUIColor)
             }

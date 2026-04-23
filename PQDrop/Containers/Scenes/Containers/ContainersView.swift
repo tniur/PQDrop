@@ -155,6 +155,7 @@ struct ContainersView: View {
                     isAvailable: container.isAvailable
                 )
                 .frame(maxWidth: .infinity)
+                .transition(.opacity.combined(with: .scale(scale: 0.96)))
                 .onTapGesture {
                     viewModel.showContainerDetails(container: container)
                 }
@@ -176,7 +177,9 @@ struct ContainersView: View {
             actions: {
                 Button(String(localized: "shared.delete"), role: .destructive) {
                     if let container = viewModel.containerToDelete {
-                        viewModel.delete(container: container)
+                        withAnimation(.easeInOut(duration: 0.22)) {
+                            viewModel.delete(container: container)
+                        }
                     }
                 }
                 Button(String(localized: "shared.cancel"), role: .cancel) {}
@@ -187,6 +190,7 @@ struct ContainersView: View {
                 }
             }
         )
+        .animation(.easeInOut(duration: 0.22), value: viewModel.filteredContainers.map(\.id))
     }
 
     // MARK: - Initializer

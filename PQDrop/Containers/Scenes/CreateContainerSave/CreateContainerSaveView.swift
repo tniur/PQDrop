@@ -29,12 +29,15 @@ struct CreateContainerSaveView: View {
 
     var body: some View {
         BackgroundView(isImage: true) {
-            switch viewModel.phase {
-            case .loading:
-                loadingBlock
-            case .success, .failure:
-                resultBlock
+            Group {
+                switch viewModel.phase {
+                case .loading:
+                    loadingBlock
+                case .success, .failure:
+                    resultBlock
+                }
             }
+            .animation(.easeInOut(duration: 0.22), value: viewModel.phase)
         }
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .tabBar)
@@ -77,6 +80,7 @@ struct CreateContainerSaveView: View {
             }
         }
         .padding(.horizontal, 24)
+        .transition(.opacity.combined(with: .scale(scale: 0.96)))
     }
 
     @ViewBuilder

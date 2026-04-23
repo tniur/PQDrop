@@ -10,6 +10,12 @@
             "state" : "new",
             "value" : "%1$@/%2$@"
           }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@/%2$@"
+          }
         }
       }
     },
@@ -2196,9 +2202,6 @@
         }
       }
     },
-    "id: %@" : {
-
-    },
     "onboarding.create.keys" : {
       "localizations" : {
         "en" : {
@@ -2924,7 +2927,6 @@
       }
     },
     "shared.id%@" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

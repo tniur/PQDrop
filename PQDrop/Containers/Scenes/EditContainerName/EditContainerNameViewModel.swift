@@ -31,6 +31,15 @@ final class EditContainerNameViewModel: ObservableObject {
         }
     }
 
+    var shouldShowSubmitButton: Bool {
+        switch mode {
+        case .create:
+            return !name.isEmpty
+        case .edit:
+            return true
+        }
+    }
+
     private let mode: Mode
     private let coordinator: ContainersCoordinatorProtocol
     private let containerRepository: ContainerRepository

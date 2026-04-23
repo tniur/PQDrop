@@ -8,6 +8,7 @@
 import Combine
 import UIKit
 import Foundation
+import PQUIComponents
 import PQContainerKit
 
 @MainActor
@@ -93,6 +94,7 @@ final class ContainerDetailsViewModel: ObservableObject {
 
     func copyId() {
         UIPasteboard.general.string = container.id.uuidString
+        PQToast.show(with: String(localized: "shared.copied"))
     }
 
     func editName() {

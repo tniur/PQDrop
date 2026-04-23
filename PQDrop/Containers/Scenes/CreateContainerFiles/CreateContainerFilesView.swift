@@ -87,8 +87,10 @@ struct CreateContainerFilesView: View {
                     action: viewModel.create
                 )
                 .padding(.horizontal)
+                .transition(.opacity)
             }
         }
+        .animation(.easeInOut(duration: 0.2), value: viewModel.hasFiles)
     }
 
     private var headerView: some View {
@@ -117,6 +119,7 @@ struct CreateContainerFilesView: View {
         LazyVGrid(columns: columns, spacing: 12) {
             ForEach(viewModel.files) { file in
                 FileCardView(file: file, showBadges: false, style: .dark)
+                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
                     .onTapGesture {
                         viewModel.openFile(file)
                     }
@@ -129,6 +132,7 @@ struct CreateContainerFilesView: View {
                     }
             }
         }
+        .animation(.easeInOut(duration: 0.22), value: viewModel.files)
     }
 
     // MARK: - Init

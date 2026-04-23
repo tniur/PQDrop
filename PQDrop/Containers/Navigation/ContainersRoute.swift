@@ -100,10 +100,12 @@ enum ContainersRoute: RouteType {
             return AnyView(view)
 
         case .containersContents(let coordinator, let container, let decryptedDir):
+            let containerRepository = ContainerRepository()
             let viewModel = ContainerContentsViewModel(
                 coordinator: coordinator,
                 container: container,
-                decryptedDir: decryptedDir
+                decryptedDir: decryptedDir,
+                containerRepository: containerRepository
             )
             let view = ContainerContentsView(viewModel: viewModel)
             return AnyView(view)
