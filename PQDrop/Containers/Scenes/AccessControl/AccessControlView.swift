@@ -68,11 +68,27 @@ struct AccessControlView: View {
 
     private var headerCardView: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(viewModel.container.name)
-                .font(PQFont.B24)
-                .foregroundStyle(PQColor.base7.swiftUIColor)
-                .multilineTextAlignment(.leading)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            HStack(alignment: .top, spacing: 8) {
+                Text(viewModel.container.name)
+                    .font(PQFont.B24)
+                    .foregroundStyle(PQColor.base7.swiftUIColor)
+                    .multilineTextAlignment(.leading)
+
+                PQImage.pencil.swiftUIImage
+                    .resizable()
+                    .renderingMode(.template)
+                    .foregroundStyle(PQColor.base7.swiftUIColor)
+                    .frame(width: 16, height: 16)
+                    .padding(9)
+                    .background(
+                        Circle()
+                            .foregroundStyle(PQColor.base0.swiftUIColor)
+                    )
+                    .onTapGesture(perform: viewModel.editName)
+
+                Spacer(minLength: 0)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             Text(String(localized: "shared.id\(viewModel.container.id.uuidString)"))
                 .font(PQFont.R15)

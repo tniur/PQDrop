@@ -110,7 +110,6 @@ struct ContactDetailsView: View {
                     .font(PQFont.B30)
                     .foregroundStyle(PQColor.base7.swiftUIColor)
                     .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
 
                 PQImage.pencil.swiftUIImage
                     .renderingMode(.template)
@@ -121,6 +120,8 @@ struct ContactDetailsView: View {
                             .foregroundStyle(PQColor.base0.swiftUIColor)
                     )
                     .onTapGesture(perform: viewModel.editName)
+
+                Spacer(minLength: 0)
             }
             .frame(maxWidth: .infinity)
             

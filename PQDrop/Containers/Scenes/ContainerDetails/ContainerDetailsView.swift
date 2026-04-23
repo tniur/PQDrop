@@ -68,13 +68,13 @@ struct ContainerDetailsView: View {
                     .multilineTextAlignment(.center)
             }
 
-            Spacer()
-
             PQButton(
                 String(localized: "shared.delete"),
                 style: .init(.secondary),
                 action: viewModel.confirmDelete
             )
+            
+            Spacer()
         }
         .padding(.horizontal)
     }
@@ -87,8 +87,7 @@ struct ContainerDetailsView: View {
                         .font(PQFont.B24)
                         .foregroundStyle(PQColor.base7.swiftUIColor)
                         .multilineTextAlignment(.leading)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    
+
                     PQImage.pencil.swiftUIImage
                         .resizable()
                         .renderingMode(.template)
@@ -100,6 +99,8 @@ struct ContainerDetailsView: View {
                                 .foregroundStyle(PQColor.base0.swiftUIColor)
                         )
                         .onTapGesture(perform: viewModel.editName)
+
+                    Spacer(minLength: 0)
                 }
                 .frame(maxWidth: .infinity)
                 

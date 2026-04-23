@@ -74,6 +74,12 @@ final class AccessControlViewModel: ObservableObject {
         }
     }
 
+    func editName() {
+        Task {
+            await coordinator.showEditContainerName(mode: .edit(container: container))
+        }
+    }
+
     func confirmSaveChanges() {
         guard hasUnsavedChanges else {
             return
