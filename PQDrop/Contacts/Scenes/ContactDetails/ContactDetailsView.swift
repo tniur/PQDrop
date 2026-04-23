@@ -147,7 +147,7 @@ struct ContactDetailsView: View {
             
             Text(String(localized: "contacts.details.fingerprint.hint"))
                 .font(PQFont.R12.italic())
-                .foregroundStyle(PQColor.blue3.swiftUIColor)
+                .foregroundStyle(PQColor.blue2.swiftUIColor)
                 .multilineTextAlignment(.center)
         }
         .contentShape(.rect)
