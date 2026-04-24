@@ -64,8 +64,7 @@ final class ImportContainerViewModel: ObservableObject {
         }
         
         Task {
-            await coordinator.finish()
-            await coordinator.showContainerDetails(with: container)
+            await coordinator.showContainerDetailsFromRoot(with: container)
         }
     }
 

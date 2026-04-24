@@ -12,6 +12,7 @@ struct Recipient: Identifiable {
     let name: String
     let fingerprint: String
     let isVerified: Bool
+    let isManageable: Bool
 
     var shortFingerprint: String {
         guard fingerprint.count > 16 else { return fingerprint }

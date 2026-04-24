@@ -14,12 +14,17 @@ enum ContainersRoute: RouteType {
     case importContainer(coordinator: ContainersCoordinatorProtocol, fileURL: URL)
     case recipientsSheet(recipients: [Recipient])
     case accessControl(coordinator: ContainersCoordinatorProtocol, container: Container)
-    case containersContents(coordinator: ContainersCoordinatorProtocol, container: Container, decryptedDir: URL)
+    case containersContents(coordinator: ContainersCoordinatorProtocol, container: Container, workspaceRoot: URL)
     case fileViewer(item: ContainerFileItem)
     case saveContainer(coordinator: ContainersCoordinatorProtocol, container: Container)
     case editContainerName(coordinator: ContainersCoordinatorProtocol, mode: EditContainerNameViewModel.Mode)
     case createContainerFiles(coordinator: ContainersCoordinatorProtocol, name: String)
-    case createContainerSave(coordinator: ContainersCoordinatorProtocol, name: String, files: [ContainerFileItem])
+    case createContainerSave(
+        coordinator: ContainersCoordinatorProtocol,
+        name: String,
+        files: [ContainerFileItem],
+        workspaceRoot: URL
+    )
 
     var presentationStyle: TransitionPresentationStyle {
         switch self {
@@ -87,24 +92,26 @@ enum ContainersRoute: RouteType {
             let archiveService = ArchiveService()
             let containerService = ContainerService(archiveService: archiveService, keyPairManager: keyPairManager)
             let contactRepository = ContactRepository()
+            let containerRepository = ContainerRepository()
             let historyRepository = HistoryRepository()
             let viewModel = AccessControlViewModel(
                 coordinator: coordinator,
                 container: container,
                 containerService: containerService,
                 contactRepository: contactRepository,
+                containerRepository: containerRepository,
                 historyRepository: historyRepository,
                 keyPairManager: keyPairManager
             )
             let view = AccessControlView(viewModel: viewModel)
             return AnyView(view)
 
-        case .containersContents(let coordinator, let container, let decryptedDir):
+        case .containersContents(let coordinator, let container, let workspaceRoot):
             let containerRepository = ContainerRepository()
             let viewModel = ContainerContentsViewModel(
                 coordinator: coordinator,
                 container: container,
-                decryptedDir: decryptedDir,
+                workspaceRoot: workspaceRoot,
                 containerRepository: containerRepository
             )
             let view = ContainerContentsView(viewModel: viewModel)
@@ -122,12 +129,14 @@ enum ContainersRoute: RouteType {
             let containerService = ContainerService(archiveService: archiveService, keyPairManager: keyPairManager)
             let historyRepository = HistoryRepository()
             let contactRepository = ContactRepository()
+            let containerRepository = ContainerRepository()
             let viewModel = SaveContainerViewModel(
                 coordinator: coordinator,
                 container: container,
                 containerService: containerService,
                 historyRepository: historyRepository,
-                contactRepository: contactRepository
+                contactRepository: contactRepository,
+                containerRepository: containerRepository
             )
             let view = SaveContainerView(viewModel: viewModel)
             return AnyView(view)
@@ -142,7 +151,7 @@ enum ContainersRoute: RouteType {
             let view = CreateContainerFilesView(viewModel: viewModel)
             return AnyView(view)
 
-        case .createContainerSave(let coordinator, let name, let files):
+        case .createContainerSave(let coordinator, let name, let files, let workspaceRoot):
             let keychainService = KeychainService()
             let keyPairManager = KeyPairManager(keychainService: keychainService)
             let archiveService = ArchiveService()
@@ -155,7 +164,8 @@ enum ContainersRoute: RouteType {
                 containerRepository: containerRepository,
                 historyRepository: historyRepository,
                 name: name,
-                files: files
+                files: files,
+                workspaceRoot: workspaceRoot
             )
             let view = CreateContainerSaveView(viewModel: viewModel)
             return AnyView(view)

@@ -122,7 +122,7 @@ struct SaveContainerView: View {
 
     private var failureBlock: some View {
         VStack(spacing: .zero) {
-            Text(String(localized: "shared.try.again"))
+            Text(viewModel.errorMessage)
                 .font(PQFont.R14)
                 .foregroundStyle(PQColor.blue2.swiftUIColor)
                 .multilineTextAlignment(.center)

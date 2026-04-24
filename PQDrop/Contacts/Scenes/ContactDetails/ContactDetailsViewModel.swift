@@ -69,13 +69,23 @@ final class ContactDetailsViewModel: ObservableObject {
     
     private let coordinator: ContactsCoordinatorProtocol
     private let contactRepository: ContactRepository
+    private let containerRepository: ContainerRepository
+    private let containerService: ContainerService
     
     // MARK: - Init
 
-    init(coordinator: ContactsCoordinatorProtocol, contact: Contact, contactRepository: ContactRepository) {
+    init(
+        coordinator: ContactsCoordinatorProtocol,
+        contact: Contact,
+        contactRepository: ContactRepository,
+        containerRepository: ContainerRepository,
+        containerService: ContainerService
+    ) {
         self.coordinator = coordinator
         self.contact = contact
         self.contactRepository = contactRepository
+        self.containerRepository = containerRepository
+        self.containerService = containerService
     }
     
     // MARK: - Methods
@@ -98,6 +108,7 @@ final class ContactDetailsViewModel: ObservableObject {
     }
     
     func deleteContact() {
+        preserveRecipientKey()
         try? contactRepository.delete(by: contact.id)
         Task {
             await coordinator.finish()
@@ -124,5 +135,27 @@ final class ContactDetailsViewModel: ObservableObject {
         
         pendingVerificationValue = newIsVerified
         showVerificationAlert = true
+    }
+
+    private func preserveRecipientKey() {
+        for container in containerRepository.fetchAll() {
+            guard let fileURL = container.fileURL else {
+                continue
+            }
+
+            guard let recoveredRawKeys = try? containerService.mergedCurrentNonOwnerRecipientPublicKeys(
+                at: fileURL,
+                storedRecipientPublicKeysRaw: container.recipientPublicKeysRaw,
+                candidateRecipientPublicKeysRaw: [contact.publicKeyRaw]
+            ) else {
+                continue
+            }
+
+            guard recoveredRawKeys != container.recipientPublicKeysRaw else {
+                continue
+            }
+
+            try? containerRepository.updateRecipientPublicKeys(recoveredRawKeys, for: container.id)
+        }
     }
 }

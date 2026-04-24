@@ -548,20 +548,20 @@
         }
       }
     },
-    "containers.access.alert.apply.title%1$lld%2$lld" : {
+    "containers.access.alert.apply.title" : {
       "extractionState" : "manual",
       "generatesSymbol" : false,
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Selected %1$lld of %2$lld contacts"
+            "value" : "Selected %1$lld of %2$lld recipients"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Выбрано %1$lld из %2$lld контактов"
+            "value" : "Выбрано %1$lld из %2$lld получателей"
           }
         }
       }
@@ -578,6 +578,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Добавление или удаление получателей требует перешифровки контейнера. Это может занять несколько минут."
+          }
+        }
+      }
+    },
+    "containers.access.available.contacts" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Available Contacts"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Доступные контакты"
+          }
+        }
+      }
+    },
+    "containers.access.current.recipients" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current Access"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сейчас имеют доступ"
           }
         }
       }
@@ -741,6 +773,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Не удалось прочитать публичный ключ выбранного контакта."
+          }
+        }
+      }
+    },
+    "containers.access.error.recipient.keys.unavailable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cannot change access because some current recipients are unknown on this device."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось изменить доступ: часть текущих получателей неизвестна на этом устройстве."
           }
         }
       }

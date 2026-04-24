@@ -129,7 +129,7 @@ struct ContainerContentsView: View {
                 }
                 .frame(maxWidth: .infinity)
 
-                Text(String(localized: "shared.id\(viewModel.container.id.uuidString)"))
+                Text(String(localized: "shared.id\(viewModel.container.shortContainerID)"))
                     .font(PQFont.R15)
                     .foregroundStyle(PQColor.base5.swiftUIColor)
                     .frame(maxWidth: .infinity, alignment: .leading)

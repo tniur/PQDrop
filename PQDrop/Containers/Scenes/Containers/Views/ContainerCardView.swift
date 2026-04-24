@@ -13,7 +13,7 @@ struct ContainerCardView: View {
     // MARK: - Properties
 
     private let name: String
-    private let id: String
+    private let containerID: String
     private let isAvailable: Bool
 
     private var boxColor: Color {
@@ -32,14 +32,6 @@ struct ContainerCardView: View {
         isAvailable ? PQColor.base10.swiftUIColor : PQColor.base4.swiftUIColor
     }
 
-    private var shortId: String {
-        guard id.count > 12 else {
-            return id
-        }
-        
-        return "\(id.prefix(6))...\(id.suffix(6))"
-    }
-
     // MARK: - Body
 
     var body: some View {
@@ -53,7 +45,7 @@ struct ContainerCardView: View {
                     .font(PQFont.B16)
                     .foregroundStyle(nameColor)
 
-                Text(String(localized: "shared.id\(shortId)"))
+                Text(String(localized: "shared.id\(containerID)"))
                     .font(PQFont.R12)
                     .foregroundStyle(idColor)
             }
@@ -73,9 +65,9 @@ struct ContainerCardView: View {
 
     // MARK: - Initializer
 
-    init(name: String, id: String, isAvailable: Bool) {
+    init(name: String, containerID: String, isAvailable: Bool) {
         self.name = name
-        self.id = id
+        self.containerID = containerID
         self.isAvailable = isAvailable
     }
 }

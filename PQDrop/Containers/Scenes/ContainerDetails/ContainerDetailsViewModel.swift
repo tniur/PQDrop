@@ -23,9 +23,11 @@ final class ContainerDetailsViewModel: ObservableObject {
     @Published var isError = false
     @Published var recipients: [Recipient] = []
     @Published var isOpening = false
+    @Published var exportURL: URL?
 
     var isAvailable: Bool { container.isAvailable }
     var isOwned: Bool { container.isOwned }
+    var hasFile: Bool { container.fileURL != nil }
 
     var historyEvents: [HistoryEvent] {
         guard isOwned, isAvailable else { return [] }
@@ -93,7 +95,7 @@ final class ContainerDetailsViewModel: ObservableObject {
     // MARK: - Methods
 
     func copyId() {
-        UIPasteboard.general.string = container.id.uuidString
+        UIPasteboard.general.string = container.containerIDHex
         PQToast.show(with: String(localized: "shared.copied"))
     }
 
@@ -118,28 +120,33 @@ final class ContainerDetailsViewModel: ObservableObject {
 
         let containerService = self.containerService
         let baseContainer = container
-        let outputDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent("decrypted_\(UUID().uuidString)")
 
         isOpening = true
 
         Task {
             do {
-                let fileURLs = try await Task.detached {
-                    try containerService.decryptContainer(
-                        at: fileURL,
-                        to: outputDir,
-                        privateKey: privateKey
-                    )
-                }.value
+                let workspace = try ContainerPlaintextWorkspace.create()
+                let fileURLs: [URL]
+
+                do {
+                    fileURLs = try await Task.detached {
+                        try containerService.decryptContainer(
+                            at: fileURL,
+                            to: workspace.decryptedDirectory,
+                            privateKey: privateKey
+                        )
+                    }.value
+                } catch {
+                    workspace.cleanup()
+                    throw error
+                }
 
                 var openedContainer = baseContainer
                 openedContainer.files = Self.makeFileItems(from: fileURLs)
 
                 isOpening = false
-                await coordinator.showContainerContents(with: openedContainer, decryptedDir: outputDir)
+                await coordinator.showContainerContents(with: openedContainer, workspaceRoot: workspace.rootURL)
             } catch {
-                try? FileManager.default.removeItem(at: outputDir)
                 isOpening = false
                 isError = true
             }
@@ -147,7 +154,14 @@ final class ContainerDetailsViewModel: ObservableObject {
     }
 
     func exportContainer() {
+        guard let fileURL = container.fileURL else {
+            return
+        }
+
+        cleanupTemporaryExport()
+        exportURL = makeTemporaryExportURL(from: fileURL)
         showShareSheet = true
+
         try? historyRepository.append(
             type: .export,
             containerID: container.containerID,
@@ -194,6 +208,9 @@ final class ContainerDetailsViewModel: ObservableObject {
             do {
                 let tempDir = FileManager.default.temporaryDirectory
                     .appendingPathComponent("copy_\(UUID().uuidString)")
+                defer {
+                    try? FileManager.default.removeItem(at: tempDir)
+                }
 
                 let fileURLs = try await Task.detached {
                     try containerService.decryptContainer(
@@ -216,14 +233,13 @@ final class ContainerDetailsViewModel: ObservableObject {
                     )
                 }.value
 
-                try? FileManager.default.removeItem(at: tempDir)
-
                 _ = try containerRepository.create(
                     name: containerName,
                     containerID: result.containerID,
                     fileURL: result.fileURL,
                     isOwned: true,
-                    isAvailable: true
+                    isAvailable: true,
+                    recipientPublicKeysRaw: result.recipientPublicKeysRaw
                 )
 
                 try? historyRepository.append(
@@ -266,8 +282,15 @@ final class ContainerDetailsViewModel: ObservableObject {
     }
 
     private func refreshAvailability() {
-        guard let fileURL = container.fileURL,
-              let publicKey = try? keyPairManager.loadPublicKey() else {
+        guard let fileURL = container.fileURL else {
+            guard container.isAvailable else { return }
+
+            container.isAvailable = false
+            try? containerRepository.updateAvailability(false, for: container.id)
+            return
+        }
+
+        guard let publicKey = try? keyPairManager.loadPublicKey() else {
             return
         }
 
@@ -296,8 +319,9 @@ final class ContainerDetailsViewModel: ObservableObject {
         let ownerFingerprint = (try? keyPairManager.loadPublicKey())?.fingerprint
 
         do {
-            let info = try containerService.inspectContainer(at: fileURL)
             let contacts = contactRepository.fetchAll()
+            persistRecoveredRecipientKeysIfNeeded(fileURL: fileURL, contacts: contacts)
+            let info = try containerService.inspectContainer(at: fileURL)
 
             recipients = info.recipientKeyIds.map { fingerprint in
                 let hexFingerprint = fingerprint.rawValue.map { String(format: "%02x", $0) }.joined()
@@ -307,7 +331,8 @@ final class ContainerDetailsViewModel: ObservableObject {
                         id: hexFingerprint,
                         name: String(localized: "shared.you"),
                         fingerprint: hexFingerprint,
-                        isVerified: true
+                        isVerified: true,
+                        isManageable: false
                     )
                 }
 
@@ -319,7 +344,8 @@ final class ContainerDetailsViewModel: ObservableObject {
                     id: hexFingerprint,
                     name: matchedContact?.name ?? String(localized: "contacts.unknown"),
                     fingerprint: hexFingerprint,
-                    isVerified: matchedContact?.isVerified ?? false
+                    isVerified: matchedContact?.isVerified ?? false,
+                    isManageable: false
                 )
             }
         } catch {
@@ -340,5 +366,65 @@ final class ContainerDetailsViewModel: ObservableObject {
                 localURL: url
             )
         }
+    }
+
+    private func persistRecoveredRecipientKeysIfNeeded(fileURL: URL, contacts: [Contact]) {
+        guard let recoveredRawKeys = try? containerService.mergedCurrentNonOwnerRecipientPublicKeys(
+            at: fileURL,
+            storedRecipientPublicKeysRaw: container.recipientPublicKeysRaw,
+            candidateRecipientPublicKeysRaw: contacts.map(\.publicKeyRaw)
+        ) else {
+            return
+        }
+
+        guard recoveredRawKeys != container.recipientPublicKeysRaw else {
+            return
+        }
+
+        try? containerRepository.updateRecipientPublicKeys(recoveredRawKeys, for: container.id)
+        container.recipientPublicKeysRaw = recoveredRawKeys
+    }
+
+    func finishExport() {
+        cleanupTemporaryExport()
+    }
+
+    private func makeTemporaryExportURL(from sourceURL: URL) -> URL {
+        let exportDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("container_export_\(UUID().uuidString)", isDirectory: true)
+        let fileExtension = sourceURL.pathExtension
+        let fileName = fileExtension.isEmpty
+            ? container.name
+            : "\(container.name).\(fileExtension)"
+        let exportURL = exportDirectory.appendingPathComponent(fileName)
+
+        do {
+            try FileManager.default.createDirectory(at: exportDirectory, withIntermediateDirectories: true)
+            try FileManager.default.copyItem(at: sourceURL, to: exportURL)
+            return exportURL
+        } catch {
+            try? FileManager.default.removeItem(at: exportDirectory)
+            return sourceURL
+        }
+    }
+
+    private func cleanupTemporaryExport() {
+        defer {
+            exportURL = nil
+        }
+
+        guard let exportURL else {
+            return
+        }
+
+        let temporaryDirectory = FileManager.default.temporaryDirectory.standardizedFileURL
+        let standardizedExportURL = exportURL.standardizedFileURL
+
+        guard standardizedExportURL.path.hasPrefix(temporaryDirectory.path) else {
+            return
+        }
+
+        let exportDirectory = standardizedExportURL.deletingLastPathComponent()
+        try? FileManager.default.removeItem(at: exportDirectory)
     }
 }

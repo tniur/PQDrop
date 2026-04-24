@@ -29,7 +29,17 @@ enum ContactsRoute: RouteType {
         switch self {
         case .contacts(let coordinator):
             let contactRepository = ContactRepository()
-            let viewModel = ContactsViewModel(coordinator: coordinator, contactRepository: contactRepository)
+            let containerRepository = ContainerRepository()
+            let keychainService = KeychainService()
+            let keyPairManager = KeyPairManager(keychainService: keychainService)
+            let archiveService = ArchiveService()
+            let containerService = ContainerService(archiveService: archiveService, keyPairManager: keyPairManager)
+            let viewModel = ContactsViewModel(
+                coordinator: coordinator,
+                contactRepository: contactRepository,
+                containerRepository: containerRepository,
+                containerService: containerService
+            )
             let view = ContactsView(viewModel: viewModel)
             return AnyView(view)
             
@@ -57,7 +67,18 @@ enum ContactsRoute: RouteType {
             
         case .contactDetails(let coordinator, let contact):
             let contactRepository = ContactRepository()
-            let viewModel = ContactDetailsViewModel(coordinator: coordinator, contact: contact, contactRepository: contactRepository)
+            let containerRepository = ContainerRepository()
+            let keychainService = KeychainService()
+            let keyPairManager = KeyPairManager(keychainService: keychainService)
+            let archiveService = ArchiveService()
+            let containerService = ContainerService(archiveService: archiveService, keyPairManager: keyPairManager)
+            let viewModel = ContactDetailsViewModel(
+                coordinator: coordinator,
+                contact: contact,
+                contactRepository: contactRepository,
+                containerRepository: containerRepository,
+                containerService: containerService
+            )
             let view = ContactDetailsView(viewModel: viewModel)
             return AnyView(view)
         }

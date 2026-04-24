@@ -8,6 +8,7 @@
 import SwiftUI
 import Combine
 import PhotosUI
+import UIKit
 import UniformTypeIdentifiers
 
 @MainActor
@@ -30,12 +31,15 @@ final class CreateContainerFilesViewModel: ObservableObject {
 
     let name: String
     private let coordinator: ContainersCoordinatorProtocol
+    private var workspace: ContainerPlaintextWorkspace?
+    private var backgroundObserver: NSObjectProtocol?
 
     // MARK: - Init
 
     init(coordinator: ContainersCoordinatorProtocol, name: String) {
         self.coordinator = coordinator
         self.name = name
+        observeBackground()
     }
 
     // MARK: - Actions
@@ -66,9 +70,9 @@ final class CreateContainerFilesViewModel: ObservableObject {
             let resourceValues = try? sourceURL.resourceValues(forKeys: [.fileSizeKey, .nameKey])
             let fileName = resourceValues?.name ?? sourceURL.lastPathComponent
             let ext = sourceURL.pathExtension
-            let destinationURL = FileManager.default.temporaryDirectory
-                .appendingPathComponent(UUID().uuidString)
-                .appendingPathExtension(ext)
+            guard let destinationURL = makeDraftFileURL(pathExtension: ext) else {
+                return nil
+            }
 
             do {
                 if FileManager.default.fileExists(atPath: destinationURL.path) {
@@ -95,6 +99,8 @@ final class CreateContainerFilesViewModel: ObservableObject {
         withAnimation(.easeInOut(duration: 0.22)) {
             files.append(contentsOf: importedFiles)
         }
+
+        cleanupWorkspaceIfEmpty()
     }
 
     func handlePickedPhotos(_ items: [PhotosPickerItem]) async {
@@ -107,9 +113,9 @@ final class CreateContainerFilesViewModel: ObservableObject {
 
             let ext = item.supportedContentTypes.first?.preferredFilenameExtension ?? "jpg"
             let fileName = "Фото_\(index + 1).\(ext)"
-            let destinationURL = FileManager.default.temporaryDirectory
-                .appendingPathComponent(UUID().uuidString)
-                .appendingPathExtension(ext)
+            guard let destinationURL = makeDraftFileURL(pathExtension: ext) else {
+                continue
+            }
 
             do {
                 try data.write(to: destinationURL, options: .atomic)
@@ -133,6 +139,8 @@ final class CreateContainerFilesViewModel: ObservableObject {
         withAnimation(.easeInOut(duration: 0.22)) {
             files.append(contentsOf: pickedFiles)
         }
+
+        cleanupWorkspaceIfEmpty()
     }
 
     func openFile(_ file: ContainerFileItem) {
@@ -142,14 +150,70 @@ final class CreateContainerFilesViewModel: ObservableObject {
     }
 
     func removeFile(_ file: ContainerFileItem) {
+        if let localURL = file.localURL {
+            try? FileManager.default.removeItem(at: localURL)
+        }
+
         withAnimation(.easeInOut(duration: 0.22)) {
             files.removeAll { $0.id == file.id }
         }
+
+        cleanupWorkspaceIfEmpty()
     }
 
     func create() {
-        Task {
-            await coordinator.showCreateContainerSave(name: name, files: files)
+        guard let workspaceRoot = workspace?.rootURL, !files.isEmpty else {
+            return
         }
+
+        Task {
+            await coordinator.showCreateContainerSave(
+                name: name,
+                files: files,
+                workspaceRoot: workspaceRoot
+            )
+        }
+    }
+
+    func cleanupWorkspace() {
+        workspace?.cleanup()
+        workspace = nil
+        files = []
+    }
+
+    private func observeBackground() {
+        backgroundObserver = NotificationCenter.default.addObserver(
+            forName: UIApplication.didEnterBackgroundNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.cleanupWorkspace()
+            }
+        }
+    }
+
+    private func makeDraftFileURL(pathExtension: String) -> URL? {
+        let normalizedExtension = pathExtension.isEmpty ? "bin" : pathExtension
+
+        if workspace == nil {
+            workspace = try? ContainerPlaintextWorkspace.create()
+        }
+
+        return workspace?.makeDraftFileURL(pathExtension: normalizedExtension)
+    }
+
+    private func cleanupWorkspaceIfEmpty() {
+        guard files.isEmpty else { return }
+        workspace?.cleanup()
+        workspace = nil
+    }
+
+    deinit {
+        if let backgroundObserver {
+            NotificationCenter.default.removeObserver(backgroundObserver)
+        }
+
+        workspace?.cleanup()
     }
 }

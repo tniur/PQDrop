@@ -16,6 +16,7 @@ struct AccessContactView: View {
     private let shortKey: String
     private let isVerified: Bool
     private let isSelected: Bool
+    private let isEnabled: Bool
 
     // MARK: - Body
 
@@ -50,6 +51,7 @@ struct AccessContactView: View {
                     lineWidth: 2
                 )
         )
+        .opacity(isEnabled ? 1 : 0.55)
     }
 
     // MARK: - Subviews
@@ -58,7 +60,7 @@ struct AccessContactView: View {
         VStack(alignment: .leading, spacing: 2) {
             Text(name)
                 .font(PQFont.B14)
-                .foregroundStyle(PQColor.base10.swiftUIColor)
+                .foregroundStyle(isEnabled ? PQColor.base10.swiftUIColor : PQColor.base5.swiftUIColor)
 
             Text(shortKey)
                 .font(PQFont.R12)
@@ -72,11 +74,13 @@ struct AccessContactView: View {
         name: String,
         shortKey: String,
         isVerified: Bool,
-        isSelected: Bool
+        isSelected: Bool,
+        isEnabled: Bool = true
     ) {
         self.name = name
         self.shortKey = shortKey
         self.isVerified = isVerified
         self.isSelected = isSelected
+        self.isEnabled = isEnabled
     }
 }

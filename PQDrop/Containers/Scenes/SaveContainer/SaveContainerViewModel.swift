@@ -24,6 +24,7 @@ final class SaveContainerViewModel: ObservableObject {
 
     @Published var phase: Phase = .loading
     @Published var status: SaveContainerStatus = .preparingFiles
+    @Published var errorMessage = ""
 
     private var uiTask: Task<Void, Never>?
     private var workTask: Task<Void, Never>?
@@ -33,6 +34,7 @@ final class SaveContainerViewModel: ObservableObject {
     private let containerService: ContainerService
     private let historyRepository: HistoryRepository
     private let contactRepository: ContactRepository
+    private let containerRepository: ContainerRepository
 
     // MARK: - Initializer
     
@@ -41,13 +43,15 @@ final class SaveContainerViewModel: ObservableObject {
         container: Container,
         containerService: ContainerService,
         historyRepository: HistoryRepository,
-        contactRepository: ContactRepository
+        contactRepository: ContactRepository,
+        containerRepository: ContainerRepository
     ) {
         self.coordinator = coordinator
         self.container = container
         self.containerService = containerService
         self.historyRepository = historyRepository
         self.contactRepository = contactRepository
+        self.containerRepository = containerRepository
         startSaving()
     }
 
@@ -77,6 +81,7 @@ final class SaveContainerViewModel: ObservableObject {
 
         phase = .loading
         status = .preparingFiles
+        errorMessage = ""
 
         uiTask = Task { [weak self] in
             guard let self else { return }
@@ -102,7 +107,8 @@ final class SaveContainerViewModel: ObservableObject {
             switch result {
             case .success:
                 self.phase = .success
-            case .failure:
+            case .failure(let error):
+                self.errorMessage = self.saveErrorMessage(error)
                 self.phase = .failure
             }
         }
@@ -123,7 +129,11 @@ final class SaveContainerViewModel: ObservableObject {
             .appendingPathExtension("pqck")
 
         do {
-            let recipients = try knownRecipientKeys(for: fileURL)
+            let resolvedRecipients = try containerService.resolveCurrentNonOwnerRecipients(
+                at: fileURL,
+                storedRecipientPublicKeysRaw: container.recipientPublicKeysRaw,
+                contacts: contactRepository.fetchAll()
+            )
 
             try await Task.detached {
                 try self.containerService.reencryptContainer(
@@ -131,12 +141,16 @@ final class SaveContainerViewModel: ObservableObject {
                     files: fileURLs,
                     originalContainerURL: fileURL,
                     destinationURL: tempURL,
-                    recipients: recipients
+                    recipients: resolvedRecipients.publicKeys
                 )
             }.value
 
             try FileManager.default.removeItem(at: fileURL)
             try FileManager.default.moveItem(at: tempURL, to: fileURL)
+            try? containerRepository.updateRecipientPublicKeys(
+                resolvedRecipients.rawPublicKeys,
+                for: container.id
+            )
 
             try? historyRepository.append(
                 type: .export,
@@ -151,25 +165,39 @@ final class SaveContainerViewModel: ObservableObject {
         }
     }
 
-    private func knownRecipientKeys(for fileURL: URL) throws -> [XWing.PublicKey] {
-        let info = try containerService.inspectContainer(at: fileURL)
-        let recipientFingerprints = Set(info.recipientKeyIds)
-
-        return contactRepository.fetchAll().compactMap { contact in
-            guard let publicKey = try? XWing.PublicKey(rawRepresentation: contact.publicKeyRaw),
-                  recipientFingerprints.contains(publicKey.fingerprint) else {
-                return nil
-            }
-
-            return publicKey
-        }
-    }
-
     private func cancelTasks() {
         uiTask?.cancel()
         workTask?.cancel()
         uiTask = nil
         workTask = nil
+    }
+
+    private func saveErrorMessage(_ error: Error) -> String {
+        if let serviceError = error as? ContainerServiceError {
+            switch serviceError {
+            case .noKeyPair:
+                return String(localized: "containers.access.error.no.key.pair")
+            case .recipientKeysUnavailable:
+                return String(localized: "containers.access.error.recipient.keys.unavailable")
+            }
+        }
+
+        if let containerError = error as? ContainerError {
+            switch containerError {
+            case .accessDenied:
+                return String(localized: "containers.access.error.access.denied")
+            case .invalidFormat, .unsupportedVersion:
+                return String(localized: "containers.access.error.invalid.format")
+            case .limitsExceeded:
+                return String(localized: "containers.access.error.limits.exceeded")
+            case .ioError:
+                return String(localized: "containers.access.error.io")
+            case .cannotOpen:
+                return String(localized: "containers.access.error.cannot.open")
+            }
+        }
+
+        return String(localized: "shared.try.again")
     }
 
     deinit {
