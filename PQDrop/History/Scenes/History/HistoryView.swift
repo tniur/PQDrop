@@ -21,6 +21,9 @@ struct HistoryView: View {
         BackgroundView(isImage: true) {
             contentView
         }
+        .onAppear {
+            viewModel.loadData()
+        }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
@@ -53,7 +56,7 @@ struct HistoryView: View {
             VStack(alignment: .leading, spacing: 20) {
                 headerView
 
-                if viewModel.visibleSections.isEmpty {
+                if viewModel.sections.isEmpty {
                     emptyView
                 } else {
                     listView
@@ -100,7 +103,7 @@ struct HistoryView: View {
 
     private var listView: some View {
         LazyVStack(alignment: .leading, spacing: 20) {
-            ForEach(viewModel.visibleSections) { section in
+            ForEach(viewModel.sections) { section in
                 VStack(alignment: .leading, spacing: 16) {
                     Text(section.dateTitle)
                         .font(PQFont.B16)

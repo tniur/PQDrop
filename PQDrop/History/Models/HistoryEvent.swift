@@ -9,6 +9,7 @@ import SwiftUI
 import PQUIComponents
 
 enum HistoryEventType: String, CaseIterable {
+    case created
     case export
     case imported
     case accessGranted
@@ -16,7 +17,7 @@ enum HistoryEventType: String, CaseIterable {
 
     var filter: HistoryEventFilter {
         switch self {
-        case .export:
+        case .created, .export:
             return .export
         case .imported:
             return .imported
@@ -27,6 +28,8 @@ enum HistoryEventType: String, CaseIterable {
 
     var icon: Image {
         switch self {
+        case .created:
+            return PQImage.plus.swiftUIImage
         case .export:
             return PQImage.export.swiftUIImage
         case .imported:
@@ -40,34 +43,38 @@ enum HistoryEventType: String, CaseIterable {
 
     var listTitlePrefix: String {
         switch self {
+        case .created:
+            return String(localized: "history.event.prefix.created")
         case .export:
-            return "Экспорт"
+            return String(localized: "history.event.prefix.export")
         case .imported:
-            return "Импорт"
+            return String(localized: "history.event.prefix.imported")
         case .accessGranted, .accessRevoked:
-            return "Доступ"
+            return String(localized: "history.event.prefix.access")
         }
     }
 
     var detailsTitle: String {
         switch self {
+        case .created:
+            return String(localized: "history.event.details.created")
         case .export:
-            return "Экспорт контейнера"
+            return String(localized: "history.event.details.export")
         case .imported:
-            return "Импорт контейнера"
+            return String(localized: "history.event.details.imported")
         case .accessGranted, .accessRevoked:
-            return "Доступ контейнера"
+            return String(localized: "history.event.details.access")
         }
     }
 
     var result: String {
         switch self {
-        case .export, .imported:
-            return "Успешно"
+        case .created, .export, .imported:
+            return String(localized: "history.event.result.success")
         case .accessGranted:
-            return "Доступ выдан"
+            return String(localized: "history.event.result.access.granted")
         case .accessRevoked:
-            return "Доступ закрыт"
+            return String(localized: "history.event.result.access.revoked")
         }
     }
 }
@@ -102,14 +109,14 @@ struct HistoryEvent: Identifiable {
 
     private static let dateTitleFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ru_RU")
+        formatter.locale = Locale.current
         formatter.dateFormat = "d MMMM yyyy"
         return formatter
     }()
 
     private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ru_RU")
+        formatter.locale = Locale.current
         formatter.dateFormat = "HH:mm"
         return formatter
     }()
