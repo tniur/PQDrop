@@ -7,4 +7,5 @@
 
 enum UserDefaultsKeys {
     static let onboardingCompleted = "pq.onboarding.completed"
+    static let historyRetentionDays = "pq.history.retentionDays"
 }

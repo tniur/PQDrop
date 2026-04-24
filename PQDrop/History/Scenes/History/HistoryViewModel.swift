@@ -17,6 +17,7 @@ final class HistoryViewModel: ObservableObject {
     @Published var pendingRetentionPeriod: HistoryRetentionPeriod?
     @Published var showRetentionAlert = false
     @Published var filter: HistoryEventFilter = .all
+    @Published private(set) var sections: [HistoryEventSection] = []
 
     var retentionSubtitle: String {
         String(localized: "history.retention.subtitle\(selectedRetentionPeriod.title)")
@@ -34,61 +35,27 @@ final class HistoryViewModel: ObservableObject {
         return String(localized: "history.retention.alert.message.increase\(pendingRetentionPeriod.title)")
     }
 
-    var visibleSections: [HistoryEventSection] {
-        sections.compactMap { section in
-            let events = filteredEvents(from: section.events)
-            guard !events.isEmpty else { return nil }
-            return HistoryEventSection(dateTitle: section.dateTitle, events: events)
-        }
-    }
-
     private let coordinator: HistoryCoordinatorProtocol
+    private let historyRepository: HistoryRepository
 
-    private var sections: [HistoryEventSection] {
-        let calendar = Calendar.current
-        let march20 = calendar.date(from: DateComponents(year: 2026, month: 3, day: 20))!
-        let march19 = calendar.date(from: DateComponents(year: 2026, month: 3, day: 19))!
-        let march17 = calendar.date(from: DateComponents(year: 2026, month: 3, day: 17))!
-        let containerID = Data(repeating: 0, count: 16)
+    init(coordinator: HistoryCoordinatorProtocol, historyRepository: HistoryRepository) {
+        self.coordinator = coordinator
+        self.historyRepository = historyRepository
 
-        let events20: [HistoryEvent] = [
-            .init(id: UUID(), type: .export, containerName: "Название контейнера", containerID: containerID, detail: nil,
-                  timestamp: calendar.date(bySettingHour: 12, minute: 9, second: 0, of: march20)!),
-            .init(id: UUID(), type: .imported, containerName: "Название контейнера", containerID: containerID, detail: nil,
-                  timestamp: calendar.date(bySettingHour: 11, minute: 11, second: 0, of: march20)!),
-            .init(id: UUID(), type: .accessGranted, containerName: "Название контейнера", containerID: containerID, detail: nil,
-                  timestamp: calendar.date(bySettingHour: 10, minute: 12, second: 0, of: march20)!),
-            .init(id: UUID(), type: .accessRevoked, containerName: "Название контейнера", containerID: containerID, detail: nil,
-                  timestamp: calendar.date(bySettingHour: 9, minute: 56, second: 0, of: march20)!)
-        ]
+        let savedDays = UserDefaults.standard.integer(forKey: UserDefaultsKeys.historyRetentionDays)
+        if let period = HistoryRetentionPeriod(rawValue: savedDays) {
+            self.selectedRetentionPeriod = period
+        }
 
-        let events19: [HistoryEvent] = [
-            .init(id: UUID(), type: .export, containerName: "Название контейнера", containerID: containerID, detail: nil,
-                  timestamp: calendar.date(bySettingHour: 10, minute: 12, second: 0, of: march19)!),
-            .init(id: UUID(), type: .imported, containerName: "Название контейнера", containerID: containerID, detail: nil,
-                  timestamp: calendar.date(bySettingHour: 10, minute: 10, second: 0, of: march19)!),
-            .init(id: UUID(), type: .accessGranted, containerName: "Название контейнера", containerID: containerID, detail: nil,
-                  timestamp: calendar.date(bySettingHour: 10, minute: 3, second: 0, of: march19)!),
-            .init(id: UUID(), type: .accessRevoked, containerName: "Название контейнера", containerID: containerID, detail: nil,
-                  timestamp: calendar.date(bySettingHour: 10, minute: 0, second: 0, of: march19)!)
-        ]
-
-        let events17: [HistoryEvent] = [
-            .init(id: UUID(), type: .export, containerName: "Название контейнера", containerID: containerID, detail: nil,
-                  timestamp: calendar.date(bySettingHour: 11, minute: 48, second: 0, of: march17)!),
-            .init(id: UUID(), type: .accessGranted, containerName: "Название контейнера", containerID: containerID, detail: nil,
-                  timestamp: calendar.date(bySettingHour: 10, minute: 55, second: 0, of: march17)!)
-        ]
-
-        return [
-            HistoryEventSection(dateTitle: events20.first!.dateTitle, events: events20),
-            HistoryEventSection(dateTitle: events19.first!.dateTitle, events: events19),
-            HistoryEventSection(dateTitle: events17.first!.dateTitle, events: events17)
-        ]
+        loadData()
     }
 
-    init(coordinator: HistoryCoordinatorProtocol) {
-        self.coordinator = coordinator
+    func loadData() {
+        let events = historyRepository.fetchAll(
+            filter: filter,
+            retentionDays: selectedRetentionPeriod.rawValue
+        )
+        sections = historyRepository.groupBySections(events)
     }
 
     // MARK: - Methods
@@ -101,8 +68,17 @@ final class HistoryViewModel: ObservableObject {
 
     func confirmRetentionChange() {
         guard let pendingRetentionPeriod else { return }
+        let previousPeriod = selectedRetentionPeriod
         selectedRetentionPeriod = pendingRetentionPeriod
         self.pendingRetentionPeriod = nil
+
+        UserDefaults.standard.set(selectedRetentionPeriod.rawValue, forKey: UserDefaultsKeys.historyRetentionDays)
+
+        if selectedRetentionPeriod.rawValue < previousPeriod.rawValue {
+            try? historyRepository.deleteOlderThan(days: selectedRetentionPeriod.rawValue)
+        }
+
+        loadData()
     }
 
     func cancelRetentionChange() {
@@ -113,6 +89,7 @@ final class HistoryViewModel: ObservableObject {
         Task {
             let model = HistoryFilterSheetModel(currentFilter: filter) { filter in
                 self.filter = filter
+                self.loadData()
             }
             await coordinator.showHistoryFilterSheet(with: model)
         }
@@ -124,8 +101,4 @@ final class HistoryViewModel: ObservableObject {
         }
     }
 
-    private func filteredEvents(from events: [HistoryEvent]) -> [HistoryEvent] {
-        guard filter != .all else { return events }
-        return events.filter { $0.type.filter == filter }
-    }
 }

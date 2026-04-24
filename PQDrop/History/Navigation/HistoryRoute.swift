@@ -25,7 +25,8 @@ enum HistoryRoute: RouteType {
     var body: some View {
         switch self {
         case .history(let coordinator):
-            let viewModel = HistoryViewModel(coordinator: coordinator)
+            let historyRepository = HistoryRepository()
+            let viewModel = HistoryViewModel(coordinator: coordinator, historyRepository: historyRepository)
             let view = HistoryView(viewModel: viewModel)
             return AnyView(view)
 
