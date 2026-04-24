@@ -30,7 +30,7 @@ final class ContainersViewModel: ObservableObject {
         guard !searchText.isEmpty else { return tabFiltered }
         return tabFiltered.filter {
             $0.name.localizedCaseInsensitiveContains(searchText) ||
-            $0.id.uuidString.localizedCaseInsensitiveContains(searchText)
+            $0.containerIDHex.localizedCaseInsensitiveContains(searchText)
         }
     }
 
@@ -48,7 +48,16 @@ final class ContainersViewModel: ObservableObject {
     }
 
     func loadContainers() {
-        containers = containerRepository.fetchAll()
+        containers = containerRepository.fetchAll().map { container in
+            guard container.fileURL == nil, container.isAvailable else {
+                return container
+            }
+
+            var unavailableContainer = container
+            unavailableContainer.isAvailable = false
+            try? containerRepository.updateAvailability(false, for: container.id)
+            return unavailableContainer
+        }
     }
 
     func delete(container: Container) {

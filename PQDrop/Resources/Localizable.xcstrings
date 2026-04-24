@@ -548,7 +548,7 @@
         }
       }
     },
-    "containers.access.alert.apply.title%1$lld%2$lld" : {
+    "containers.access.alert.apply.title" : {
       "extractionState" : "manual",
       "generatesSymbol" : false,
       "localizations" : {

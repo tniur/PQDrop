@@ -16,4 +16,16 @@ struct Container: Identifiable {
     var isAvailable: Bool
     var isOwned: Bool
     var files: [ContainerFileItem] = []
+
+    var containerIDHex: String {
+        containerID.map { String(format: "%02x", $0) }.joined()
+    }
+
+    var shortContainerID: String {
+        guard containerIDHex.count > 12 else {
+            return containerIDHex
+        }
+
+        return "\(containerIDHex.prefix(6))...\(containerIDHex.suffix(6))"
+    }
 }

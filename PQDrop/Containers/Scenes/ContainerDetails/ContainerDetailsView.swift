@@ -109,7 +109,7 @@ struct ContainerDetailsView: View {
                 }
                 .frame(maxWidth: .infinity)
                 
-                Text(String(localized: "shared.id\(viewModel.container.id.uuidString)"))
+                Text(String(localized: "shared.id\(viewModel.container.shortContainerID)"))
                     .font(PQFont.R15)
                     .foregroundStyle(PQColor.base5.swiftUIColor)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -158,13 +158,14 @@ struct ContainerDetailsView: View {
                 icon: PQImage.box.swiftUIImage,
                 action: viewModel.openContainer
             )
-            .disabled(!viewModel.isAvailable || viewModel.isOpening)
+            .disabled(!viewModel.isAvailable || !viewModel.hasFile || viewModel.isOpening)
 
             PQButton(
                 String(localized: "shared.export"),
                 icon: PQImage.export.swiftUIImage,
                 action: viewModel.exportContainer
             )
+            .disabled(!viewModel.hasFile)
         }
         .frame(maxWidth: .infinity)
     }
@@ -182,9 +183,9 @@ struct ContainerDetailsView: View {
                 ChevronRowView(
                     icon: PQImage.export.swiftUIImage,
                     title: String(localized: "containers.access.management"),
-                    isEnabled: viewModel.isAvailable
+                    isEnabled: viewModel.isAvailable && viewModel.hasFile
                 )
-                .onTapGesture(perform: viewModel.isAvailable ? viewModel.showAccessManagement : {})
+                .onTapGesture(perform: viewModel.isAvailable && viewModel.hasFile ? viewModel.showAccessManagement : {})
 
                 ChevronRowView(
                     icon: PQImage.clock.swiftUIImage,
@@ -198,7 +199,7 @@ struct ContainerDetailsView: View {
                 icon: PQImage.copy.swiftUIImage,
                 action: viewModel.copyContainerToSelf
             )
-            .disabled(!viewModel.isAvailable)
+            .disabled(!viewModel.isAvailable || !viewModel.hasFile)
         }
     }
 

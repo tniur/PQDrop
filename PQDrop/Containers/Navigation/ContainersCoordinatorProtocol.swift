@@ -10,6 +10,7 @@ import Foundation
 protocol ContainersCoordinatorProtocol: AnyObject {
     func finish() async
     func showContainerDetails(with container: Container) async
+    func showContainerDetailsFromRoot(with container: Container) async
     func showImportContainerValidation(fileURL: URL) async
     func showRecipientsSheet(recipients: [Recipient]) async
     func showAccessControl(with container: Container) async

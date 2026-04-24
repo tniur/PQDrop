@@ -45,7 +45,7 @@ final class ContainerService {
             allRecipients.insert(ownerKey, at: 0)
         }
         
-        let fileName = "\(name).pqck"
+        let fileName = "\(UUID().uuidString)_\(name).pqck"
         let containerURL = destinationDir.appendingPathComponent(fileName)
         
         try ContainerV1.encryptFile(

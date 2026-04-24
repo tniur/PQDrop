@@ -30,6 +30,11 @@ final class ContainersCoordinator: Coordinator<ContainersRoute>, ContainersCoord
         await navigate(toRoute: .containerDetails(coordinator: self, container: container))
     }
 
+    func showContainerDetailsFromRoot(with container: Container) async {
+        await router.popToRoot()
+        await navigate(toRoute: .containerDetails(coordinator: self, container: container))
+    }
+
     func showImportContainerValidation(fileURL: URL) async {
         await navigate(toRoute: .importContainer(coordinator: self, fileURL: fileURL))
     }

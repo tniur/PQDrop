@@ -90,7 +90,7 @@ struct AccessControlView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            Text(String(localized: "shared.id\(viewModel.container.id.uuidString)"))
+            Text(String(localized: "shared.id\(viewModel.container.shortContainerID)"))
                 .font(PQFont.R15)
                 .foregroundStyle(PQColor.base5.swiftUIColor)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -150,8 +150,11 @@ struct AccessControlView: View {
         case .applyAccessChanges:
             return Alert(
                 title: Text(
-                    String(localized:
-                        "containers.access.alert.apply.title\(viewModel.selectedContactIds.count)\(viewModel.visibleRecipientsCount)"
+                    String(
+                        format: String(localized: "containers.access.alert.apply.title"),
+                        locale: Locale.current,
+                        Int64(viewModel.selectedContactIds.count),
+                        Int64(viewModel.visibleRecipientsCount)
                     )
                 ),
                 message: Text(String(localized: "containers.access.alert.changes.message")),

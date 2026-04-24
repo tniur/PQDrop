@@ -27,6 +27,7 @@ final class ContainerDetailsViewModel: ObservableObject {
 
     var isAvailable: Bool { container.isAvailable }
     var isOwned: Bool { container.isOwned }
+    var hasFile: Bool { container.fileURL != nil }
 
     var historyEvents: [HistoryEvent] {
         guard isOwned, isAvailable else { return [] }
@@ -94,7 +95,7 @@ final class ContainerDetailsViewModel: ObservableObject {
     // MARK: - Methods
 
     func copyId() {
-        UIPasteboard.general.string = container.id.uuidString
+        UIPasteboard.general.string = container.containerIDHex
         PQToast.show(with: String(localized: "shared.copied"))
     }
 
@@ -281,8 +282,15 @@ final class ContainerDetailsViewModel: ObservableObject {
     }
 
     private func refreshAvailability() {
-        guard let fileURL = container.fileURL,
-              let publicKey = try? keyPairManager.loadPublicKey() else {
+        guard let fileURL = container.fileURL else {
+            guard container.isAvailable else { return }
+
+            container.isAvailable = false
+            try? containerRepository.updateAvailability(false, for: container.id)
+            return
+        }
+
+        guard let publicKey = try? keyPairManager.loadPublicKey() else {
             return
         }
 
