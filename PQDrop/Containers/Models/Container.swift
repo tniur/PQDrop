@@ -10,6 +10,7 @@ import Foundation
 struct Container: Identifiable {
     let id: UUID
     let containerID: Data
+    var recipientPublicKeysRaw: [Data] = []
     var name: String
     var fileURL: URL?
     var isAvailable: Bool

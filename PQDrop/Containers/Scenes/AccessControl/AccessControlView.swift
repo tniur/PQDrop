@@ -103,17 +103,19 @@ struct AccessControlView: View {
 
     private var contactsListView: some View {
         ScrollView(showsIndicators: false) {
-            VStack(spacing: 12) {
-                ForEach(viewModel.contacts) { contact in
-                    AccessContactView(
-                        name: contact.name,
-                        shortKey: contact.shortFingerprint,
-                        isVerified: contact.isVerified,
-                        isSelected: viewModel.isSelected(contact.id)
+            VStack(alignment: .leading, spacing: 20) {
+                if !viewModel.currentAccessRecipients.isEmpty {
+                    recipientsSection(
+                        title: String(localized: "containers.access.current.recipients"),
+                        recipients: viewModel.currentAccessRecipients
                     )
-                    .onTapGesture {
-                        viewModel.toggleContact(contact.id)
-                    }
+                }
+
+                if !viewModel.availableContacts.isEmpty {
+                    recipientsSection(
+                        title: String(localized: "containers.access.available.contacts"),
+                        recipients: viewModel.availableContacts
+                    )
                 }
             }
             .padding(.horizontal)
@@ -149,7 +151,7 @@ struct AccessControlView: View {
             return Alert(
                 title: Text(
                     String(localized:
-                        "containers.access.alert.apply.title\(viewModel.selectedContactIds.count)\(viewModel.contacts.count)"
+                        "containers.access.alert.apply.title\(viewModel.selectedContactIds.count)\(viewModel.visibleRecipientsCount)"
                     )
                 ),
                 message: Text(String(localized: "containers.access.alert.changes.message")),
@@ -175,6 +177,34 @@ struct AccessControlView: View {
                 message: Text(message),
                 dismissButton: .default(Text(String(localized: "shared.got.it")))
             )
+        }
+    }
+
+    private func recipientsSection(title: String, recipients: [Recipient]) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title)
+                .font(PQFont.B14)
+                .foregroundStyle(PQColor.base0.swiftUIColor)
+                .padding(.horizontal, 4)
+
+            VStack(spacing: 12) {
+                ForEach(recipients) { recipient in
+                    AccessContactView(
+                        name: recipient.name,
+                        shortKey: recipient.shortFingerprint,
+                        isVerified: recipient.isVerified,
+                        isSelected: viewModel.isSelected(recipient.id),
+                        isEnabled: recipient.isManageable
+                    )
+                    .onTapGesture {
+                        guard recipient.isManageable else {
+                            return
+                        }
+
+                        viewModel.toggleContact(recipient.id)
+                    }
+                }
+            }
         }
     }
 }

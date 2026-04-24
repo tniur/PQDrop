@@ -18,11 +18,20 @@ final class AccessControlViewModel: ObservableObject {
     @Published var hasAccessContactIds: Set<String> = []
     @Published var selectedContactIds: Set<String> = []
     @Published var activeAlert: AccessControlAlert?
-    @Published var contacts: [Recipient] = []
+    @Published var currentAccessRecipients: [Recipient] = []
+    @Published var availableContacts: [Recipient] = []
     @Published var isProcessing = false
 
     var hasUnsavedChanges: Bool {
         selectedContactIds != hasAccessContactIds
+    }
+
+    var visibleRecipients: [Recipient] {
+        currentAccessRecipients + availableContacts
+    }
+
+    var visibleRecipientsCount: Int {
+        visibleRecipients.count
     }
 
     private var idsToGrant: Set<String> {
@@ -36,6 +45,7 @@ final class AccessControlViewModel: ObservableObject {
     private let coordinator: ContainersCoordinatorProtocol
     private let containerService: ContainerService
     private let contactRepository: ContactRepository
+    private let containerRepository: ContainerRepository
     private let historyRepository: HistoryRepository
     private let keyPairManager: KeyPairManager
     private var contactPublicKeys: [String: Data] = [:]
@@ -47,6 +57,7 @@ final class AccessControlViewModel: ObservableObject {
         container: Container,
         containerService: ContainerService,
         contactRepository: ContactRepository,
+        containerRepository: ContainerRepository,
         historyRepository: HistoryRepository,
         keyPairManager: KeyPairManager
     ) {
@@ -54,6 +65,7 @@ final class AccessControlViewModel: ObservableObject {
         self.container = container
         self.containerService = containerService
         self.contactRepository = contactRepository
+        self.containerRepository = containerRepository
         self.historyRepository = historyRepository
         self.keyPairManager = keyPairManager
 
@@ -86,7 +98,7 @@ final class AccessControlViewModel: ObservableObject {
         }
 
         let hasUnverified = idsToGrant.contains { id in
-            contacts.first(where: { $0.id == id })?.isVerified == false
+            visibleRecipients.first(where: { $0.id == id })?.isVerified == false
         }
 
         if hasUnverified {
@@ -110,7 +122,7 @@ final class AccessControlViewModel: ObservableObject {
             do {
                 let info = try containerService.inspectContainer(at: fileURL)
                 let privateKey = try loadPrivateKeyForRekey(info: info)
-                let recipientKeys = try selectedContactIds.map(publicKey(for:))
+                let recipientKeys = deduplicatedRecipientKeys(try selectedRecipientKeys())
 
                 let tempURL = FileManager.default.temporaryDirectory
                     .appendingPathComponent(UUID().uuidString)
@@ -130,29 +142,29 @@ final class AccessControlViewModel: ObservableObject {
 
                 try verifyRecipients(at: tempURL, recipientKeys: recipientKeys, ownerKey: privateKey.publicKey)
                 try replaceContainerFile(at: fileURL, with: tempURL)
+                let storedRecipientPublicKeysRaw = recipientKeys.map(\.rawRepresentation)
+                try? containerRepository.updateRecipientPublicKeys(storedRecipientPublicKeysRaw, for: container.id)
+                container.recipientPublicKeysRaw = storedRecipientPublicKeysRaw
 
                 for contactId in idsToGrant {
-                    let contactName = contacts.first(where: { $0.id == contactId })?.name ?? ""
                     try? historyRepository.append(
                         type: .accessGranted,
                         containerID: container.containerID,
                         containerName: container.name,
-                        detail: contactName
+                        detail: recipientName(for: contactId)
                     )
                 }
 
                 for contactId in idsToRevoke {
-                    let contactName = contacts.first(where: { $0.id == contactId })?.name ?? ""
                     try? historyRepository.append(
                         type: .accessRevoked,
                         containerID: container.containerID,
                         containerName: container.name,
-                        detail: contactName
+                        detail: recipientName(for: contactId)
                     )
                 }
 
-                reloadAccessState()
-                selectedContactIds = hasAccessContactIds
+                loadContacts()
                 isProcessing = false
             } catch {
                 isProcessing = false
@@ -174,37 +186,112 @@ final class AccessControlViewModel: ObservableObject {
         hasAccessContactIds.removeAll()
         selectedContactIds.removeAll()
         contactPublicKeys.removeAll()
+        currentAccessRecipients = []
+        availableContacts = []
 
-        contacts = allContacts.map { contact in
-            let hexFingerprint = Fingerprint.fromPublicKeyRaw(contact.publicKeyRaw).hexStringGrouped
-            let idString = contact.id.uuidString
-            contactPublicKeys[idString] = contact.publicKeyRaw
+        var localRecipients: [Recipient] = []
+        var localRecipientsByID: [String: Recipient] = [:]
 
-            return Recipient(
-                id: idString,
+        for contact in allContacts {
+            let fingerprint = Fingerprint.fromPublicKeyRaw(contact.publicKeyRaw)
+            let recipientID = recipientID(for: fingerprint)
+
+            guard localRecipientsByID[recipientID] == nil else {
+                continue
+            }
+
+            contactPublicKeys[recipientID] = contact.publicKeyRaw
+
+            let recipient = Recipient(
+                id: recipientID,
                 name: contact.name,
-                fingerprint: hexFingerprint,
-                isVerified: contact.isVerified
+                fingerprint: fingerprint.hexStringGrouped,
+                isVerified: contact.isVerified,
+                isManageable: true
             )
+
+            localRecipients.append(recipient)
+            localRecipientsByID[recipientID] = recipient
         }
 
-        guard let fileURL = container.fileURL else { return }
+        var storedRecipientKeysByID: [String: Data] = [:]
+        for rawPublicKey in container.recipientPublicKeysRaw {
+            guard let publicKey = try? XWing.PublicKey(rawRepresentation: rawPublicKey) else {
+                continue
+            }
+
+            let recipientID = recipientID(for: publicKey.fingerprint)
+
+            if storedRecipientKeysByID[recipientID] == nil {
+                storedRecipientKeysByID[recipientID] = rawPublicKey
+            }
+        }
+
+        guard let fileURL = container.fileURL else {
+            availableContacts = makeAvailableContacts(from: localRecipients, excluding: [])
+            return
+        }
+
+        persistRecoveredRecipientKeysIfNeeded(fileURL: fileURL, contacts: allContacts)
 
         do {
             let info = try containerService.inspectContainer(at: fileURL)
+            let ownerFingerprint = ownPublicKeyRaw.map(Fingerprint.fromPublicKeyRaw)
+            var currentRecipientIDs: Set<String> = []
+            var currentRecipients: [Recipient] = []
 
-            for contact in allContacts {
-                let contactFingerprint = Fingerprint.fromPublicKeyRaw(contact.publicKeyRaw)
-                if info.recipientKeyIds.contains(contactFingerprint) {
-                    hasAccessContactIds.insert(contact.id.uuidString)
+            for fingerprint in info.recipientKeyIds where fingerprint != ownerFingerprint {
+                let recipientID = recipientID(for: fingerprint)
+                currentRecipientIDs.insert(recipientID)
+
+                if let localRecipient = localRecipientsByID[recipientID] {
+                    currentRecipients.append(localRecipient)
+                    continue
                 }
-            }
-        } catch {}
 
-        selectedContactIds = hasAccessContactIds
+                if let rawPublicKey = storedRecipientKeysByID[recipientID] {
+                    contactPublicKeys[recipientID] = rawPublicKey
+                    currentRecipients.append(
+                        Recipient(
+                            id: recipientID,
+                            name: String(localized: "contacts.unknown"),
+                            fingerprint: fingerprint.hexStringGrouped,
+                            isVerified: false,
+                            isManageable: true
+                        )
+                    )
+                    continue
+                }
+
+                currentRecipients.append(
+                    Recipient(
+                        id: recipientID,
+                        name: String(localized: "contacts.unknown"),
+                        fingerprint: fingerprint.hexStringGrouped,
+                        isVerified: false,
+                        isManageable: false
+                    )
+                )
+            }
+
+            hasAccessContactIds = currentRecipientIDs
+            selectedContactIds = currentRecipientIDs
+            currentAccessRecipients = currentRecipients
+            availableContacts = makeAvailableContacts(from: localRecipients, excluding: currentRecipientIDs)
+        } catch {
+            availableContacts = makeAvailableContacts(from: localRecipients, excluding: [])
+        }
+    }
+
+    private func selectedRecipientKeys() throws -> [XWing.PublicKey] {
+        try selectedContactIds.map(publicKey(for:))
     }
 
     private func publicKey(for contactId: String) throws -> XWing.PublicKey {
+        guard contactPublicKeys[contactId] != nil else {
+            throw ContainerServiceError.recipientKeysUnavailable
+        }
+
         guard let keyData = contactPublicKeys[contactId],
               let publicKey = try? XWing.PublicKey(rawRepresentation: keyData) else {
             throw AccessUpdateError.contactKeyUnavailable
@@ -255,16 +342,39 @@ final class AccessControlViewModel: ObservableObject {
         }
     }
 
-    private func reloadAccessState() {
-        guard let fileURL = container.fileURL,
-              let info = try? containerService.inspectContainer(at: fileURL) else {
-            return
+    private func makeAvailableContacts(
+        from contacts: [Recipient],
+        excluding recipientIDs: Set<String>
+    ) -> [Recipient] {
+        contacts.filter { !recipientIDs.contains($0.id) }
+    }
+
+    private func recipientName(for contactId: String) -> String {
+        guard let recipient = visibleRecipients.first(where: { $0.id == contactId }) else {
+            return String(localized: "contacts.unknown")
         }
 
-        hasAccessContactIds = Set(contactPublicKeys.compactMap { contactId, rawPublicKey in
-            let fingerprint = Fingerprint.fromPublicKeyRaw(rawPublicKey)
-            return info.recipientKeyIds.contains(fingerprint) ? contactId : nil
-        })
+        let unknownName = String(localized: "contacts.unknown")
+        guard recipient.name == unknownName else {
+            return recipient.name
+        }
+
+        return "\(unknownName) (\(recipient.shortFingerprint))"
+    }
+
+    private func recipientID(for fingerprint: Fingerprint) -> String {
+        fingerprint.rawValue.map { String(format: "%02x", $0) }.joined()
+    }
+
+    private func deduplicatedRecipientKeys(_ recipients: [XWing.PublicKey]) -> [XWing.PublicKey] {
+        var seenFingerprints: Set<Fingerprint> = []
+        var uniqueRecipients: [XWing.PublicKey] = []
+
+        for recipient in recipients where seenFingerprints.insert(recipient.fingerprint).inserted {
+            uniqueRecipients.append(recipient)
+        }
+
+        return uniqueRecipients
     }
 
     private func accessUpdateErrorMessage(_ error: Error) -> String {
@@ -278,6 +388,15 @@ final class AccessControlViewModel: ObservableObject {
                 return String(localized: "containers.access.error.contact.key.unavailable")
             case .verificationFailed:
                 return String(localized: "containers.access.error.verification.failed")
+            }
+        }
+
+        if let serviceError = error as? ContainerServiceError {
+            switch serviceError {
+            case .noKeyPair:
+                return String(localized: "containers.access.error.no.key.pair")
+            case .recipientKeysUnavailable:
+                return String(localized: "containers.access.error.recipient.keys.unavailable")
             }
         }
 
@@ -297,6 +416,23 @@ final class AccessControlViewModel: ObservableObject {
         }
 
         return String(localized: "containers.access.error.generic")
+    }
+
+    private func persistRecoveredRecipientKeysIfNeeded(fileURL: URL, contacts: [Contact]) {
+        guard let recoveredRawKeys = try? containerService.mergedCurrentNonOwnerRecipientPublicKeys(
+            at: fileURL,
+            storedRecipientPublicKeysRaw: container.recipientPublicKeysRaw,
+            candidateRecipientPublicKeysRaw: contacts.map(\.publicKeyRaw)
+        ) else {
+            return
+        }
+
+        guard recoveredRawKeys != container.recipientPublicKeysRaw else {
+            return
+        }
+
+        try? containerRepository.updateRecipientPublicKeys(recoveredRawKeys, for: container.id)
+        container.recipientPublicKeysRaw = recoveredRawKeys
     }
 }
 

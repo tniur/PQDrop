@@ -42,8 +42,8 @@ final class ContainersCoordinator: Coordinator<ContainersRoute>, ContainersCoord
         await navigate(toRoute: .accessControl(coordinator: self, container: container))
     }
     
-    func showContainerContents(with container: Container, decryptedDir: URL) async {
-        await navigate(toRoute: .containersContents(coordinator: self, container: container, decryptedDir: decryptedDir))
+    func showContainerContents(with container: Container, workspaceRoot: URL) async {
+        await navigate(toRoute: .containersContents(coordinator: self, container: container, workspaceRoot: workspaceRoot))
     }
     
     func showFileViewer(with item: ContainerFileItem) async {
@@ -62,8 +62,19 @@ final class ContainersCoordinator: Coordinator<ContainersRoute>, ContainersCoord
         await navigate(toRoute: .createContainerFiles(coordinator: self, name: name))
     }
 
-    func showCreateContainerSave(name: String, files: [ContainerFileItem]) async {
-        await navigate(toRoute: .createContainerSave(coordinator: self, name: name, files: files))
+    func showCreateContainerSave(
+        name: String,
+        files: [ContainerFileItem],
+        workspaceRoot: URL
+    ) async {
+        await navigate(
+            toRoute: .createContainerSave(
+                coordinator: self,
+                name: name,
+                files: files,
+                workspaceRoot: workspaceRoot
+            )
+        )
     }
 
     func pop() async {

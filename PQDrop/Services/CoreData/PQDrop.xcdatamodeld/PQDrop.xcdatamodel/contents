@@ -20,6 +20,7 @@
         <attribute name="isAvailable" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
         <attribute name="isOwned" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES"/>
         <attribute name="name" attributeType="String"/>
+        <attribute name="recipientPublicKeysRaw" optional="YES" attributeType="Binary"/>
         <attribute name="updatedAt" attributeType="Date" usesScalarValueType="NO"/>
         <uniquenessConstraints>
             <uniquenessConstraint>

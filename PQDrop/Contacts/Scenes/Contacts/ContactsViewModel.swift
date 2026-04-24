@@ -37,12 +37,21 @@ final class ContactsViewModel: ObservableObject {
     
     private let coordinator: ContactsCoordinatorProtocol
     private let contactRepository: ContactRepository
+    private let containerRepository: ContainerRepository
+    private let containerService: ContainerService
     
     // MARK: - Initializer
 
-    init(coordinator: ContactsCoordinatorProtocol, contactRepository: ContactRepository) {
+    init(
+        coordinator: ContactsCoordinatorProtocol,
+        contactRepository: ContactRepository,
+        containerRepository: ContainerRepository,
+        containerService: ContainerService
+    ) {
         self.coordinator = coordinator
         self.contactRepository = contactRepository
+        self.containerRepository = containerRepository
+        self.containerService = containerService
         loadContacts()
     }
     
@@ -69,11 +78,13 @@ final class ContactsViewModel: ObservableObject {
     }
     
     func delete(contact: Contact) {
+        preserveRecipientKeys(for: [contact])
         try? contactRepository.delete(by: contact.id)
         loadContacts()
     }
     
     func clearContacts() {
+        preserveRecipientKeys(for: contacts)
         try? contactRepository.deleteAll()
         loadContacts()
     }
@@ -82,6 +93,32 @@ final class ContactsViewModel: ObservableObject {
         Task {
             await coordinator.showContactDetails(with: contact)
             loadContacts()
+        }
+    }
+
+    private func preserveRecipientKeys(for contacts: [Contact]) {
+        guard !contacts.isEmpty else { return }
+
+        let candidateRecipientPublicKeysRaw = contacts.map(\.publicKeyRaw)
+
+        for container in containerRepository.fetchAll() {
+            guard let fileURL = container.fileURL else {
+                continue
+            }
+
+            guard let recoveredRawKeys = try? containerService.mergedCurrentNonOwnerRecipientPublicKeys(
+                at: fileURL,
+                storedRecipientPublicKeysRaw: container.recipientPublicKeysRaw,
+                candidateRecipientPublicKeysRaw: candidateRecipientPublicKeysRaw
+            ) else {
+                continue
+            }
+
+            guard recoveredRawKeys != container.recipientPublicKeysRaw else {
+                continue
+            }
+
+            try? containerRepository.updateRecipientPublicKeys(recoveredRawKeys, for: container.id)
         }
     }
 }

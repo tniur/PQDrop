@@ -34,6 +34,7 @@ final class CreateContainerSaveViewModel: ObservableObject {
     private let historyRepository: HistoryRepository
     private let name: String
     private let files: [ContainerFileItem]
+    private let workspaceRoot: URL
 
     init(
         coordinator: ContainersCoordinatorProtocol,
@@ -41,7 +42,8 @@ final class CreateContainerSaveViewModel: ObservableObject {
         containerRepository: ContainerRepository,
         historyRepository: HistoryRepository,
         name: String,
-        files: [ContainerFileItem]
+        files: [ContainerFileItem],
+        workspaceRoot: URL
     ) {
         self.coordinator = coordinator
         self.containerService = containerService
@@ -49,6 +51,7 @@ final class CreateContainerSaveViewModel: ObservableObject {
         self.historyRepository = historyRepository
         self.name = name
         self.files = files
+        self.workspaceRoot = workspaceRoot
         startCreating()
     }
 
@@ -114,6 +117,7 @@ final class CreateContainerSaveViewModel: ObservableObject {
 
             switch result {
             case .success(let container):
+                self.cleanupWorkspace()
                 self.createdContainer = container
                 self.phase = .success
             case .failure:
@@ -169,6 +173,10 @@ final class CreateContainerSaveViewModel: ObservableObject {
         workTask?.cancel()
         uiTask = nil
         workTask = nil
+    }
+
+    private func cleanupWorkspace() {
+        try? FileManager.default.removeItem(at: workspaceRoot)
     }
 
     deinit {

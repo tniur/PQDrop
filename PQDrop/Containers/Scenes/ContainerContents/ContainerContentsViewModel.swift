@@ -56,7 +56,7 @@ final class ContainerContentsViewModel: ObservableObject {
 
     private let coordinator: ContainersCoordinatorProtocol
     private let containerRepository: ContainerRepository
-    private var decryptedDir: URL?
+    private var workspaceRoot: URL?
     private var backgroundObserver: NSObjectProtocol?
 
     // MARK: - Init
@@ -64,12 +64,12 @@ final class ContainerContentsViewModel: ObservableObject {
     init(
         coordinator: ContainersCoordinatorProtocol,
         container: Container,
-        decryptedDir: URL,
+        workspaceRoot: URL,
         containerRepository: ContainerRepository
     ) {
         self.coordinator = coordinator
         self.container = container
-        self.decryptedDir = decryptedDir
+        self.workspaceRoot = workspaceRoot
         self.containerRepository = containerRepository
 
         observeBackground()
@@ -90,6 +90,7 @@ final class ContainerContentsViewModel: ObservableObject {
         container.fileURL = updated.fileURL
         container.isAvailable = updated.isAvailable
         container.isOwned = updated.isOwned
+        container.recipientPublicKeysRaw = updated.recipientPublicKeysRaw
     }
 
     func copyId() {
@@ -139,9 +140,9 @@ final class ContainerContentsViewModel: ObservableObject {
             let resourceValues = try? sourceURL.resourceValues(forKeys: [.fileSizeKey, .nameKey])
             let fileName = resourceValues?.name ?? sourceURL.lastPathComponent
             let ext = sourceURL.pathExtension
-            let destinationURL = FileManager.default.temporaryDirectory
-                .appendingPathComponent(UUID().uuidString)
-                .appendingPathExtension(ext)
+            guard let destinationURL = makeDraftFileURL(pathExtension: ext) else {
+                return nil
+            }
 
             do {
                 if FileManager.default.fileExists(atPath: destinationURL.path) {
@@ -183,9 +184,9 @@ final class ContainerContentsViewModel: ObservableObject {
 
             let ext = item.supportedContentTypes.first?.preferredFilenameExtension ?? "jpg"
             let fileName = "Фото_\(index + 1).\(ext)"
-            let destinationURL = FileManager.default.temporaryDirectory
-                .appendingPathComponent(UUID().uuidString)
-                .appendingPathExtension(ext)
+            guard let destinationURL = makeDraftFileURL(pathExtension: ext) else {
+                continue
+            }
 
             do {
                 try data.write(to: destinationURL, options: .atomic)
@@ -221,6 +222,9 @@ final class ContainerContentsViewModel: ObservableObject {
 
         withAnimation(.easeInOut(duration: 0.22)) {
             if container.files[index].isDraftAdded {
+                if let localURL = container.files[index].localURL {
+                    try? FileManager.default.removeItem(at: localURL)
+                }
                 container.files.remove(at: index)
                 return
             }
@@ -249,10 +253,10 @@ final class ContainerContentsViewModel: ObservableObject {
         }
     }
 
-    func cleanupDecryptedFiles() {
-        guard let dir = decryptedDir else { return }
-        try? FileManager.default.removeItem(at: dir)
-        decryptedDir = nil
+    func cleanupWorkspace() {
+        guard let workspaceRoot else { return }
+        try? FileManager.default.removeItem(at: workspaceRoot)
+        self.workspaceRoot = nil
         container.files = []
     }
 
@@ -263,9 +267,20 @@ final class ContainerContentsViewModel: ObservableObject {
             queue: .main
         ) { [weak self] _ in
             Task { @MainActor in
-                self?.cleanupDecryptedFiles()
+                self?.cleanupWorkspace()
             }
         }
+    }
+
+    private func makeDraftFileURL(pathExtension: String) -> URL? {
+        guard let workspaceRoot else { return nil }
+
+        let draftsDirectory = workspaceRoot.appendingPathComponent("drafts", isDirectory: true)
+        try? FileManager.default.createDirectory(at: draftsDirectory, withIntermediateDirectories: true)
+
+        return draftsDirectory
+            .appendingPathComponent(UUID().uuidString)
+            .appendingPathExtension(pathExtension)
     }
 
     deinit {
@@ -273,8 +288,8 @@ final class ContainerContentsViewModel: ObservableObject {
             NotificationCenter.default.removeObserver(backgroundObserver)
         }
 
-        if let decryptedDir {
-            try? FileManager.default.removeItem(at: decryptedDir)
+        if let workspaceRoot {
+            try? FileManager.default.removeItem(at: workspaceRoot)
         }
     }
 }
