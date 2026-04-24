@@ -40,7 +40,12 @@ struct ContainerDetailsView: View {
             Text(String(localized: "containers.details.delete.alert.message"))
         }
         .sheet(isPresented: $viewModel.showShareSheet) {
-            ActivityViewControllerRepresentable(activityItems: [viewModel.container.fileURL as Any].compactMap { $0 })
+            ActivityViewControllerRepresentable(
+                activityItems: [viewModel.exportURL as Any].compactMap { $0 },
+                onComplete: {
+                    viewModel.finishExport()
+                }
+            )
         }
         .onAppear {
             viewModel.reload()

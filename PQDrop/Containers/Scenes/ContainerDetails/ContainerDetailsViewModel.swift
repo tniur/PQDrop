@@ -23,6 +23,7 @@ final class ContainerDetailsViewModel: ObservableObject {
     @Published var isError = false
     @Published var recipients: [Recipient] = []
     @Published var isOpening = false
+    @Published var exportURL: URL?
 
     var isAvailable: Bool { container.isAvailable }
     var isOwned: Bool { container.isOwned }
@@ -152,7 +153,14 @@ final class ContainerDetailsViewModel: ObservableObject {
     }
 
     func exportContainer() {
+        guard let fileURL = container.fileURL else {
+            return
+        }
+
+        cleanupTemporaryExport()
+        exportURL = makeTemporaryExportURL(from: fileURL)
         showShareSheet = true
+
         try? historyRepository.append(
             type: .export,
             containerID: container.containerID,
@@ -367,5 +375,48 @@ final class ContainerDetailsViewModel: ObservableObject {
 
         try? containerRepository.updateRecipientPublicKeys(recoveredRawKeys, for: container.id)
         container.recipientPublicKeysRaw = recoveredRawKeys
+    }
+
+    func finishExport() {
+        cleanupTemporaryExport()
+    }
+
+    private func makeTemporaryExportURL(from sourceURL: URL) -> URL {
+        let exportDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("container_export_\(UUID().uuidString)", isDirectory: true)
+        let fileExtension = sourceURL.pathExtension
+        let fileName = fileExtension.isEmpty
+            ? container.name
+            : "\(container.name).\(fileExtension)"
+        let exportURL = exportDirectory.appendingPathComponent(fileName)
+
+        do {
+            try FileManager.default.createDirectory(at: exportDirectory, withIntermediateDirectories: true)
+            try FileManager.default.copyItem(at: sourceURL, to: exportURL)
+            return exportURL
+        } catch {
+            try? FileManager.default.removeItem(at: exportDirectory)
+            return sourceURL
+        }
+    }
+
+    private func cleanupTemporaryExport() {
+        defer {
+            exportURL = nil
+        }
+
+        guard let exportURL else {
+            return
+        }
+
+        let temporaryDirectory = FileManager.default.temporaryDirectory.standardizedFileURL
+        let standardizedExportURL = exportURL.standardizedFileURL
+
+        guard standardizedExportURL.path.hasPrefix(temporaryDirectory.path) else {
+            return
+        }
+
+        let exportDirectory = standardizedExportURL.deletingLastPathComponent()
+        try? FileManager.default.removeItem(at: exportDirectory)
     }
 }
