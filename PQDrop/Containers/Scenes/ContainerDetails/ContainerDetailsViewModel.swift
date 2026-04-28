@@ -29,39 +29,7 @@ final class ContainerDetailsViewModel: ObservableObject {
     var isOwned: Bool { container.isOwned }
     var hasFile: Bool { container.fileURL != nil }
 
-    var historyEvents: [HistoryEvent] {
-        guard isOwned, isAvailable else { return [] }
-
-        let calendar = Calendar.current
-        let baseDate = calendar.date(from: DateComponents(year: 2026, month: 3, day: 20))!
-
-        return [
-            .init(
-                id: UUID(),
-                type: .export,
-                containerName: container.name,
-                containerID: container.containerID,
-                detail: nil,
-                timestamp: calendar.date(bySettingHour: 12, minute: 9, second: 0, of: baseDate)!
-            ),
-            .init(
-                id: UUID(),
-                type: .imported,
-                containerName: container.name,
-                containerID: container.containerID,
-                detail: nil,
-                timestamp: calendar.date(bySettingHour: 11, minute: 11, second: 0, of: baseDate)!
-            ),
-            .init(
-                id: UUID(),
-                type: .accessGranted,
-                containerName: container.name,
-                containerID: container.containerID,
-                detail: nil,
-                timestamp: calendar.date(bySettingHour: 10, minute: 12, second: 0, of: baseDate)!
-            )
-        ]
-    }
+    @Published private(set) var historyEvents: [HistoryEvent] = []
 
     private let coordinator: ContainersCoordinatorProtocol
     private let containerService: ContainerService
@@ -279,6 +247,16 @@ final class ContainerDetailsViewModel: ObservableObject {
 
         refreshAvailability()
         loadRecipients()
+        loadHistory()
+    }
+
+    private func loadHistory() {
+        guard isOwned, isAvailable else {
+            historyEvents = []
+            return
+        }
+        
+        historyEvents = historyRepository.fetchForContainer(containerID: container.containerID)
     }
 
     private func refreshAvailability() {

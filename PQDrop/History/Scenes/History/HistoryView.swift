@@ -26,11 +26,13 @@ struct HistoryView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .principal) {
+            ToolbarItem(placement: .topBarLeading) {
                 Text(String(localized: "history.title"))
                     .font(PQFont.B30)
                     .foregroundStyle(PQColor.base0.swiftUIColor)
+                    .fixedSize()
             }
+            .sharedBackgroundVisibility(.hidden)
 
             ToolbarItem(placement: .navigationBarTrailing) {
                 filterButton

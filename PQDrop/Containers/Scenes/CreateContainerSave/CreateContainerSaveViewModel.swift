@@ -148,7 +148,7 @@ final class CreateContainerSaveViewModel: ObservableObject {
             )
 
             try? historyRepository.append(
-                type: .export,
+                type: .created,
                 containerID: result.containerID,
                 containerName: name
             )

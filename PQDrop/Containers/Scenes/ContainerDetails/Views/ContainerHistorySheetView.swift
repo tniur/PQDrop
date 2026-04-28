@@ -33,7 +33,7 @@ struct ContainerHistorySheetView: View {
                 .foregroundStyle(PQColor.base10.swiftUIColor)
                 .padding(.top, 20)
 
-            if !events.isEmpty {
+            if events.isEmpty {
                 emptyView
             } else {
                 listView
