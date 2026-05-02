@@ -70,7 +70,7 @@ final class ImportContainerViewModel: ObservableObject {
 
     func goToList() {
         Task {
-            await coordinator.finish()
+            await coordinator.finishToReceivedTab()
         }
     }
 

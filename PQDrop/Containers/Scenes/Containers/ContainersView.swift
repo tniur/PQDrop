@@ -50,6 +50,11 @@ struct ContainersView: View {
                 break
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .containersTabSelectionRequested)) { notification in
+            if let tab = notification.object as? ContainersTab {
+                viewModel.selectedTab = tab
+            }
+        }
     }
 
     // MARK: - Subviews

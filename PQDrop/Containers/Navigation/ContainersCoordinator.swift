@@ -26,12 +26,21 @@ final class ContainersCoordinator: Coordinator<ContainersRoute>, ContainersCoord
         await restart()
     }
 
+    func finishToReceivedTab() async {
+        NotificationCenter.default.post(
+            name: .containersTabSelectionRequested,
+            object: ContainersTab.received
+        )
+        await restart()
+    }
+
     func showContainerDetails(with container: Container) async {
         await navigate(toRoute: .containerDetails(coordinator: self, container: container))
     }
 
     func showContainerDetailsFromRoot(with container: Container) async {
-        await router.popToRoot()
+        await router.popToRoot(animated: false)
+        try? await Task.sleep(for: .milliseconds(150))
         await navigate(toRoute: .containerDetails(coordinator: self, container: container))
     }
 

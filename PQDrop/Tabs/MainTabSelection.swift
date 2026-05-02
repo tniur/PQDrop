@@ -9,5 +9,6 @@ import Foundation
 
 extension Notification.Name {
     static let mainTabSelectionRequested = Notification.Name("mainTabSelectionRequested")
+    static let containersTabSelectionRequested = Notification.Name("containersTabSelectionRequested")
     static let appResetRequested = Notification.Name("appResetRequested")
 }
